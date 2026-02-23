@@ -403,7 +403,7 @@ The PR Curve and the Area under the curve (AUC), can also be a good single numbe
 * **The Trade-off:** If $k$ is too small, the model overfits. If $k$ is too large, the model underfits reality.
 * **How to choose:** We treat $k$ as a hyperparameter and select the best value using cross-validation (e.g., 10-fold cross-validation).
 
-### 4. Lazy vs. Eager Learning
+## Lazy vs. Eager Learning
 * **Lazy Learning (e.g., kNN):** Defers computation until a prediction is needed.
     * *Pros:* Very quick to train (it just stores the data), less memory usage during training.
     * *Cons:* Prediction is slow, relies heavily on training data during prediction, uses more memory during prediction.
@@ -425,7 +425,7 @@ Because distance metrics like Euclidean distance are heavily influenced by the s
 | **Output Range** | Fixed (0 to 1) | Not bounded | 
 | **Outlier Handling**| Very sensitive | More robust |  
 | **Distribution** | Changes the shape | Maintains shape (mostly) |  
-| **Common Use Case** | When you need exact boundaries | When you need a "standard normal curve" (Mean 0, Std Dev 1) |
+| **Common Use Case** | When you need exact boundaries from min to max value | When you need a "standard normal curve" (Mean 0, Std Dev 1) |
 
 ### 2. Pipelines
 * We should avoid altering the entire raw dataset directly before training, as future data would also need to be manually transformed.
@@ -434,6 +434,7 @@ Because distance metrics like Euclidean distance are heavily influenced by the s
 
 ### 3. Feature Engineering & Custom Transforms
 The features we provide to a model drastically dictate what it can learn. We can design custom features to give the model better predictive power.
+
 * **Custom Calculations:** Using tools like `FunctionTransformer`, we can add derived features, such as calculating a point's radius/distance from the center $(0,0)$ to help classify circular data.
 * **1D to 2D Signals:** Converting 1-dimensional signals into 2-dimensional representations. For example, converting audio data or stock market data into spectrograms allows models (especially computer vision models) to find complex visual patterns in the data.
 
@@ -452,6 +453,7 @@ The features we provide to a model drastically dictate what it can learn. We can
 
 ### 3. Dimensionality Reduction Techniques
 To fix the curse of dimensionality before applying algorithms like kNN, we can use:
+
 * **Feature Grouping:** Grouping common features based on domain knowledge (e.g., averaging 365 daily weather readings into 12 monthly averages).
 * **Extraction/Embedding Algorithms:** Using techniques like Principal Component Analysis (PCA) or Linear Discriminant Analysis (LDA) to compress the data into a lower-dimensional space.
 
@@ -460,31 +462,77 @@ To fix the curse of dimensionality before applying algorithms like kNN, we can u
 ## Part 4: Decision Trees & Ensembles
 
 ### 1. Decision Trees: The "20 Questions" Intuition
-* **How it works:** Decision Trees mimic human decision-making by incrementally breaking a dataset into smaller subsets based on feature values (e.g., "Is it a mammal? -> Does it have stripes? -> Tiger").
+* **How it works:** Decision Trees mimic human decision-making by incrementally splitting a dataset into smaller subsets based on feature values (e.g., "Is it a mammal? -> Does it have stripes? -> Tiger").
 * **Anatomy of a Tree:**
-    * **Root Node:** The top of the tree representing the entire population (the first split).
-    * **Decision Node:** A point where a branch splits based on a feature condition.
-    * **Leaf Node (Terminal Node):** The end of a branch that does not split further. It holds the final prediction/category.
-    * **Depth:** How many layers of splits the tree has.
+    * **Root Node:** First split, entire dataset.
+    * **Decision Node:** Internal split based on a feature condition.
+    * **Leaf Node (Terminal Node):** Final node that outputs a prediction.
+    * **Depth:** Number of split layers.
+
+#### How Trees Learn: Splitting & Purity
+* At each node, the algorithm selects the feature and threshold that produce the **purest** child nodes.
+* It evaluates all possible splits and chooses the one that minimises impurity.
+
+**Impurity Measures:**
+* **Gini Impurity**
+* **Entropy (Information Gain)**
+
+**Gini Index (Binary Case):**
+
+$$\text{Gini} = 1 - (p_{yes}^2 + p_{no}^2)$$
+
+* $0$ → perfectly pure node.
+* $0.5$ → maximum impurity (50/50 split).
+* Lower Gini = better split.
+* For a full split, compute the **weighted average** of child-node Gini values and choose the lowest.
+
+**Continuous Features:**
+1. Sort feature values.
+2. Use midpoints as candidate thresholds.
+3. Compute impurity for each.
+4. Select threshold with minimum impurity.
+
+**Overfitting:**
+* Without limits, trees split until leaves are perfectly pure.
+* Leads to memorisation and poor generalisation.
+* Controlled using hyperparameters such as:
+  * `max_depth`
+  * `min_samples_split`
+  * `min_samples_leaf`
+
+---
 
 ### 2. Ensemble Learning
-* **Concept:** Instead of relying on a single model (like one decision tree), we combine a group of models (an "ensemble") to make predictions. This capitalizes on the "wisdom of the crowd" to achieve higher accuracy and robustness.
+* **Concept:** Combine multiple models instead of relying on a single tree.
+* Leverages the "wisdom of the crowd" for improved accuracy and robustness.
+
+---
 
 ### 3. Bagging (Bootstrap Aggregating) & Random Forests
-* **Structure:** Models are trained in **Parallel**.
-* **Bagging:** Trains multiple models on different random subsets of the training data.
-* **Random Forests:** A powerful type of bagging specifically using decision trees. It introduces extra randomness: at each node split, it only considers a *random subset of features*. This decorrelates the trees so they don't all make the same mistakes.
-* **Goal:** Bagging primarily **reduces Variance** (prevents overfitting). It is very robust and hard to overfit.
+* **Structure:** Models trained in **parallel**.
+* **Bagging:** 
+  * Train models on bootstrap samples (random samples with replacement).
+  * Aggregate via majority vote (classification) or averaging (regression).
+  * Primarily **reduces variance**.
+* **Random Forests:** 
+  * Bagging + random subset of features at each split.
+  * Decorrelates trees so they do not all make the same mistakes.
+* **Goal:** Strong variance reduction, robust, hard to overfit.
+
+---
 
 ### 4. Boosting
-* **Structure:** Models are trained **Sequentially** (one after another).
-* **How it works:** Each new tree tries to fix the mistakes of the previous tree. 
-    * *Tree 1* makes predictions.
-    * *Tree 2* focuses heavily on the samples that Tree 1 misclassified (by weighting them higher).
-    * *Tree 3* focuses on the errors of Tree 2, and so on.
-* **Popular Algorithms:** AdaBoost, Gradient Boosting, XGBoost, LightGBM (XGBoost/LightGBM are the gold standard for tabular data competitions).
-* **Goal:** Boosting primarily **reduces Bias**. However, unlike bagging, boosting *can* overfit if left unchecked and is harder to tune.
-* 
-### 5. Summary: Bagging vs. Boosting
-* **Bagging:** Parallel execution, reduces Variance, resistant to overfitting.
-* **Boosting:** Sequential execution, reduces Bias, prone to overfitting but often yields superior performance when tuned correctly.
+* **Structure:** Models trained **sequentially**.
+* **How it works:**
+  * Tree 1 makes predictions.
+  * Tree 2 focuses more on misclassified samples.
+  * Tree 3 focuses on remaining errors, and so on.
+* **Popular Algorithms:** AdaBoost, Gradient Boosting, XGBoost, LightGBM.
+* **Goal:** Primarily **reduces bias**.
+* Can overfit if not properly tuned.
+
+---
+
+### 5. Summary: Bagging vs Boosting
+* **Bagging:** Parallel, reduces variance, resistant to overfitting.
+* **Boosting:** Sequential, reduces bias, more prone to overfitting but often higher performance when tuned well.
