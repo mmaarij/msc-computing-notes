@@ -9,6 +9,9 @@ on:
       - '!README.md'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   convert-to-pdf:
     runs-on: ubuntu-latest
@@ -47,9 +50,4 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add "**/*.pdf"
           git diff --staged --quiet || git commit -m "📄 Auto-generate PDFs from markdown notes"
-      
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          git push
