@@ -24,9 +24,7 @@
 
 1.  **Mean ($\bar{x}$):** Arithmetic average
     
-    $$
-    \bar{x} = \frac{\sum x_i}{n}
-    $$
+    $$\bar{x} = \frac{\sum x_i}{n}$$
     
 2.  **Median:** Middle value when data is ordered.
 3.  **Mode:** Most frequently occurring value.
@@ -35,16 +33,12 @@
 
 - **Range:**
     
-    $$
-    \text{Max} - \text{Min}
-    $$
+    $$\text{Max} - \text{Min}$$
     
     Very sensitive to outliers.
 - **Sample Variance ($s^2$):**
     
-    $$
-    s^2 = \frac{\sum (x_i - \bar{x})^2}{n - 1}
-    $$
+    $$s^2 = \frac{\sum (x_i - \bar{x})^2}{n - 1}$$
     
 - **Sample Standard Deviation ($s$):**
     
@@ -61,27 +55,19 @@
 
 - **Sample Space ($\Omega$):** Set of all possible outcomes.
     
-    $$
-    P(\Omega) = 1
-    $$
+    $$P(\Omega) = 1$$
     
 - **Empty Set ($\emptyset$):** Impossible event.
     
-    $$
-    P(\emptyset) = 0
-    $$
+    $$P(\emptyset) = 0$$
     
 - **Probability Bounds:**
     
-    $$
-    0 \le P(A) \le 1
-    $$
+    $$0 \le P(A) \le 1$$
     
 - **Complement Rule:**
     
-    $$
-    P(A^c) = 1 - P(A)
-    $$
+    $$P(A^c) = 1 - P(A)$$
     
     Notation: $A^c$, $\bar{A}$, or $A'$.
 
@@ -94,9 +80,7 @@
 
 - **General Addition Rule:**
     
-    $$
-    P(A \cup B) = P(A) + P(B) - P(A \cap B)
-    $$
+    $$P(A \cup B) = P(A) + P(B) - P(A \cap B)$$
     
 - **Disjoint (Mutually Exclusive) Events:**
     
@@ -115,23 +99,17 @@
 
 Probability that $B$ occurs given that $A$ has occurred:
 
-$$
-P(B \mid A) = \frac{P(A \cap B)}{P(A)}
-$$
+$$P(B \mid A) = \frac{P(A \cap B)}{P(A)}$$
 
 ## Multiplication Law
 
-$$
-P(A \cap B) = P(B \mid A) \times P(A)
-$$
+$$P(A \cap B) = P(B \mid A) \times P(A)$$
 
 ## Independence
 
 Two events are independent if one does not affect the other:
 
-- $$
-    P(B \mid A) = P(B)
-    $$
+- $$P(B \mid A) = P(B)$$
     
     or
 - $$
@@ -147,17 +125,13 @@ Two events are independent if one does not affect the other:
 
 Used to reverse conditional probabilities:
 
-$$
-P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
-$$
+$$P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}$$
 
 ## Law of Total Probability
 
 If $A_1, A_2, \dots, A_n$ partition the sample space:
 
-$$
-P(B) = \sum_{i=1}^{n} P(B \mid A_i) \times P(A_i)
-$$
+$$P(B) = \sum_{i=1}^{n} P(B \mid A_i) \times P(A_i)$$
 
 * * *
 
@@ -177,31 +151,23 @@ A **Random Variable ($X$)** is a numerical model for a measurement.
 
 ## Probability Mass Function (pmf)
 
-$$
-f(x) = P(X = x)
-$$
+$$f(x) = P(X = x)$$
 
 ## Expected Value (Mean)
 
 The long-run average or centre of gravity:
 
-$$
-E(X) = \mu = \sum x \cdot P(X = x)
-$$
+$$E(X) = \mu = \sum x \cdot P(X = x)$$
 
 *Example (Fair die):*
 
-$$
-E(X) = 3.5
-$$
+$$E(X) = 3.5$$
 
 * * *
 
 # 7\. Cumulative Distribution Function (CDF)
 
-$$
-F(x) = P(X \le x)
-$$
+$$F(x) = P(X \le x)$$
 
 - For discrete RVs, the CDF has a **step shape**.
 - **At least rule:**
@@ -227,17 +193,13 @@ Used for the number of successes in $n$ trials.
 
 ### Model
 
-$$
-P(X = x) = \binom{n}{x} p^x (1 - p)^{n-x}
-$$
+$$P(X = x) = \binom{n}{x} p^x (1 - p)^{n-x}$$
 
 ### Parameters
 
 - **Mean:**
     
-    $$
-    \mu = np
-    $$
+    $$\mu = np$$
     
 - **Standard Deviation:**
     
@@ -260,18 +222,14 @@ Used for counting arrivals in a fixed interval of time or space.
 
 ### Model
 
-$$
-P(X = x) = \frac{e^{-\alpha t} (\alpha t)^x}{x!}
-$$
+$$P(X = x) = \frac{e^{-\alpha t} (\alpha t)^x}{x!}$$
 
 - $\alpha$ = average rate per unit
 - $t$ = length of interval
 
 ### Key Property (Very Exam Important)
 
-$$
-Rate = \lambda = E(X) = Var(X) = \alpha t
-$$
+$$Rate = \lambda = E(X) = Var(X) = \alpha t$$
 
 * * *
 
@@ -288,9 +246,7 @@ A continuous random variable can take values anywhere in a continuum, such as he
     
 - **Total Area:**  
     The total area under $f(x)$ is always 1
-  $$
-  \int_{-∞}^{∞}\text{f(x)dx} = 1
-  $$
+  $$\int_{-∞}^{\u221e}\text{f(x)dx} = 1$$
     
 
 ### Uniform Distribution
@@ -299,9 +255,7 @@ The simplest continuous distribution where probability is constant between $a$ a
 
 - **PDF:**
     
-    $$
-    f(x) = \frac{1}{b - a}, \quad a \le x \le b
-    $$
+    $$f(x) = \frac{1}{b - a}, \quad a \le x \le b$$
     
 
 * * *
@@ -334,21 +288,15 @@ Regardless of the population distribution, if sample size $n$ is large, the dist
 
 - **Mean of $\bar{X}$:**
     
-    $$
-    E(\bar{X}) = \mu
-    $$
+    $$E(\bar{X}) = \mu$$
     
 - **Variance of $\bar{X}$:**
     
-    $$
-    \text{Var}(\bar{X}) = \frac{\sigma^2}{n}
-    $$
+    $$\text{Var}(\bar{X}) = \frac{\sigma^2}{n}$$
     
 - **Standard Error:**
     
-    $$
-    \frac{\sigma}{\sqrt{n}}
-    $$
+    $$\frac{\sigma}{\sqrt{n}}$$
     
 - **Z Statistic:**
     
@@ -404,9 +352,7 @@ An interval constructed around $\bar{x}$ where we are reasonably confident the t
 
 ### Formula (Known $\sigma$ or Large $n$)
 
-$$
-\bar{x} \pm z_{\alpha/2} \frac{\sigma}{\sqrt{n}}
-$$
+$$\bar{x} \pm z_{\alpha/2} \frac{\sigma}{\sqrt{n}}$$
 
 ### Example: Cola Cans
 
@@ -416,9 +362,7 @@ $$
 
 Resulting interval:
 
-$$
-[299.40, 299.88]
-$$
+$$[299.40, 299.88]$$
 
 Since 300 is not in the interval, reject $H_0$.
 
@@ -568,9 +512,7 @@ Tests whether observed categorical data matches a claimed distribution.
 
 #### Test Statistic
 
-$$
-\chi^2 = \sum \frac{(O - E)^2}{E}
-$$
+$$\chi^2 = \sum \frac{(O - E)^2}{E}$$
 
 Where:
 
@@ -624,15 +566,11 @@ Tests whether two categorical variables are related.
 
 For contingency table:
 
-$$
-E_{ij} = \frac{(\text{Row Total})(\text{Column Total})}{\text{Grand Total}}
-$$
+$$E_{ij} = \frac{(\text{Row Total})(\text{Column Total})}{\text{Grand Total}}$$
 
 Degrees of freedom:
 
-$$
-df = (r - 1)(c - 1)
-$$
+$$df = (r - 1)(c - 1)$$
 
 ---
 
@@ -690,9 +628,7 @@ Effect size measures the **magnitude** of a difference.
 
 For $2 \times 2$ tables:
 
-$$
-\phi = \sqrt{\frac{\chi^2}{n}}
-$$
+$$\phi = \sqrt{\frac{\chi^2}{n}}$$
 
 **Guidelines:**
 
@@ -706,9 +642,7 @@ $$
 
 Used when comparing two means.
 
-$$
-d = \frac{\bar{x}_1 - \bar{x}_2}{s}
-$$
+$$d = \frac{\bar{x}_1 - \bar{x}_2}{s}$$
 
 For independent samples, use the pooled standard deviation.
 
@@ -739,9 +673,7 @@ Write the probability of the entire dataset.
 
 If observations are independent:
 
-$$
-L(\theta) = \prod f(x_i \mid \theta)
-$$
+$$L(\theta) = \prod f(x_i \mid \theta)$$
 
 ---
 
@@ -749,9 +681,7 @@ $$
 
 Take the natural log:
 
-$$
-\ell(\theta) = \sum \ln \big(f(x_i \mid \theta)\big)
-$$
+$$\ell(\theta) = \sum \ln \big(f(x_i \mid \theta)\big)$$
 
 Why?
 
@@ -765,9 +695,7 @@ Why?
 
 Find derivative with respect to $\theta$:
 
-$$
-\frac{d\ell}{d\theta}
-$$
+$$\frac{d\ell}{d\theta}$$
 
 ---
 
@@ -786,15 +714,11 @@ This gives the MLE estimate.
 - Data: Counts of deaths by horse kicks (von Bortkiewicz data)  
 - Model:
 
-$$
-X \sim \text{Poisson}(\lambda)
-$$
+$$X \sim \text{Poisson}(\lambda)$$
 
 ### MLE Result
 
-$$
-\hat{\lambda}_{MLE} = \frac{1}{n} \sum x_i = \bar{x}
-$$
+$$\hat{\lambda}_{MLE} = \frac{1}{n} \sum x_i = \bar{x}$$
 
 Takeaway: For Poisson, the MLE for $\lambda$ is the **sample mean**.
 
@@ -808,9 +732,7 @@ We estimate two parameters: $\mu$ and $\sigma^2$.
 
 ### 1. Estimating the Mean
 
-$$
-\hat{\mu} = \bar{x}
-$$
+$$\hat{\mu} = \bar{x}$$
 
 Takeaway: MLE mean equals the sample mean.
 
@@ -818,18 +740,14 @@ Takeaway: MLE mean equals the sample mean.
 
 ### 2. Estimating the Variance
 
-$$
-\hat{\sigma}^2_{MLE} = \frac{1}{n} \sum (x_i - \bar{x})^2
-$$
+$$\hat{\sigma}^2_{MLE} = \frac{1}{n} \sum (x_i - \bar{x})^2$$
 
 ### Bias Issue
 
 - MLE divides by $n$ → biased (underestimates variance)  
 - Sample variance:
 
-$$
-s^2 = \frac{1}{n - 1} \sum (x_i - \bar{x})^2
-$$
+$$s^2 = \frac{1}{n - 1} \sum (x_i - \bar{x})^2$$
 
 Uses Bessel's correction and is unbiased.
 
@@ -966,9 +884,7 @@ Used to compare two nested models to determine whether additional parameters sig
 
 ### The Test Statistic
 
-$$
-\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]
-$$
+$$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 
 - $\ell(\hat{\theta})$: Log-likelihood of the unrestricted model.  
 - $\ell(\hat{\theta}_0)$: Log-likelihood of the restricted model.

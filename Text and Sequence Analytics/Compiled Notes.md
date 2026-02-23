@@ -162,9 +162,7 @@ POS tagging labels words with lexical classes (noun, verb, etc.) based on their 
 - **Bloom Filter:** A probabilistic data structure used to test set membership efficiently; ideal for representing large sets of stop words or computing similarity metrics while saving memory.
 - **Index Compression Factor (ICF):** Measures a stemmer's strength by the percentage of distinct words it reduces.
 
-$$
-\text{ICF} = \frac{n - s}{n} \times 100
-$$
+$$\text{ICF} = \frac{n - s}{n} \times 100$$
 
 where $n$ is the number of distinct words before stemming and $s$  is the number after stemming.
 
@@ -220,14 +218,7 @@ Decomposes words into smaller units to handle OOV words and provide better morph
 
 #### Merging Score Formula
 
-$$
-\text{score} = 
-\frac{
-\text{freq}(\text{Token}_{Left}) \times \text{freq}(\text{Token}_{Right})
-}{
-\text{freq}(\text{Token}_{new})
-}
-$$
+$$\text{score} = \frac{\text{freq}(\text{Token}_{Left}) \times \text{freq}(\text{Token}_{Right})}{\text{freq}(\text{Token}_{new})}$$
 
 #### Markers
 
@@ -250,14 +241,7 @@ $$
 
 #### Log Loss Formula
 
-$$
-\text{loss} = 
-\sum_{i=1}^{n} 
-\log 
-\left(
-\sum_{w \in S(w_i)} p(w)
-\right)
-$$
+$$\text{loss} = \sum_{i=1}^{n} \log \left(\sum_{w \in S(w_i)} p(w)\right)$$
 
 Where $S(w_i)$ is the set of all possible tokenizations of a word $w_i$.
 

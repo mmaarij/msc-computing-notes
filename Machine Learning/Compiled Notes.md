@@ -43,17 +43,13 @@ To perform Machine Learning, you need 4 components:
 - **Definition:** A linear relationship means a change in $x$ always produces the same proportionate change in $y$.
 - **School Math Formula:**
     
-    $$
-    y = mx + c
-    $$
+    $$y = mx + c$$
     
     Where $m$ is the slope and $c$ is the y-intercept.
 - **Machine Learning Notation:**  
     We scale this up for larger models using **Weights ($w$)**. Weights are the parameters or coefficients that the model learns during training.
     
-    $$
-    y = w_0 + w_1 x
-    $$
+    $$y = w_0 + w_1 x$$
     
     - $w_0$ = bias or intercept (previously $c$).
     - $w_1$ = weight or slope (previously $m$).
@@ -65,9 +61,7 @@ To perform Machine Learning, you need 4 components:
     - *Critique:* Implies you cook a 0 lb turkey for 20 mins (the y-intercept).
 - **Power Model (Pief Panofsky):**
     
-    $$
-    t = \frac{w^{2/3}}{1.5}
-    $$
+    $$t = \frac{w^{2/3}}{1.5}$$
     
     - *Comparison:* Linear works well for small weights (1–6 lbs) but diverges significantly at higher weights.
 - **Lesson:** Data points might follow a curve. If data is scattered on a curve, a simple linear model is an **inappropriate fit** as it assumes values keep increasing indefinitely.
@@ -81,9 +75,7 @@ To perform Machine Learning, you need 4 components:
     - **Residual:** The difference between the prediction ($\hat{y}$) and the observation ($y$).
 - **Cost Function (Mean Squared Error, MSE):**
     
-    $$
-    L = \frac{1}{2m} \sum_{i=0}^{m} (\hat{y}_i - y_i)^2
-    $$
+    $$L = \frac{1}{2m} \sum_{i=0}^{m} (\hat{y}_i - y_i)^2$$
     
     - $m$: number of samples.
     - Note: The $\frac{1}{2m}$ term is for mathematical convenience to make derivatives simpler.
@@ -97,16 +89,12 @@ Real-world problems have more than one input feature.
 
 - **Polynomial Regression:**
     
-    $$
-    y = w_0 + w_1 x + w_2 x^2 + \dots
-    $$
+    $$y = w_0 + w_1 x + w_2 x^2 + \dots$$
     
     (fits curves).
 - **Multiple Linear Regression:** Input $x$ is a vector of features $(x_1, x_2, \dots)$.
     
-    $$
-    y = w_0 + w_1 x_1 + w_2 x_2 + w_3 x_3 + \dots
-    $$
+    $$y = w_0 + w_1 x_1 + w_2 x_2 + w_3 x_3 + \dots$$
     
 
 * * *
@@ -233,9 +221,7 @@ We do predict a continuous value between $0$ and $1$, but we interpret it as a p
 
 With standard linear regression:
 
-$$
-\hat{y} = w_0 + w_1x_1
-$$
+$$\hat{y} = w_0 + w_1x_1$$
 
 - Predictions range from $-\infty$ to $+\infty$.
 - For binary classification, $\hat{y}$ can easily be $< 0$ or $> 1$.
@@ -249,9 +235,7 @@ Linear regression therefore does not naturally constrain outputs to the valid pr
 
 The **sigmoid function**, also called the **logistic function**, takes any real-valued number and maps it into the range $(0,1)$.
 
-$$
-y = f(x) = \frac{1}{1 + e^{-x}}
-$$
+$$y = f(x) = \frac{1}{1 + e^{-x}}$$
 
 - As $x \to +\infty$, $y \to 1$.
 - As $x \to -\infty$, $y \to 0$.
@@ -259,15 +243,11 @@ $$
 
 Since our linear model output
 
-$$
-\hat{y} = w_0 + w_1x_1 + \dots + w_nx_n
-$$
+$$\hat{y} = w_0 + w_1x_1 + \dots + w_nx_n$$
 
 also ranges from $-\infty$ to $+\infty$, we apply the sigmoid to map it into a probability:
 
-$$
-p = \frac{1}{1 + e^{-(w_0 + w_1x_1 + \dots + w_nx_n)}}
-$$
+$$p = \frac{1}{1 + e^{-(w_0 + w_1x_1 + \dots + w_nx_n)}}$$
 
 This is the **logistic regression function**. The weights $w_0, \dots, w_n$ are often written as $\beta_0, \dots, \beta_n$ in the literature.
 
@@ -277,9 +257,7 @@ This is the **logistic regression function**. The weights $w_0, \dots, w_n$ are 
 
 The term
 
-$$
-\frac{p}{1-p}
-$$
+$$\frac{p}{1-p}$$
 
 is known as the **odds**.
 
@@ -294,23 +272,17 @@ The odds function is asymmetrical:
 
 To address this asymmetry, we take the natural logarithm of the odds:
 
-$$
-\ln\left(\frac{p}{1-p}\right)
-$$
+$$\ln\left(\frac{p}{1-p}\right)$$
 
 This is called the **logit function**:
 
-$$
-\text{logit}(p) = \ln\left(\frac{p}{1-p}\right)
-$$
+$$\text{logit}(p) = \ln\left(\frac{p}{1-p}\right)$$
 
 The logit function forms the basis of logistic regression.
 
 The linear model in logistic regression is therefore written as:
 
-$$
-\ln\left(\frac{p}{1-p}\right) = w_0 + w_1x_1 + \dots + w_nx_n
-$$
+$$\ln\left(\frac{p}{1-p}\right) = w_0 + w_1x_1 + \dots + w_nx_n$$
 
 ---
 
@@ -352,9 +324,7 @@ The logit and logistic functions are inverses of each other.
 
 - **Formula:**
 
-  $$
-  L(w) = -\frac{1}{n} \sum_{i=1}^{n} [y_i \cdot \log(\hat{y}_i) + (1-y_i) \cdot \log(1-\hat{y}_i)]
-  $$
+  $$L(w) = -\frac{1}{n} \sum_{i=1}^{n} [y_i \cdot \log(\hat{y}_i) + (1-y_i) \cdot \log(1-\hat{y}_i)]$$
 
 ---
 
@@ -366,15 +336,11 @@ These are ways to measure the "magnitude" or distance of a vector, often used in
 
 - **L1 Norm (Manhattan):** The sum of absolute values.
 
-  $$
-  ||x||_1 = \sum |x_i|
-  $$
+  $$||x||_1 = \sum |x_i|$$
 
 - **L2 Norm (Euclidean):** The square root of the sum of squared values (straight line distance).
 
-  $$
-  ||x||_2 = \sqrt{\sum x_i^2}
-  $$
+  $$||x||_2 = \sqrt{\sum x_i^2}$$
 
 ### 2. Regression Metrics
 
