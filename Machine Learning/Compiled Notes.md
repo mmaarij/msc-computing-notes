@@ -43,7 +43,9 @@ To perform Machine Learning, you need 4 components:
 - **Definition:** A linear relationship means a change in $x$ always produces the same proportionate change in $y$.
 - **School Math Formula:** $y = mx + c$, where $m$ is the slope and $c$ is the y-intercept.
 - **Machine Learning Notation:**  
-    We scale this up for larger models using **Weights ($w$)**. Weights are the parameters or coefficients that the model learns during training. $y = w_0 + w_1 x$
+    We scale this up for larger models using **Weights ($w$)**. Weights are the parameters or coefficients that the model learns during training.
+
+    $$y = w_0 + w_1 x$$
 
     - $w_0$ = bias or intercept (previously $c$).
     - $w_1$ = weight or slope (previously $m$).
@@ -53,7 +55,9 @@ To perform Machine Learning, you need 4 components:
 - **Scenario:** Predicting cooking time ($t$) based on weight ($w$).
 - **Linear Model:** $t = m w + c$ (Rule of thumb: 20 mins per pound + 20 mins).
     - *Critique:* Implies you cook a 0 lb turkey for 20 mins (the y-intercept).
-- **Power Model (Pief Panofsky):** $t = \frac{w^{2/3}}{1.5}$
+- **Power Model (Pief Panofsky):**
+
+    $$t = \frac{w^{2/3}}{1.5}$$
 
     - *Comparison:* Linear works well for small weights (1–6 lbs) but diverges significantly at higher weights.
 - **Lesson:** Data points might follow a curve. If data is scattered on a curve, a simple linear model is an **inappropriate fit** as it assumes values keep increasing indefinitely.
@@ -65,7 +69,9 @@ To perform Machine Learning, you need 4 components:
     - **$y$ (Observation):** The actual observed data point.
     - **$\hat{y}$ (Prediction):** The value predicted by the function.
     - **Residual:** The difference between the prediction ($\hat{y}$) and the observation ($y$).
-- **Cost Function (Mean Squared Error, MSE):** $L = \frac{1}{2m} \sum_{i=0}^{m} (\hat{y}_i - y_i)^2$
+- **Cost Function (Mean Squared Error, MSE):**
+
+    $$L = \frac{1}{2m} \sum_{i=0}^{m} (\hat{y}_i - y_i)^2$$
 
     - $m$: number of samples.
     - Note: The $\frac{1}{2m}$ term is for mathematical convenience to make derivatives simpler.
@@ -80,7 +86,7 @@ Real-world problems have more than one input feature.
 - **Polynomial Regression:** $y = w_0 + w_1 x + w_2 x^2 + \dots$ (fits curves).
 - **Multiple Linear Regression:** Input $x$ is a vector of features $(x_1, x_2, \dots)$.
 
-    $y = w_0 + w_1 x_1 + w_2 x_2 + w_3 x_3 + \dots$
+    $$y = w_0 + w_1 x_1 + w_2 x_2 + w_3 x_3 + \dots$$
     
 
 * * *
@@ -313,7 +319,9 @@ The logit and logistic functions are inverses of each other.
   - If correct answer is $1$: We want predicted $p$ to be close to $1$. If $p$ is low, error is massive ($-\log(p)$).
   - If correct answer is $0$: We want predicted $p$ to be close to $0$. If $p$ is high, error is massive ($-\log(1-p)$).
 
-- **Formula:** $L(w) = -\frac{1}{n} \sum_{i=1}^{n} [y_i \cdot \log(\hat{y}_i) + (1-y_i) \cdot \log(1-\hat{y}_i)]$
+- **Formula:**
+
+  $$L(w) = -\frac{1}{n} \sum_{i=1}^{n} [y_i \cdot \log(\hat{y}_i) + (1-y_i) \cdot \log(1-\hat{y}_i)]$$
 
 ---
 

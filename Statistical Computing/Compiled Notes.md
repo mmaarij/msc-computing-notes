@@ -22,7 +22,9 @@
 
 ### Measures of Centrality (Centre)
 
-1.  **Mean ($\bar{x}$):** Arithmetic average - $\bar{x} = \frac{\sum x_i}{n}$
+1.  **Mean ($\bar{x}$):** Arithmetic average
+
+    $$\bar{x} = \frac{\sum x_i}{n}$$
     
 2.  **Median:** Middle value when data is ordered.
 3.  **Mode:** Most frequently occurring value.
@@ -30,8 +32,13 @@
 ### Measures of Variation (Spread)
 
 - **Range:** $\text{Max} - \text{Min}$. Very sensitive to outliers.
-- **Sample Variance ($s^2$):** $s^2 = \frac{\sum (x_i - \bar{x})^2}{n - 1}$
-- **Sample Standard Deviation ($s$):** $s = \sqrt{\frac{\sum (x_i - \bar{x})^2}{n - 1}}$
+- **Sample Variance ($s^2$):**
+
+    $$s^2 = \frac{\sum (x_i - \bar{x})^2}{n - 1}$$
+
+- **Sample Standard Deviation ($s$):**
+
+    $$s = \sqrt{\frac{\sum (x_i - \bar{x})^2}{n - 1}}$$
     
 
 * * *
@@ -163,8 +170,10 @@ $$P(X = x) = \binom{n}{x} p^x (1 - p)^{n-x}$$
 #### Parameters
 
 - **Mean:** $\mu = np$
-    
-- **Standard Deviation:** $\sigma = \sqrt{np(1 - p)}$
+
+- **Standard Deviation:**
+
+    $$\sigma = \sqrt{np(1 - p)}$$
     
 
 * * *
@@ -204,14 +213,18 @@ A continuous random variable can take values anywhere in a continuum, such as he
     A curve where the area under the curve between two points represents probability.
     
 - **Total Area:**  
-    The total area under $f(x)$ is always 1: $\int_{-\infty}^{\infty} f(x)\,dx = 1$
+    The total area under $f(x)$ is always 1:
+
+    $$\int_{-\infty}^{\infty} f(x)\,dx = 1$$
     
 
 ### Uniform Distribution
 
 The simplest continuous distribution where probability is constant between $a$ and $b$.
 
-- **PDF:** $f(x) = \frac{1}{b - a}, \quad a \le x \le b$
+- **PDF:**
+
+    $$f(x) = \frac{1}{b - a}, \quad a \le x \le b$$
     
 
 * * *
@@ -240,11 +253,15 @@ Regardless of the population distribution, if sample size $n$ is large, the dist
 
 - **Mean of $\bar{X}$:** $E(\bar{X}) = \mu$
 
-- **Variance of $\bar{X}$:** $\text{Var}(\bar{X}) = \frac{\sigma^2}{n}$
+- **Variance of $\bar{X}$:**
+
+    $$\text{Var}(\bar{X}) = \frac{\sigma^2}{n}$$
 
 - **Standard Error:** $\frac{\sigma}{\sqrt{n}}$
     
-- **Z Statistic:** $Z = \frac{\bar{X} - \mu}{\sigma / \sqrt{n}}$
+- **Z Statistic:**
+
+    $$Z = \frac{\bar{X} - \mu}{\sigma / \sqrt{n}}$$
     
 
 * * *
