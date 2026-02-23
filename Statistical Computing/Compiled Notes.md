@@ -334,9 +334,7 @@ The probability of observing a result at least as extreme as the one obtained, a
 - **Decision Rule:**  
     Reject $H_0$ if
     
-    $$
-    \text{p-value} < \alpha
-    $$
+    $$\text{p-value} < \alpha$$
     
 
 * * *
