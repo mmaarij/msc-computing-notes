@@ -379,3 +379,112 @@ The PR Curve and the Area under the curve (AUC), can also be a good single numbe
 
 > **Note on Optimization**
 > We typically **train** using one metric (like Log-Loss for classification or MSE for regression because they are differentiable/convex) but **evaluate** using others (like Accuracy, F1-Score, or MAE) that are more interpretable for humans.
+
+# Week 4: k-Nearest Neighbours, Feature Engineering & Tree Ensembles
+
+## Part 1: k-Nearest Neighbours (kNN) Basics
+
+### 1. The Algorithm
+* **Definition:** kNN is a simple, two-part algorithm used for either classification or regression.
+* **Procedure:**
+    1.  Given a target instance ($x_j$), calculate the distance to all recorded training cases ($x_i$).
+    2.  Retrieve the $k$ most similar (nearest) recorded cases.
+    3.  **For Classification:** Take the maximum of $k$ votes (the most common category among the neighbors).
+    4.  **For Regression:** Calculate the "average" across these $k$ cases.
+
+### 2. Distance Metrics
+* We typically use **Euclidean distance** to calculate the "nearest" neighbor.
+* **Formula:** $d(t,s) = \sqrt{(t_1 - s_1)^2 + ... + (t_p - s_p)^2}$.
+* **The Scale Problem:** Scale matters significantly. If one predictor/feature has a much larger value range than another, it will disproportionately influence the distance measurement.
+
+### 3. Choosing $k$
+* **$k=1$ (1-Nearest Neighbour):** Looking at only the single closest point tends to overfit the training data and captures noise.
+* **Higher $k$ (e.g., $k=5$):** Taking a vote among multiple neighbors smooths out the decision boundary and reduces overfitting.
+* **The Trade-off:** If $k$ is too small, the model overfits. If $k$ is too large, the model underfits reality.
+* **How to choose:** We treat $k$ as a hyperparameter and select the best value using cross-validation (e.g., 10-fold cross-validation).
+
+### 4. Lazy vs. Eager Learning
+* **Lazy Learning (e.g., kNN):** Defers computation until a prediction is needed.
+    * *Pros:* Very quick to train (it just stores the data), less memory usage during training.
+    * *Cons:* Prediction is slow, relies heavily on training data during prediction, uses more memory during prediction.
+* **Eager Learning (e.g., SVM, Neural Networks, Decision Trees):** Precomputes a model during the training phase.
+    * *Pros:* Faster predictions, less memory usage during prediction, less dependent on original data once trained.
+    * *Cons:* Slower and more memory-intensive during the training phase.
+
+---
+
+## Part 2: Feature Engineering & Preprocessing
+
+### 1. Feature Scaling
+Because distance metrics like Euclidean distance are heavily influenced by the scale of the data, we must bring features into a similar range.
+
+#### Normalization vs. Standardization
+
+| Feature | Min-Max Scaling (Normalization) | Standardization |
+| :--- | :--- | :--- |
+| **Output Range** | Fixed (0 to 1) | Not bounded | 
+| **Outlier Handling**| Very sensitive | More robust |  
+| **Distribution** | Changes the shape | Maintains shape (mostly) |  
+| **Common Use Case** | When you need exact boundaries | When you need a "standard normal curve" (Mean 0, Std Dev 1) |
+
+### 2. Pipelines
+* We should avoid altering the entire raw dataset directly before training, as future data would also need to be manually transformed.
+* **Solution:** Build the transformation directly into the model using `make_pipeline`. 
+* Any data that goes into the pipeline automatically passes through the transformation step (e.g., `StandardScaler()`) before reaching the classifier step.
+
+### 3. Feature Engineering & Custom Transforms
+The features we provide to a model drastically dictate what it can learn. We can design custom features to give the model better predictive power.
+* **Custom Calculations:** Using tools like `FunctionTransformer`, we can add derived features, such as calculating a point's radius/distance from the center $(0,0)$ to help classify circular data.
+* **1D to 2D Signals:** Converting 1-dimensional signals into 2-dimensional representations. For example, converting audio data or stock market data into spectrograms allows models (especially computer vision models) to find complex visual patterns in the data.
+
+---
+
+## Part 3: The Curse of Dimensionality
+
+### 1. The Problem with High Dimensions
+* **Sparsity:** As the number of dimensions (features) increases, data points spread out, increasing sparsity.
+* **Failing Distance Metrics:** In high dimensions (e.g., >10), Euclidean distance becomes unhelpful because all vectors become almost equidistant from the search query vector. This misleads nearest-neighbor algorithms.
+
+### 2. The Bioinformatics Problem (Simultaneous Equations)
+* In fields like bioinformatics (e.g., genome sequencing), datasets often have very few subjects (e.g., 1000) but millions of features (genes). 
+* This creates a mathematical problem similar to simultaneous equations: if you have millions of unknown variables (features) but only 1000 equations (subjects), you cannot reliably solve the system. 
+* **The Solution:** This issue is typically addressed using **Regularization** (especially L1 Regularization, which forces the model to ignore irrelevant features by shrinking their weights to zero).
+
+### 3. Dimensionality Reduction Techniques
+To fix the curse of dimensionality before applying algorithms like kNN, we can use:
+* **Feature Grouping:** Grouping common features based on domain knowledge (e.g., averaging 365 daily weather readings into 12 monthly averages).
+* **Extraction/Embedding Algorithms:** Using techniques like Principal Component Analysis (PCA) or Linear Discriminant Analysis (LDA) to compress the data into a lower-dimensional space.
+
+---
+
+## Part 4: Decision Trees & Ensembles
+
+### 1. Decision Trees: The "20 Questions" Intuition
+* **How it works:** Decision Trees mimic human decision-making by incrementally breaking a dataset into smaller subsets based on feature values (e.g., "Is it a mammal? -> Does it have stripes? -> Tiger").
+* **Anatomy of a Tree:**
+    * **Root Node:** The top of the tree representing the entire population (the first split).
+    * **Decision Node:** A point where a branch splits based on a feature condition.
+    * **Leaf Node (Terminal Node):** The end of a branch that does not split further. It holds the final prediction/category.
+    * **Depth:** How many layers of splits the tree has.
+
+### 2. Ensemble Learning
+* **Concept:** Instead of relying on a single model (like one decision tree), we combine a group of models (an "ensemble") to make predictions. This capitalizes on the "wisdom of the crowd" to achieve higher accuracy and robustness.
+
+### 3. Bagging (Bootstrap Aggregating) & Random Forests
+* **Structure:** Models are trained in **Parallel**.
+* **Bagging:** Trains multiple models on different random subsets of the training data.
+* **Random Forests:** A powerful type of bagging specifically using decision trees. It introduces extra randomness: at each node split, it only considers a *random subset of features*. This decorrelates the trees so they don't all make the same mistakes.
+* **Goal:** Bagging primarily **reduces Variance** (prevents overfitting). It is very robust and hard to overfit.
+
+### 4. Boosting
+* **Structure:** Models are trained **Sequentially** (one after another).
+* **How it works:** Each new tree tries to fix the mistakes of the previous tree. 
+    * *Tree 1* makes predictions.
+    * *Tree 2* focuses heavily on the samples that Tree 1 misclassified (by weighting them higher).
+    * *Tree 3* focuses on the errors of Tree 2, and so on.
+* **Popular Algorithms:** AdaBoost, Gradient Boosting, XGBoost, LightGBM (XGBoost/LightGBM are the gold standard for tabular data competitions).
+* **Goal:** Boosting primarily **reduces Bias**. However, unlike bagging, boosting *can* overfit if left unchecked and is harder to tune.
+* 
+### 5. Summary: Bagging vs. Boosting
+* **Bagging:** Parallel execution, reduces Variance, resistant to overfitting.
+* **Boosting:** Sequential execution, reduces Bias, prone to overfitting but often yields superior performance when tuned correctly.

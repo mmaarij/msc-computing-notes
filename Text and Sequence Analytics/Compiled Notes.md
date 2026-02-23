@@ -247,9 +247,7 @@ Where $S(w_i)$ is the set of all possible tokenizations of a word $w_i$.
 
 - **Training Complexity**:
 
-  $$
-  O(nv)
-  $$
+  $$O(nv)$$
 
   where $n$ is training examples and $v$ is vocabulary size.
 
@@ -298,16 +296,12 @@ Division of already tokenized text into smaller, overlapping sub-sequences, ofte
 
 - Reversible tokenization:
 
-  $$
-  (\text{token id}) \leftrightarrow (\text{Unicode})
-  $$
+  $$(\text{token id}) \leftrightarrow (\text{Unicode})$$
 
 - Excellent for languages without whitespaces (Chinese/Japanese) because it treats the whole sentence as a Unicode stream.  
 
 - Training time is reduced to:
 
-  $$
-  O(n \log n)
-  $$
+  $$O(n \log n)$$
 
   using an **Enhanced Suffix Array (ESA)**.
