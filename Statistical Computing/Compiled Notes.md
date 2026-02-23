@@ -18,116 +18,85 @@
 
 * * *
 
-# 2\. Measures of Centrality and Variation
+## Measures of Centrality and Variation
 
-## Measures of Centrality (Centre)
+### Measures of Centrality (Centre)
 
-1.  **Mean ($\bar{x}$):** Arithmetic average
-    
-    $$\bar{x} = \frac{\sum x_i}{n}$$
+1.  **Mean ($\bar{x}$):** Arithmetic average - $\bar{x} = \frac{\sum x_i}{n}$
     
 2.  **Median:** Middle value when data is ordered.
 3.  **Mode:** Most frequently occurring value.
 
-## Measures of Variation (Spread)
+### Measures of Variation (Spread)
 
-- **Range:**
-    
-    $$\text{Max} - \text{Min}$$
-    
-    Very sensitive to outliers.
-- **Sample Variance ($s^2$):**
-    
-    $$s^2 = \frac{\sum (x_i - \bar{x})^2}{n - 1}$$
-    
-- **Sample Standard Deviation ($s$):**
-    
-    $$
-    s = \sqrt{\frac{\sum (x_i - \bar{x})^2}{n - 1}}
-    $$
+- **Range:** $\text{Max} - \text{Min}$. Very sensitive to outliers.
+- **Sample Variance ($s^2$):** $s^2 = \frac{\sum (x_i - \bar{x})^2}{n - 1}$
+- **Sample Standard Deviation ($s$):** $s = \sqrt{\frac{\sum (x_i - \bar{x})^2}{n - 1}}$
     
 
 * * *
 
-# 3\. Probability Theory Basics
+## Probability Theory Basics
 
-## Core Rules
+### Core Rules
 
-- **Sample Space ($\Omega$):** Set of all possible outcomes.
-    
-    $$P(\Omega) = 1$$
-    
-- **Empty Set ($\emptyset$):** Impossible event.
-    
-    $$P(\emptyset) = 0$$
-    
-- **Probability Bounds:**
-    
-    $$0 \le P(A) \le 1$$
-    
-- **Complement Rule:**
-    
-    $$P(A^c) = 1 - P(A)$$
-    
-    Notation: $A^c$, $\bar{A}$, or $A'$.
+- **Sample Space ($\Omega$):** Set of all possible outcomes. $P(\Omega) = 1$
 
-## Combining Events
+- **Empty Set ($\emptyset$):** Impossible event. $P(\emptyset) = 0$
+
+- **Probability Bounds:** $0 \le P(A) \le 1$
+
+- **Complement Rule:** $P(A^c) = 1 - P(A)$. Notation: $A^c$, $\bar{A}$, or $A'$.
+
+### Combining Events
 
 - **Intersection (AND):** $A \cap B$
 - **Union (OR):** $A \cup B$
 
-### Addition Rules
+#### Addition Rules
 
-- **General Addition Rule:**
-    
-    $$P(A \cup B) = P(A) + P(B) - P(A \cap B)$$
+- **General Addition Rule:** $P(A \cup B) = P(A) + P(B) - P(A \cap B)$
     
 - **Disjoint (Mutually Exclusive) Events:**
     
     - Cannot occur together
     - $A \cap B = \emptyset$
-    - $$
-        P(A \cup B) = P(A) + P(B)
-        $$
+    - $P(A \cup B) = P(A) + P(B)$
         
 
 * * *
 
-# 4\. Conditional Probability and Independence
+## Conditional Probability and Independence
 
-## Conditional Probability
+### Conditional Probability
 
 Probability that $B$ occurs given that $A$ has occurred:
 
 $$P(B \mid A) = \frac{P(A \cap B)}{P(A)}$$
 
-## Multiplication Law
+### Multiplication Law
 
 $$P(A \cap B) = P(B \mid A) \times P(A)$$
 
-## Independence
+### Independence
 
 Two events are independent if one does not affect the other:
 
-- $$P(B \mid A) = P(B)$$
-    
-    or
-- $$
-    P(A \cap B) = P(A) \times P(B)
-    $$
+- $P(B \mid A) = P(B)$, or
+- $P(A \cap B) = P(A) \times P(B)$
     
 
 * * *
 
-# 5\. Advanced Probability Theorems
+## Advanced Probability Theorems
 
-## Bayes' Theorem
+### Bayes' Theorem
 
 Used to reverse conditional probabilities:
 
 $$P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}$$
 
-## Law of Total Probability
+### Law of Total Probability
 
 If $A_1, A_2, \dots, A_n$ partition the sample space:
 
@@ -135,9 +104,9 @@ $$P(B) = \sum_{i=1}^{n} P(B \mid A_i) \times P(A_i)$$
 
 * * *
 
-# 6\. Discrete Random Variables
+## Discrete Random Variables
 
-## Definition
+### Definition
 
 A **Random Variable ($X$)** is a numerical model for a measurement.
 
@@ -149,11 +118,11 @@ A **Random Variable ($X$)** is a numerical model for a measurement.
     - 1 for success
     - 0 for failure
 
-## Probability Mass Function (pmf)
+### Probability Mass Function (pmf)
 
 $$f(x) = P(X = x)$$
 
-## Expected Value (Mean)
+### Expected Value (Mean)
 
 The long-run average or centre of gravity:
 
@@ -165,69 +134,59 @@ $$E(X) = 3.5$$
 
 * * *
 
-# 7\. Cumulative Distribution Function (CDF)
+## Cumulative Distribution Function (CDF)
 
 $$F(x) = P(X \le x)$$
 
 - For discrete RVs, the CDF has a **step shape**.
-- **At least rule:**
-    
-    $$
-    P(X \ge k) = 1 - P(X < k)
-    $$
+- **At least rule:** $P(X \ge k) = 1 - P(X < k)$
     
 
 * * *
 
-# 8\. Discrete Probability Distributions
+## Discrete Probability Distributions
 
-## A. Binomial Distribution
+### Binomial Distribution
 
 Used for the number of successes in $n$ trials.
 
-### Assumptions (Always state in exams)
+#### Assumptions (Always state in exams)
 
 1.  Fixed number of trials ($n$)
 2.  Constant probability of success ($p$)
 3.  Trials are independent
 
-### Model
+#### Model
 
 $$P(X = x) = \binom{n}{x} p^x (1 - p)^{n-x}$$
 
-### Parameters
+#### Parameters
 
-- **Mean:**
+- **Mean:** $\mu = np$
     
-    $$\mu = np$$
-    
-- **Standard Deviation:**
-    
-    $$
-    \sigma = \sqrt{np(1 - p)}
-    $$
+- **Standard Deviation:** $\sigma = \sqrt{np(1 - p)}$
     
 
 * * *
 
-## B. Poisson Distribution
+### Poisson Distribution
 
 Used for counting arrivals in a fixed interval of time or space.
 
-### Assumptions
+#### Assumptions
 
 1.  Probability proportional to interval size
 2.  Probability of two or more arrivals in a very small interval is negligible
 3.  Non-overlapping intervals are independent
 
-### Model
+#### Model
 
 $$P(X = x) = \frac{e^{-\alpha t} (\alpha t)^x}{x!}$$
 
 - $\alpha$ = average rate per unit
 - $t$ = length of interval
 
-### Key Property (Very Exam Important)
+#### Key Property (Very Exam Important)
 
 $$Rate = \lambda = E(X) = Var(X) = \alpha t$$
 
@@ -235,7 +194,7 @@ $$Rate = \lambda = E(X) = Var(X) = \alpha t$$
 
 # Week 2: Continuous, Sampling & Hypothesis Testing
 
-## 1\. Continuous Random Variables
+## Continuous Random Variables
 
 ### Definition
 
@@ -245,31 +204,24 @@ A continuous random variable can take values anywhere in a continuum, such as he
     A curve where the area under the curve between two points represents probability.
     
 - **Total Area:**  
-    The total area under $f(x)$ is always 1
-  $$\int_{-∞}^{\u221e}\text{f(x)dx} = 1$$
+    The total area under $f(x)$ is always 1: $\int_{-\infty}^{\infty} f(x)\,dx = 1$
     
 
 ### Uniform Distribution
 
 The simplest continuous distribution where probability is constant between $a$ and $b$.
 
-- **PDF:**
-    
-    $$f(x) = \frac{1}{b - a}, \quad a \le x \le b$$
+- **PDF:** $f(x) = \frac{1}{b - a}, \quad a \le x \le b$
     
 
 * * *
 
-## 2\. The Normal Distribution (Slides 6 to 8)
+## The Normal Distribution
 
 ### Properties
 
 - Defined by **Mean ($\mu$)** and **Variance ($\sigma^2$)**.
-- Notation:
-    
-    $$
-    X \sim N(\mu, \sigma^2)
-    $$
+- Notation: $X \sim N(\mu, \sigma^2)$
     
 
 ### Empirical Rule (68, 95, 99.7)
@@ -280,34 +232,24 @@ The simplest continuous distribution where probability is constant between $a$ a
 
 * * *
 
-## 3\. Sampling Distributions
+## Sampling Distributions
 
 ### Central Limit Theorem (CLT)
 
 Regardless of the population distribution, if sample size $n$ is large, the distribution of the sample mean $\bar{X}$ is approximately normal.
 
-- **Mean of $\bar{X}$:**
+- **Mean of $\bar{X}$:** $E(\bar{X}) = \mu$
+
+- **Variance of $\bar{X}$:** $\text{Var}(\bar{X}) = \frac{\sigma^2}{n}$
+
+- **Standard Error:** $\frac{\sigma}{\sqrt{n}}$
     
-    $$E(\bar{X}) = \mu$$
-    
-- **Variance of $\bar{X}$:**
-    
-    $$\text{Var}(\bar{X}) = \frac{\sigma^2}{n}$$
-    
-- **Standard Error:**
-    
-    $$\frac{\sigma}{\sqrt{n}}$$
-    
-- **Z Statistic:**
-    
-    $$
-    Z = \frac{\bar{X} - \mu}{\sigma / \sqrt{n}}
-    $$
+- **Z Statistic:** $Z = \frac{\bar{X} - \mu}{\sigma / \sqrt{n}}$
     
 
 * * *
 
-## 4\. Hypothesis Testing Basics
+## Hypothesis Testing Basics
 
 ### Core Concepts
 
@@ -339,7 +281,7 @@ The probability of observing a result at least as extreme as the one obtained, a
 
 * * *
 
-## 5\. Confidence Intervals
+## Confidence Intervals
 
 ### Definition
 
@@ -366,7 +308,7 @@ Since 300 is not in the interval, reject $H_0$.
 
 * * *
 
-## 6\. Hypothesis Tests for Proportions
+## Hypothesis Tests for Proportions
 
 Used for categorical data.
 
@@ -387,7 +329,7 @@ prop.test(64, 100, p = 0.5)
 
 * * *
 
-## 7\. One Sample t-Test
+## One Sample t-Test
 
 Used when population variance $\sigma^2$ is unknown.
 
@@ -419,7 +361,7 @@ t.test(corrib, mu = 5, alternative = "less")
 
 * * *
 
-## 8\. Comparing Two Means: Independent Samples
+## Comparing Two Means: Independent Samples
 
 Used to compare two separate groups.
 
@@ -447,7 +389,7 @@ t.test(x, y, alternative = "less")
 
 * * *
 
-## 9\. Comparing Two Means: Paired Samples
+## Comparing Two Means: Paired Samples
 
 Used when observations are dependent or matched.
 
@@ -522,7 +464,7 @@ Large $\chi^2$ means observed differs strongly from expected.
 
 ---
 
-## M\&Ms Example
+## M&Ms Example
 
 **Claim ($H_0$):**
 
@@ -547,20 +489,20 @@ chisq.test(chocolate, p = probs)
 
 ---
 
-# 16. Chi-Squared Test of Independence
+## Chi-Squared Test of Independence
 
-## Purpose
+### Purpose
 
 Tests whether two categorical variables are related.
 
-### Hypotheses
+#### Hypotheses
 
 - $H_0$: Variables are independent  
 - $H_1$: Variables are dependent  
 
 ---
 
-## Expected Counts Formula
+### Expected Counts Formula
 
 For contingency table:
 
@@ -572,7 +514,7 @@ $$df = (r - 1)(c - 1)$$
 
 ---
 
-## Assumptions
+### Assumptions
 
 1. Categorical variables  
 2. Independent observations  
@@ -584,7 +526,7 @@ If violated, combine categories or use Fisher's test.
 
 ---
 
-## Fisher's Exact Test
+### Fisher's Exact Test
 
 Used for small samples.
 
@@ -598,14 +540,14 @@ wilcox.test(group_A, group_B, alternative = "two.sided", paired = TRUE)
 
 ---
 
-## Mann-Whitney U Test / Wilcoxon Test
+### Mann-Whitney U Test / Wilcoxon Test
 Used for median
 
 ```r
 wilcox.test
 ```
 
-### Effect Size: Statistical vs Practical Significance
+#### Effect Size: Statistical vs Practical Significance
 
 #### The Problem with Large Samples
 
@@ -622,7 +564,7 @@ Effect size measures the **magnitude** of a difference.
 
 ---
 
-#### A. Chi-Squared Tests: Phi Coefficient
+#### Chi-Squared Tests: Phi Coefficient
 
 For $2 \times 2$ tables:
 
@@ -636,7 +578,7 @@ $$\phi = \sqrt{\frac{\chi^2}{n}}$$
 
 ---
 
-#### B. t Tests: Cohen's d
+#### t Tests: Cohen's d
 
 Used when comparing two means.
 
@@ -650,9 +592,9 @@ For independent samples, use the pooled standard deviation.
 - 0.5 medium  
 - 0.8+ large  
 
-# Maximum Likelihood Estimation (MLE)
+## Maximum Likelihood Estimation
 
-## The Core Idea
+### The Core Idea
 
 How do we find the "best" parameters such as $\mu$ or $\lambda$?
 
@@ -663,9 +605,9 @@ MLE finds the parameter that makes your data most likely.
 
 ---
 
-## MLE Step by Step
+### MLE Step by Step
 
-### 1. Likelihood Function
+#### Likelihood Function
 
 Write the probability of the entire dataset.
 
@@ -675,7 +617,7 @@ $$L(\theta) = \prod f(x_i \mid \theta)$$
 
 ---
 
-### 2. Log-Likelihood
+#### Log-Likelihood
 
 Take the natural log:
 
@@ -689,7 +631,7 @@ Why?
 
 ---
 
-### 3. Differentiate
+#### Differentiate
 
 Find derivative with respect to $\theta$:
 
@@ -697,7 +639,7 @@ $$\frac{d\ell}{d\theta}$$
 
 ---
 
-### 4. Solve
+#### Solve
 
 Set derivative equal to 0 and solve for $\theta$.
 
@@ -705,16 +647,16 @@ This gives the MLE estimate.
 
 ---
 
-# 18. MLE Examples
+## MLE Examples
 
-## A. Poisson Distribution (Horse Kicks)
+### Poisson Distribution (Horse Kicks)
 
 - Data: Counts of deaths by horse kicks (von Bortkiewicz data)  
 - Model:
 
 $$X \sim \text{Poisson}(\lambda)$$
 
-### MLE Result
+#### MLE Result
 
 $$\hat{\lambda}_{MLE} = \frac{1}{n} \sum x_i = \bar{x}$$
 
@@ -722,13 +664,13 @@ Takeaway: For Poisson, the MLE for $\lambda$ is the **sample mean**.
 
 ---
 
-## B. Normal Distribution
+### Normal Distribution
 
 We estimate two parameters: $\mu$ and $\sigma^2$.
 
 ---
 
-### 1. Estimating the Mean
+#### Estimating the Mean
 
 $$\hat{\mu} = \bar{x}$$
 
@@ -736,11 +678,11 @@ Takeaway: MLE mean equals the sample mean.
 
 ---
 
-### 2. Estimating the Variance
+#### Estimating the Variance
 
 $$\hat{\sigma}^2_{MLE} = \frac{1}{n} \sum (x_i - \bar{x})^2$$
 
-### Bias Issue
+#### Bias Issue
 
 - MLE divides by $n$ → biased (underestimates variance)  
 - Sample variance:
@@ -753,7 +695,7 @@ Conclusion: For large $n$, difference is negligible.
 
 ---
 
-# R Implementation (stats4)
+## R Implementation
 
 For complex models, solve numerically.
 
@@ -794,7 +736,7 @@ summary(fit)
 
 When we cannot find the maximum likelihood mathematically, we use algorithms to walk uphill to the peak.
 
-### 1. Gradient Ascent / Descent
+### Gradient Ascent / Descent
 
 - **How it works:** Finds the direction of the steepest slope, the gradient, and takes a step in that direction.  
 
@@ -802,7 +744,7 @@ When we cannot find the maximum likelihood mathematically, we use algorithms to 
 
 - **Cons:** Slow, linear convergence; choosing the right step size is tricky.
 
-### 2. Newton's Method
+### Newton's Method
 
 - **How it works:** Uses curvature, the Hessian matrix of second derivatives, to fit a quadratic curve and jump straight to its maximum.  
 
@@ -810,13 +752,13 @@ When we cannot find the maximum likelihood mathematically, we use algorithms to 
 
 - **Cons:** Fails if the Hessian matrix is not invertible or near saddle points; computationally expensive because it requires second derivatives.
 
-### 3. BFGS (Quasi-Newton)
+### BFGS (Quasi-Newton)
 
 - **How it works:** Achieves Newton-like speed without computing second derivatives. It approximates the Hessian matrix using previous gradient information.  
 
 - **Pros:** Fast, robust, and requires no second derivatives. This is the default in R's `optim()` and `mle()`.
 
-### 4. Nelder-Mead (Simplex)
+### Nelder-Mead (Simplex)
 
 - **How it works:** Uses no derivatives. It constructs a simplex, a geometric shape of points, that reflects and shrinks over the surface to find the peak.  
 
@@ -860,11 +802,7 @@ Even when computed numerically, MLE has excellent theoretical properties.
 
 2. **Equivariance:** If $\hat{\theta}$ is the MLE of $\theta$, then $g(\hat{\theta})$ is the MLE of $g(\theta)$.  
 
-3. **Asymptotic Normality:** For large samples,  
-   $$
-   \hat{\theta} \approx \mathcal{N}\left(\theta, \frac{1}{I(\theta)}\right)
-   $$
-   where $I(\theta)$ is the Fisher Information.  
+3. **Asymptotic Normality:** For large samples, $\hat{\theta} \approx \mathcal{N}\left(\theta, \frac{1}{I(\theta)}\right)$, where $I(\theta)$ is the Fisher Information.  
 
 4. **Asymptotic Efficiency:** For large samples, the MLE achieves the minimum possible variance among regular estimators.
 
@@ -889,10 +827,7 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 
 ### The Distribution
 
-- Under $H_0$,  
-  $$
-  \Lambda \sim \chi^2_{df}
-  $$  
+- Under $H_0$, $\Lambda \sim \chi^2_{df}$  
 
 - Degrees of freedom $df$ equal the number of restrictions imposed under $H_0$.
 
@@ -904,7 +839,7 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 
 ---
 
-# Complete Exam Quick Reference Table
+## Complete Exam Quick Reference Table
 
 | Concept / Test | Formula or R Function | Use Case | Key Exam Notes |
 |---------------|----------------------|----------|---------------|
@@ -940,13 +875,13 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 | **MLE Normal Mean** | $\hat{\mu}=\bar{x}$ | Estimate mean | Same as sample mean |
 | **MLE Normal Variance** | $\hat{\sigma}^2=\frac{1}{n}\sum (x_i-\bar{x})^2$ | Estimate variance | Biased |
 | **Cohen d** | $d=\frac{\bar{x}_1-\bar{x}_2}{s}$ | t test effect size | 0.2 small, 0.5 med, 0.8 large |
-| BFGS | `optim(method="BFGS")` | General-purpose MLE optimization | Fast, robust, no second derivatives required |
-| Nelder-Mead | `optim(method="Nelder-Mead")` | Non-smooth likelihoods | Very robust but slower, weak in high dimensions |
-| Negative Log-Likelihood | $-\sum \log f(x_i \mid \theta)$ | Convert maximization to minimization | R minimizes by default |
-| Convergence Check | `fit$convergence == 0` | Verify optimizer success | 0 indicates successful convergence |
-| Equivariance (MLE) | If $\hat{\theta}$ is MLE, then $g(\hat{\theta})$ is MLE of $g(\theta)$ | Transformations of parameters | Core theoretical property |
-| LRT Statistic | $\Lambda = -2[\ell(\hat{\theta}_0) - \ell(\hat{\theta})]$ | Compare nested models | Based on log-likelihood difference |
-| LRT Distribution | $\Lambda \sim \chi^2_{df}$ | Compute p-values | df equals number of restrictions |
-| Profile Confidence Intervals | `confint(fit)` | Construct CIs via LRT | Does not rely on normal approximation |
+| **BFGS** | `optim(method="BFGS")` | General-purpose MLE optimization | Fast, robust, no second derivatives required |
+| **Nelder-Mead** | `optim(method="Nelder-Mead")` | Non-smooth likelihoods | Very robust but slower, weak in high dimensions |
+| **Negative Log-Likelihood** | $-\sum \log f(x_i \mid \theta)$ | Convert maximization to minimization | R minimizes by default |
+| **Convergence Check** | `fit$convergence == 0` | Verify optimizer success | 0 indicates successful convergence |
+| **Equivariance (MLE)** | If $\hat{\theta}$ is MLE, then $g(\hat{\theta})$ is MLE of $g(\theta)$ | Transformations of parameters | Core theoretical property |
+| **LRT Statistic** | $\Lambda = -2[\ell(\hat{\theta}_0) - \ell(\hat{\theta})]$ | Compare nested models | Based on log-likelihood difference |
+| **LRT Distribution** | $\Lambda \sim \chi^2_{df}$ | Compute p-values | df equals number of restrictions |
+| **Profile Confidence Intervals** | `confint(fit)` | Construct CIs via LRT | Does not rely on normal approximation |
 
 ---

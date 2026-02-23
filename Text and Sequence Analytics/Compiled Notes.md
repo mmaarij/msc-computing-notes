@@ -1,6 +1,6 @@
-# Week 1
+# Week 1: Introduction to Text & Sequence Analytics
 
-## 1. Fundamentals of Text Analytics
+## Fundamentals of Text Analytics
 
 **Text analytics**, or **text mining**, is the process of extracting high-quality information from unstructured text. It differs from standard data processing because text is inherently 'noisy' and lacks a regular syntax or pattern.
 
@@ -13,7 +13,7 @@
 
 ---
 
-## 2. The DIKW Pyramid
+## The DIKW Pyramid
 
 This hierarchy illustrates how we move from raw facts to actionable insight. In exams, this is often used to explain the goal of information management vs. knowledge management.
 
@@ -26,7 +26,7 @@ This hierarchy illustrates how we move from raw facts to actionable insight. In 
 
 ---
 
-## 3. Artificial Intelligence: Capabilities & Branches
+## Artificial Intelligence: Capabilities & Branches
 
 AI is categorized by its 'reach' relative to human intelligence.
 
@@ -48,7 +48,7 @@ AI is categorized by its 'reach' relative to human intelligence.
 
 ---
 
-## 4. Sequence Analysis (SA) & Bioinformatics
+## Sequence Analysis & Bioinformatics
 
 A unique aspect of this course is the crossover between human language and biological 'languages' like DNA.
 
@@ -58,7 +58,7 @@ A unique aspect of this course is the crossover between human language and biolo
 
 ---
 
-## 5. Historical Context & Thought Experiments
+## Historical Context & Thought Experiments
 
 Dr. Healy highlights several milestones that defined the field:
 
@@ -71,7 +71,7 @@ Dr. Healy highlights several milestones that defined the field:
 
 ---
 
-## 6. Modern Tools & Frameworks
+## Modern Tools & Frameworks
 
 To implement these theories, the industry uses specific Python and Java ecosystems.
 
@@ -82,9 +82,9 @@ To implement these theories, the industry uses specific Python and Java ecosyste
 
 ---
 
-# Week 2
+# Week 2: Text Processing & Normalization
 
-## 1. Text Representation
+## Text Representation
 
 Computers do not process characters directly; they represent them as numeric values.
 
@@ -102,7 +102,7 @@ Computers do not process characters directly; they represent them as numeric val
 
 ---
 
-## 2. Regular Expressions (Regex)
+## Regular Expressions (Regex)
 
 Developed in the 1950s, Regex is the 'de facto' standard for pattern matching and text manipulation.
 
@@ -116,7 +116,7 @@ Developed in the 1950s, Regex is the 'de facto' standard for pattern matching an
 
 ---
 
-## 3. Text Normalization (The Pipeline)
+## Text Normalization
 
 Before analysis, text must be 'wrangled' or cleaned through a series of steps:
 
@@ -128,7 +128,7 @@ Before analysis, text must be 'wrangled' or cleaned through a series of steps:
 
 ---
 
-## 4. Key Stemming Algorithms
+## Key Stemming Algorithms
 
 Stemming is a trade-off between speed and accuracy.
 
@@ -143,7 +143,7 @@ Stemming is a trade-off between speed and accuracy.
 
 ---
 
-## 5. Part of Speech (POS) Tagging
+## Part of Speech (POS) Tagging
 
 POS tagging labels words with lexical classes (noun, verb, etc.) based on their role in a sentence.
 
@@ -157,7 +157,7 @@ POS tagging labels words with lexical classes (noun, verb, etc.) based on their 
 
 ---
 
-## 6. Performance Metrics & Data Structures
+## Performance Metrics & Data Structures
 
 - **Bloom Filter:** A probabilistic data structure used to test set membership efficiently; ideal for representing large sets of stop words or computing similarity metrics while saving memory.
 - **Index Compression Factor (ICF):** Measures a stemmer's strength by the percentage of distinct words it reduces.
@@ -166,9 +166,9 @@ $$\text{ICF} = \frac{n - s}{n} \times 100$$
 
 where $n$ is the number of distinct words before stemming and $s$  is the number after stemming.
 
-# Week 3
+# Week 3: Tokenization & Sequence Segmentation
 
-## 1. Text Tokenization Basics
+## Text Tokenization Basics
 
 - **Definition**: Segmenting text into meaningful atomic units (tokens) such as characters, sub-words, or words.  
 - **Vocabulary**: The complete set of unique tokens used by a specific tokenizer.  
@@ -181,7 +181,7 @@ where $n$ is the number of distinct words before stemming and $s$  is the number
 
 ---
 
-## 2. Sub-Word Tokenization
+## Sub-Word Tokenization
 
 Decomposes words into smaller units to handle OOV words and provide better morphological understanding while keeping vocabulary size manageable.
 
@@ -210,6 +210,7 @@ Decomposes words into smaller units to handle OOV words and provide better morph
     where $V$ is vocabulary size and $C$ is corpus size.
 
   - Tokenization for text $T$: $O(T \log V)$
+
 ---
 ### WordPiece
 
@@ -245,15 +246,11 @@ $$\text{loss} = \sum_{i=1}^{n} \log \left(\sum_{w \in S(w_i)} p(w)\right)$$
 
 Where $S(w_i)$ is the set of all possible tokenizations of a word $w_i$.
 
-- **Training Complexity**:
-
-  $$O(nv)$$
-
-  where $n$ is training examples and $v$ is vocabulary size.
+- **Training Complexity:** $O(nv)$ where $n$ is training examples and $v$ is vocabulary size.
 
 ---
 
-## 3. Sequence Segmentation
+## Sequence Segmentation
 
 Division of already tokenized text into smaller, overlapping sub-sequences, often using a sliding window.
 
@@ -286,7 +283,7 @@ Division of already tokenized text into smaller, overlapping sub-sequences, ofte
 
 ---
 
-## 4. SentencePiece Framework
+## SentencePiece Framework
 
 - **Origin**: Developed by Meta.  
 
@@ -294,14 +291,146 @@ Division of already tokenized text into smaller, overlapping sub-sequences, ofte
 
 - Implements optimized BPE, WordPiece, and Unigram (default).  
 
-- Reversible tokenization:
-
-  $$(\text{token id}) \leftrightarrow (\text{Unicode})$$
+- Reversible tokenization: $(\text{token id}) \leftrightarrow (\text{Unicode})$
 
 - Excellent for languages without whitespaces (Chinese/Japanese) because it treats the whole sentence as a Unicode stream.  
 
-- Training time is reduced to:
+- Training time is reduced to $O(n \log n)$ using an **Enhanced Suffix Array (ESA)**.
 
-  $$O(n \log n)$$
+# Week 4: Sequence Similarity & Alignment
 
-  using an **Enhanced Suffix Array (ESA)**.
+## Mathematical Fundamentals of Similarity
+
+To compare sequences, we distinguish between measuring how much they are alike versus how much they differ.
+
+### Similarity (s)
+
+Measures the degree of correspondence between sequences. Higher similarity implies a closer relationship.
+
+### Distance (d)
+
+Measures the number of changes required to transform one sequence into another.
+
+### Identity (I)
+
+A Boolean indicator function:
+
+$$I(a, b) = \begin{cases} 1 & \text{if } a = b \\ 0 & \text{if } a \ne b \end{cases}$$
+
+---
+
+### Metric Properties
+
+For a distance function $d(x, y)$ to be a true metric, it must satisfy:
+
+1. **Non-negativity:** $d(x, y) \ge 0$
+
+2. **Identity of Indiscernibles:** $d(x, y) = 0 \iff x = y$
+
+3. **Symmetry:** $d(x, y) = d(y, x)$
+
+4. **Triangle Inequality:** $d(x, z) \le d(x, y) + d(y, z)$
+
+---
+
+## Distance Calculations
+
+These quantify the cost of transforming one string into another.
+
+### Hamming Distance
+
+The number of positions at which corresponding symbols differ.
+
+**Constraint:** Sequences must be of equal length.
+
+$$d_H(s_1, s_2) = \sum_{i=1}^{n} \mathbf{1}[s_{1i} \ne s_{2i}]$$
+
+where $\mathbf{1}[\cdot]$ is the indicator function.
+
+---
+
+### Levenshtein (Edit) Distance
+
+The minimum number of insertions, deletions, or substitutions required to transform string $A$ into string $B$.
+
+Let $d(i,j)$ denote the distance between the first $i$ characters of $A$ and the first $j$ characters of $B$.
+
+**Recurrence Relation:**
+
+$$d(i,j) = \min \begin{cases} d(i-1, j) + 1 & \text{(Deletion)} \\ d(i, j-1) + 1 & \text{(Insertion)} \\ d(i-1, j-1) + \text{cost} & \text{(Substitution)} \end{cases}$$
+
+where $\text{cost} = \begin{cases} 0 & \text{if } A[i] = B[j] \\ 1 & \text{if } A[i] \ne B[j] \end{cases}$
+
+---
+
+## Sequence Alignment
+
+Alignment algorithms use a scoring matrix $H$ and defined transition rules to find an optimal alignment.
+
+---
+
+### Needleman-Wunsch (Global Alignment)
+
+Aligns sequences from beginning to end. Suitable for closely related sequences of similar length.
+
+**Initialization:** $H(i,0) = i \times \text{gap}$ and $H(0,j) = j \times \text{gap}$
+
+**Recurrence Relation:**
+
+$$H(i,j) = \max \begin{cases} H(i-1, j-1) + S(a_i, b_j) & \text{(Match/Mismatch)} \\ H(i-1, j) + \text{gap} & \text{(Gap in B)} \\ H(i, j-1) + \text{gap} & \text{(Gap in A)} \end{cases}$$
+
+Time complexity: $O(mn)$
+
+---
+
+### Smith-Waterman (Local Alignment)
+
+Finds the highest scoring local subsequences within two sequences.
+
+**Initialization:** $H(i,0) = 0$ and $H(0,j) = 0$
+
+**Recurrence Relation:**
+
+$$H(i,j) = \max \begin{cases} 0 & \text{(Restart)} \\ H(i-1, j-1) + S(a_i, b_j) & \text{(Match/Mismatch)} \\ H(i-1, j) + \text{gap} & \text{(Gap in B)} \\ H(i, j-1) + \text{gap} & \text{(Gap in A)} \end{cases}$$
+
+The inclusion of $0$ prevents negative scores and allows the alignment to restart at any position.
+
+---
+
+## Advanced Scoring Parameters
+
+### Affine Gap Penalty
+
+More realistic than a linear gap penalty because opening a gap is typically more costly than extending one.
+
+$$W = g + (L - 1)e$$
+
+where:
+
+- $g$ = gap opening penalty  
+- $e$ = gap extension penalty  
+- $L$ = total length of the gap  
+
+---
+
+## BLAST Statistical Significance
+
+BLAST evaluates whether an alignment is statistically meaningful.
+
+### Bit Score $S'$
+
+A normalized alignment score independent of database size.
+
+### E-value (Expect Value)
+
+The expected number of matches occurring by chance.
+
+$$E = m \times n \times 2^{-S'}$$
+
+where:
+
+- $m$ = query length  
+- $n$ = database length  
+- $S'$ = bit score  
+
+A very small or zero E-value indicates a statistically significant match.
