@@ -201,7 +201,7 @@ Real-world problems have more than one input feature.
 > - **Label Encoding:** Assigning numbers (0, 1, 2) can mislead the model into thinking there is an order or hierarchy (e.g., $2 > 1$), which might not exist.
 > - **One-Hot Encoding:** A safer approach for non-ordinal data. It splits one feature into multiple binary features (e.g., `Color_Red`, `Color_Blue`), preventing the model from assuming false relationships.
 
----
+***
 
 ## Logistic Regression & The Logit Function
 
@@ -209,7 +209,7 @@ Logistic Regression is a **classification algorithm**, named "regression" only b
 
 We do predict a continuous value between $0$ and $1$, but we interpret it as a probability ($p$) and then apply a threshold to obtain a discrete class label.
 
----
+***
 
 ### The Core Problem with Linear Regression
 
@@ -223,7 +223,7 @@ $$\hat{y} = w_0 + w_1x_1$$
 
 Linear regression therefore does not naturally constrain outputs to the valid probability range.
 
----
+***
 
 ### The Sigmoid Function
 
@@ -245,7 +245,7 @@ $$p = \frac{1}{1 + e^{-(w_0 + w_1x_1 + \dots + w_nx_n)}}$$
 
 This is the **logistic regression function**. The weights $w_0, \dots, w_n$ are often written as $\beta_0, \dots, \beta_n$ in the literature.
 
----
+***
 
 ### Odds and the Logit Function
 
@@ -278,7 +278,7 @@ The linear model in logistic regression is therefore written as:
 
 $$\ln\left(\frac{p}{1-p}\right) = w_0 + w_1x_1 + \dots + w_nx_n$$
 
----
+***
 
 ### Logit vs. Logistic Function
 
@@ -302,7 +302,7 @@ The logit and logistic functions are inverses of each other.
 > - **Short Answer:** It is complicated. Technically yes, but it is often determined by **human decision** and domain constraints rather than just data.
 > - **Example:** In cancer diagnosis, you might lower the threshold (e.g., to 0.1) to catch more cases. You would rather tolerate False Positives (scaring a healthy patient) than False Negatives (missing cancer).
 
----
+***
 
 ## Training & Loss Functions
 
@@ -323,7 +323,7 @@ The logit and logistic functions are inverses of each other.
 
   $$L(w) = -\frac{1}{n} \sum_{i=1}^{n} [y_i \cdot \log(\hat{y}_i) + (1-y_i) \cdot \log(1-\hat{y}_i)]$$
 
----
+***
 
 ## Metrics & Evaluation
 
@@ -409,7 +409,7 @@ The PR Curve and the Area under the curve (AUC), can also be a good single numbe
     * *Pros:* Faster predictions, less memory usage during prediction, less dependent on original data once trained.
     * *Cons:* Slower and more memory-intensive during the training phase.
 
----
+***
 
 ## Feature Engineering & Preprocessing
 
@@ -439,7 +439,7 @@ The features we provide to a model drastically dictate what it can learn. We can
 * **Custom Calculations:** Using tools like `FunctionTransformer`, we can add derived features, such as calculating a point's radius/distance from the center $(0,0)$ to help classify circular data.
 * **1D to 2D Signals:** Converting 1-dimensional signals into 2-dimensional representations. For example, converting audio data or stock market data into spectrograms allows models (especially computer vision models) to find complex visual patterns in the data.
 
----
+***
 
 ## The Curse of Dimensionality
 
@@ -461,7 +461,7 @@ To fix the curse of dimensionality before applying algorithms like kNN, we can u
 * **Feature Grouping:** Grouping common features based on domain knowledge (e.g., averaging 365 daily weather readings into 12 monthly averages).
 * **Extraction/Embedding Algorithms:** Using techniques like Principal Component Analysis (PCA) or Linear Discriminant Analysis (LDA) to compress the data into a lower-dimensional space.
 
----
+***
 
 ## Decision Trees & Ensembles
 
@@ -509,14 +509,14 @@ $$\text{Gini} = 1 - (p_{yes}^2 + p_{no}^2)$$
   * `min_samples_split`
   * `min_samples_leaf`
 
----
+***
 
 ### Ensemble Learning
 
 * **Concept:** Combine multiple models instead of relying on a single tree.
 * Leverages the "wisdom of the crowd" for improved accuracy and robustness.
 
----
+***
 
 ### Bagging & Random Forests
 
@@ -530,7 +530,7 @@ $$\text{Gini} = 1 - (p_{yes}^2 + p_{no}^2)$$
   * Decorrelates trees so they do not all make the same mistakes.
 * **Goal:** Strong variance reduction, robust, hard to overfit.
 
----
+***
 
 ### Boosting
 
@@ -543,7 +543,7 @@ $$\text{Gini} = 1 - (p_{yes}^2 + p_{no}^2)$$
 * **Goal:** Primarily **reduces bias**.
 * Can overfit if not properly tuned.
 
----
+***
 
 ### Bagging vs. Boosting
 

@@ -11,7 +11,7 @@
   - Sentiment Analysis and Topic Modelling
   - Classification and Clustering
 
----
+***
 
 ## The DIKW Pyramid
 
@@ -24,7 +24,7 @@ This hierarchy illustrates how we move from raw facts to actionable insight. In 
 | **Information** | Data that has been categorized, combined, and calculated | Know What |
 | **Data**        | Raw facts, figures, and measurements                     | Raw Input |
 
----
+***
 
 ## Artificial Intelligence: Capabilities & Branches
 
@@ -46,7 +46,7 @@ AI is categorized by its 'reach' relative to human intelligence.
 - **Expert Systems:** Simulating human expertise in specific fields.
 - **Fuzzy Logic:** Handling vagueness and uncertainty in reasoning.
 
----
+***
 
 ## Sequence Analysis & Bioinformatics
 
@@ -56,7 +56,7 @@ A unique aspect of this course is the crossover between human language and biolo
 - **The Connection:** Biological sequences use symbols (like English) where the order is the most critical factor, just like NLP.
 - **Key Growth:** The volume of data in GenBank (Nucleotides, Amino Acids) has seen exponential growth over 30 years.
 
----
+***
 
 ## Historical Context & Thought Experiments
 
@@ -69,7 +69,7 @@ Dr. Healy highlights several milestones that defined the field:
   - 1st AI Winter: Triggered by the 1966 ALPAC report.
   - 2nd AI Winter: Mid-1980s to early 1990s.
 
----
+***
 
 ## Modern Tools & Frameworks
 
@@ -80,7 +80,7 @@ To implement these theories, the industry uses specific Python and Java ecosyste
 - **LLM Ecosystem:** Hugging Face, LangChain, and models like GPT, Gemini, and Llama.
 - **Data Interchange:** ONNX (Open Neural Network Exchange) allows models to move between different languages like Python and Java.
 
----
+***
 
 # Week 2: Text Processing & Normalization
 
@@ -100,7 +100,7 @@ Computers do not process characters directly; they represent them as numeric val
 - **Immutability:** Once a `String` is declared, it cannot be changed; modifying it actually creates a new object to improve performance.
 - **String Pooling:** Literal strings (e.g., `String t = "Happy Days!"`) are shared in a 'String Pool' in the JVM heap to save memory.
 
----
+***
 
 ## Regular Expressions (Regex)
 
@@ -114,7 +114,7 @@ Developed in the 1950s, Regex is the 'de facto' standard for pattern matching an
 | `^` / `$`    | Start / End of string           | `^Hi` / `end$`       |
 | `[^a-zA-Z]`  | Match only letters              | Useful for removing numbers or symbols |
 
----
+***
 
 ## Text Normalization
 
@@ -126,7 +126,7 @@ Before analysis, text must be 'wrangled' or cleaned through a series of steps:
 - **Lemmatization:** A more accurate, context-aware method that uses a dictionary (like WordNet) to find the valid base form (lemma).
 - **Stop Word Removal:** Filtering out noisy, insignificant words (like 'the', 'and') that often make up 25%+ of a document.
 
----
+***
 
 ## Key Stemming Algorithms
 
@@ -141,7 +141,7 @@ Stemming is a trade-off between speed and accuracy.
 - **Over-stemming:** Too aggressive; stems 'university' to 'universe'.
 - **Under-stemming:** Too lazy; fails to stem 'knavish' to 'knave'.
 
----
+***
 
 ## Part of Speech (POS) Tagging
 
@@ -155,7 +155,7 @@ POS tagging labels words with lexical classes (noun, verb, etc.) based on their 
   - `CD`: Cardinal number
   - `PRP`: Personal pronoun
 
----
+***
 
 ## Performance Metrics & Data Structures
 
@@ -179,7 +179,7 @@ where $n$ is the number of distinct words before stemming and $s$  is the number
 - **Word-level**: Often used for semantic analysis and Part-of-Speech tagging, but results in large vocabularies and frequent OOV misses.  
 - **Character-level**: Useful for spelling correction and OOV handling, but creates long sequences that are computationally expensive to process.  
 
----
+***
 
 ## Sub-Word Tokenization
 
@@ -211,7 +211,7 @@ Decomposes words into smaller units to handle OOV words and provide better morph
 
   - Tokenization for text $T$: $O(T \log V)$
 
----
+***
 ### WordPiece
 
 - **Concept**: Iterative sub-word tokenization similar to BPE but uses a likelihood scoring system for merges.  
@@ -233,7 +233,7 @@ $$\text{score} = \frac{\text{freq}(\text{Token}_{Left}) \times \text{freq}(\text
 - `[PAD]`: Padding to reach fixed-size vector lengths.  
 - `[MASK]`: Used in BERT pre-training to hide words for prediction.  
 
----
+***
 
 ### Unigram Tokenization
 
@@ -248,7 +248,7 @@ Where $S(w_i)$ is the set of all possible tokenizations of a word $w_i$.
 
 - **Training Complexity:** $O(nv)$ where $n$ is training examples and $v$ is vocabulary size.
 
----
+***
 
 ## Sequence Segmentation
 
@@ -267,21 +267,21 @@ Division of already tokenized text into smaller, overlapping sub-sequences, ofte
     - C: 11  
   - A 64-bit long can encode a 32-mer.
 
----
+***
 
 ### Shingles
 
 - **Definition**: A word or group of words, similar to n-grams but typically used for document-level analysis.  
 - **Applications**: Near-duplicate detection, document clustering, and data deduplication.  
 
----
+***
 
 ### Skip-grams
 
 - **Definition**: Similar to n-grams but allows gaps (skips) between words.  
 - **Value**: Captures semantic relationships between non-adjacent words, essential for creating dense word embeddings.  
 
----
+***
 
 ## SentencePiece Framework
 
@@ -317,7 +317,7 @@ A Boolean indicator function:
 
 $$I(a, b) = \begin{cases} 1 & \text{if } a = b \\ 0 & \text{if } a \ne b \end{cases}$$
 
----
+***
 
 ### Metric Properties
 
@@ -331,7 +331,7 @@ For a distance function $d(x, y)$ to be a true metric, it must satisfy:
 
 4. **Triangle Inequality:** $d(x, z) \le d(x, y) + d(y, z)$
 
----
+***
 
 ## Distance Calculations
 
@@ -347,7 +347,7 @@ $$d_H(s_1, s_2) = \sum_{i=1}^{n} \mathbf{1}[s_{1i} \ne s_{2i}]$$
 
 where $\mathbf{1}[\cdot]$ is the indicator function.
 
----
+***
 
 ### Levenshtein (Edit) Distance
 
@@ -361,13 +361,13 @@ $$d(i,j) = \min \begin{cases} d(i-1, j) + 1 & \text{(Deletion)} \\ d(i, j-1) + 1
 
 where $\text{cost} = \begin{cases} 0 & \text{if } A[i] = B[j] \\ 1 & \text{if } A[i] \ne B[j] \end{cases}$
 
----
+***
 
 ## Sequence Alignment
 
 Alignment algorithms use a scoring matrix $H$ and defined transition rules to find an optimal alignment.
 
----
+***
 
 ### Needleman-Wunsch (Global Alignment)
 
@@ -381,7 +381,7 @@ $$H(i,j) = \max \begin{cases} H(i-1, j-1) + S(a_i, b_j) & \text{(Match/Mismatch)
 
 Time complexity: $O(mn)$
 
----
+***
 
 ### Smith-Waterman (Local Alignment)
 
@@ -395,7 +395,7 @@ $$H(i,j) = \max \begin{cases} 0 & \text{(Restart)} \\ H(i-1, j-1) + S(a_i, b_j) 
 
 The inclusion of $0$ prevents negative scores and allows the alignment to restart at any position.
 
----
+***
 
 ## Advanced Scoring Parameters
 
@@ -411,7 +411,7 @@ where:
 - $e$ = gap extension penalty  
 - $L$ = total length of the gap  
 
----
+***
 
 ## BLAST Statistical Significance
 
