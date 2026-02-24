@@ -426,14 +426,28 @@ Used to compare two separate groups.
     
     If p-value > 0.05, assume equal variances.
     
-3.  **Run t-Test:**
-    
-    - Welch Two Sample t-test (default in R)
+3.  **Run t-Test:**  
+    Choose the appropriate variant based on the variance test result.
 
-**R Code:**
+### Which t-Test to Use
+
+| Situation | Test | R Code |
+|-----------|------|--------|
+| **Unequal variances** (or unsure) | Welch Two Sample t-test — **does NOT assume equal variances** | `t.test(x, y, alternative = ...)` |
+| **Equal variances confirmed** | Pooled (Student's) t-test — assumes equal variances | `t.test(x, y, var.equal = TRUE, alternative = ...)` |
+
+> **Default in R:** `t.test()` uses Welch's test (`var.equal = FALSE`) — safe to use in all cases.
+
+**R Code (Welch — unequal/unknown variances):**
 
 ```r
 t.test(x, y, alternative = "less")
+```
+
+**R Code (Pooled — equal variances confirmed):**
+
+```r
+t.test(x, y, var.equal = TRUE, alternative = "less")
 ```
 
 * * *
@@ -910,7 +924,8 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 | **Levene Test** | `leveneTest()` | Compare variances | Robust |
 | **Bartlett Test** | `bartlett.test()` | Compare variances | Needs normality |
 | **One Sample t Test** | `t.test(x, mu=...)` | Mean vs constant | Unknown $\sigma$ |
-| **Independent t Test** | `t.test(x, y)` | Two groups | Welch default |
+| **Independent t Test** | `t.test(x, y)` | Two groups, unequal/unknown variances | Welch default; no equal variance assumption |
+| **Independent t Test (Equal Var)** | `t.test(x, y, var.equal=TRUE)` | Two groups, equal variances confirmed | Pooled; only after Levene/Bartlett p > 0.05 |
 | **Paired t Test** | `t.test(x, y, paired=TRUE)` | Before vs after | Uses differences |
 | **Proportion Test** | `prop.test(x, n)` | Test proportion | Large samples ($n \ge 30$), normal approx |
 | **Exact Binomial Test** | `binom.test(x, n, p=...)` | Test proportion exactly | Small samples; exact binomial p-value |
