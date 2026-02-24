@@ -36,13 +36,7 @@ jobs:
             
             echo "Converting: $file for Course: $course_name"
 
-            cat << 'EOF' > header.tex
-\usepackage{titling}
-\pretitle{\begin{center}\vspace*{\fill}\Huge\bfseries}
-\posttitle{\end{center}}
-\preauthor{\begin{center}\large}
-\postauthor{\end{center}\vspace*{\fill}\clearpage}
-EOF
+            printf "\\usepackage{titling}\n\\pretitle{\\begin{center}\\vspace*{\\fill}\\Huge\\bfseries}\n\\posttitle{\\end{center}}\n\\preauthor{\\begin{center}\\large}\n\\postauthor{\\end{center}\\vspace*{\\fill}\\clearpage}\n" > header.tex
 
             pandoc "$file" -o "$dir/$filename.pdf" \
               --pdf-engine=xelatex \
