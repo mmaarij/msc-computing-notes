@@ -448,7 +448,7 @@ Now we analyse **qualitative (categorical) data**:
 
 We compare **Observed vs Expected frequencies**.
 
-***
+---
 
 ### The Chi-Squared Distribution ($\chi^2$)
 
@@ -459,7 +459,7 @@ We compare **Observed vs Expected frequencies**.
 - As df increases, it becomes more Normal shaped
 - Right tail area = significance level $\alpha$
 
-***
+---
 
 ## Chi-Squared Goodness-of-Fit Test
 
@@ -479,7 +479,7 @@ Where:
 
 Large $\chi^2$ means observed differs strongly from expected.
 
-***
+---
 
 ## M&Ms Example
 
@@ -494,7 +494,7 @@ Large $\chi^2$ means observed differs strongly from expected.
 
 Reject $H_0$ if $\chi^2_{calc} > \chi^2_{critical}$.
 
-***
+---
 
 ### R Code
 
@@ -504,7 +504,7 @@ probs <- c(0.3, 0.2, 0.2, 0.1, 0.1, 0.1)
 chisq.test(chocolate, p = probs)
 ```
 
-***
+---
 
 ## Chi-Squared Test of Independence
 
@@ -517,7 +517,7 @@ Tests whether two categorical variables are related.
 - $H_0$: Variables are independent  
 - $H_1$: Variables are dependent  
 
-***
+---
 
 ### Expected Counts Formula
 
@@ -529,19 +529,19 @@ Degrees of freedom:
 
 $$df = (r - 1)(c - 1)$$
 
-***
+---
 
 ### Assumptions
 
 1. Categorical variables  
 2. Independent observations  
 3. Rule of 5:
-   - At least 80% of expected counts ≥ 5  
-   - No expected count < 1  
+   - At least 80% of expected counts $\ge$ 5  
+   - No expected count $\lt$ 1  
 
 If violated, combine categories or use Fisher's test.
 
-***
+---
 
 ### Fisher's Exact Test
 
@@ -555,7 +555,7 @@ wilcox.test(group_A, group_B, alternative = "two.sided")
 wilcox.test(group_A, group_B, alternative = "two.sided", paired = TRUE)
 ```
 
-***
+---
 
 ### Mann-Whitney U Test / Wilcoxon Test
 Used for median
@@ -573,13 +573,13 @@ wilcox.test
 - With very large $n$, even tiny differences can produce small p values.  
 - Example: A 2 second improvement may be statistically significant but practically useless.
 
-***
+---
 
 #### The Solution: Effect Size
 
 Effect size measures the **magnitude** of a difference.
 
-***
+---
 
 #### Chi-Squared Tests: Phi Coefficient
 
@@ -593,7 +593,7 @@ $$\phi = \sqrt{\frac{\chi^2}{n}}$$
 - 0.3 medium  
 - 0.5 large  
 
-***
+---
 
 #### t Tests: Cohen's d
 
@@ -620,7 +620,7 @@ MLE finds the parameter that makes your data most likely.
 - **Fisher's Principle:** Choose parameter $\theta$ that makes the observed data most probable.  
 - Goal: Find $\theta$ that maximizes $P(\text{data} \mid \theta)$ i.e. the Likelihood Function $L(\theta)$.
 
-***
+---
 
 ### MLE Step by Step
 
@@ -632,7 +632,7 @@ If observations are independent:
 
 $$L(\theta) = \prod f(x_i \mid \theta)$$
 
-***
+---
 
 #### Log-Likelihood
 
@@ -646,7 +646,7 @@ Why?
 - Differentiating a sum is easier  
 - Logs turn products into sums  
 
-***
+---
 
 #### Differentiate
 
@@ -654,7 +654,7 @@ Find derivative with respect to $\theta$:
 
 $$\frac{d\ell}{d\theta}$$
 
-***
+---
 
 #### Solve
 
@@ -662,7 +662,7 @@ Set derivative equal to 0 and solve for $\theta$.
 
 This gives the MLE estimate.
 
-***
+---
 
 ## MLE Examples
 
@@ -679,13 +679,13 @@ $$\hat{\lambda}_{MLE} = \frac{1}{n} \sum x_i = \bar{x}$$
 
 Takeaway: For Poisson, the MLE for $\lambda$ is the **sample mean**.
 
-***
+---
 
 ### Normal Distribution
 
 We estimate two parameters: $\mu$ and $\sigma^2$.
 
-***
+---
 
 #### Estimating the Mean
 
@@ -693,7 +693,7 @@ $$\hat{\mu} = \bar{x}$$
 
 Takeaway: MLE mean equals the sample mean.
 
-***
+---
 
 #### Estimating the Variance
 
@@ -710,7 +710,7 @@ Uses Bessel's correction and is unbiased.
 
 Conclusion: For large $n$, difference is negligible.
 
-***
+---
 
 ## R Implementation
 
@@ -731,7 +731,7 @@ fit <- mle(nloglik, start = list(lambda = 1))
 summary(fit)
 ```
 
-***
+---
 
 # Week 4
 
@@ -747,7 +747,7 @@ summary(fit)
 
 - **The Solution:** Numerical optimization. We use a computer to find where the derivative is approximately zero, which corresponds to the peak of the likelihood.
 
-***
+---
 
 ## Numerical Optimization Methods
 
@@ -783,7 +783,7 @@ When we cannot find the maximum likelihood mathematically, we use algorithms to 
 
 - **Cons:** Slow; struggles in high-dimensional problems with many parameters.
 
-***
+---
 
 ## MLE Optimization in R
 
@@ -809,7 +809,7 @@ When we cannot find the maximum likelihood mathematically, we use algorithms to 
 
 - **Check Convergence:** In R, `optim()$convergence == 0` indicates successful convergence. Any non-zero value indicates failure.
 
-***
+---
 
 ## Why We Love MLE (Theoretical Properties)
 
@@ -823,7 +823,7 @@ Even when computed numerically, MLE has excellent theoretical properties.
 
 4. **Asymptotic Efficiency:** For large samples, the MLE achieves the minimum possible variance among regular estimators.
 
-***
+---
 
 ## The Likelihood Ratio Test (LRT)
 
@@ -854,7 +854,7 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 
 - In R, `confint(fit)` computes profile likelihood confidence intervals.
 
-***
+---
 
 ## Complete Exam Quick Reference Table
 
@@ -901,4 +901,4 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 | **LRT Distribution** | $\Lambda \sim \chi^2_{df}$ | Compute p-values | df equals number of restrictions |
 | **Profile Confidence Intervals** | `confint(fit)` | Construct CIs via LRT | Does not rely on normal approximation |
 
-***
+---

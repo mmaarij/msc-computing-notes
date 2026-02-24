@@ -2,7 +2,6 @@ import os
 import subprocess
 from pathlib import Path
 
-# 1. Setup the LaTeX header as a clean multi-line string
 LATEX_HEADER = r"""
 \usepackage{titling}
 \pretitle{\begin{center}\vspace*{\fill}\Huge\bfseries}
@@ -12,23 +11,27 @@ LATEX_HEADER = r"""
 """
 
 def convert_md_to_pdf():
-    # Create the temporary header file
+    # 1. Create the header file
     with open("header.tex", "w") as f:
         f.write(LATEX_HEADER)
+    
+    # 2. Create a file to force a page break after the TOC
+    with open("after_toc.tex", "w") as f:
+        f.write(r"\clearpage")
 
-    # Find all "Compiled Notes.md" files
     for path in Path(".").rglob("Compiled Notes.md"):
         course_name = path.parent.name
         output_path = path.with_suffix(".pdf")
         
         print(f"Converting: {path} for Course: {course_name}")
 
-        # Construct the Pandoc command
         cmd = [
             "pandoc", str(path),
             "-o", str(output_path),
             "--pdf-engine=xelatex",
             "--include-in-header=header.tex",
+            # This is the secret sauce: it puts the page break right after the TOC
+            "--include-before-body=after_toc.tex", 
             "--variable", f"title={course_name}",
             "--variable", "author=Compiled Revision Notes",
             "--variable", "geometry:margin=1in",
@@ -38,8 +41,7 @@ def convert_md_to_pdf():
             "--variable", "toc-title=Table of Contents",
             "-V", "colorlinks=true",
             "-V", "linkcolor=blue",
-            "-V", "urlcolor=blue",
-            "-V", 'include-after=\\clearpage'
+            "-V", "urlcolor=blue"
         ]
 
         try:
