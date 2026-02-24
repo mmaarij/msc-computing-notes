@@ -537,7 +537,7 @@ $$df = (r - 1)(c - 1)$$
 2. Independent observations  
 3. Rule of 5:
    - At least 80% of expected counts $\ge$ 5  
-   - No expected count $\lt$ 1  
+   - No expected count $<$ 1  
 
 If violated, combine categories or use Fisher's test.
 
