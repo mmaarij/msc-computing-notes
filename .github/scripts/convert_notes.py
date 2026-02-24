@@ -2,40 +2,38 @@ import os
 import subprocess
 from pathlib import Path
 
-# The header uses etoolbox to patch the \tableofcontents command
-# to ensure \clearpage runs immediately after it finishes.
 LATEX_HEADER = r"""
 \usepackage{titling}
-\usepackage{etoolbox}
-
-% 1. Format the Title Page: Center title and subtitle vertically
+% Center Title and Subtitle vertically on Page 1
 \pretitle{\begin{center}\vspace*{\fill}\Huge\bfseries}
 \posttitle{\end{center}}
 \preauthor{\begin{center}\large}
 \postauthor{\end{center}\vspace*{\fill}\clearpage}
-
-% 2. Force a page break after the Table of Contents
-\patchcmd{\tableofcontents}{\endgroup}{\endgroup\clearpage}{}{}
 """
 
 def convert_md_to_pdf():
     # 1. Create the header file
-    # Using 'w' with encoding ensure clean file creation
     with open("header.tex", "w", encoding="utf-8") as f:
         f.write(LATEX_HEADER)
     
-    # 2. Iterate through folders to find the notes
     for path in Path(".").rglob("Compiled Notes.md"):
-        # The course name is the name of the folder containing the .md file
         course_name = path.parent.name
         output_path = path.with_suffix(".pdf")
+        temp_md_path = path.with_name("temp_compiled.md")
         
         print(f"Converting: {path} for Course: {course_name}")
 
-        # Construct the Pandoc command
-        # Note: We removed --include-before-body as the LaTeX patch handles the break now
+        # 2. Create a temporary MD file with a page break at the very top
+        # This forces a break after the TOC renders but before content starts
+        with open(path, "r", encoding="utf-8") as original:
+            content = original.read()
+        
+        with open(temp_md_path, "w", encoding="utf-8") as temp_file:
+            temp_file.write("\\newpage\n\n" + content)
+
+        # 3. Construct Pandoc command using the temp file
         cmd = [
-            "pandoc", str(path),
+            "pandoc", str(temp_md_path),
             "-o", str(output_path),
             "--pdf-engine=xelatex",
             "--include-in-header=header.tex",
@@ -52,13 +50,16 @@ def convert_md_to_pdf():
         ]
 
         try:
-            # Run the conversion
             subprocess.run(cmd, check=True)
             print(f"Successfully created {output_path}")
         except subprocess.CalledProcessError as e:
             print(f"Error converting {path}: {e}")
-            
-    # Cleanup temporary header file
+        finally:
+            # 4. Cleanup the temporary MD file
+            if os.path.exists(temp_md_path):
+                os.remove(temp_md_path)
+
+    # Cleanup header
     if os.path.exists("header.tex"):
         os.remove("header.tex")
 
