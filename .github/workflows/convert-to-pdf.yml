@@ -28,6 +28,13 @@ jobs:
           sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-latex-extra
 
       - name: Convert Markdown to PDF
+        env:
+          LATEX_HEADER: |
+            \usepackage{titling}
+            \pretitle{\begin{center}\vspace*{\fill}\Huge\bfseries}
+            \posttitle{\end{center}}
+            \preauthor{\begin{center}\large}
+            \postauthor{\end{center}\vspace*{\fill}\clearpage}
         run: |
           find . -name "Compiled Notes.md" -type f | while read file; do
             course_name=$(basename "$(dirname "$file")")
@@ -36,7 +43,8 @@ jobs:
             
             echo "Converting: $file for Course: $course_name"
 
-            printf "\\usepackage{titling}\n\\pretitle{\\begin{center}\\vspace*{\\fill}\\Huge\\bfseries}\n\\posttitle{\\end{center}}\n\\preauthor{\\begin{center}\\large}\n\\postauthor{\\end{center}\\vspace*{\\fill}\\clearpage}\n" > header.tex
+            # Safely write the environment variable to header.tex
+            echo "$LATEX_HEADER" > header.tex
 
             pandoc "$file" -o "$dir/$filename.pdf" \
               --pdf-engine=xelatex \
