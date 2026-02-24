@@ -329,13 +329,20 @@ Since 300 is not in the interval, reject $H_0$.
 
 Used for categorical data.
 
+### Two Approaches
+
+| Test | Method | Best For |
+|------|--------|---------|
+| `prop.test` | Normal ($\chi^2$) approximation | Large samples ($n \ge 30$) |
+| `binom.test` | Exact binomial probabilities | Small samples or when exact results are needed |
+
 ### Example: Thanos Snap
 
 - $H_0: p = 0.5$
 - $H_1: p \ne 0.5$
 - Observed: 64 vanished out of 100
 
-**R Code:**
+**R Code (Approximate):**
 
 ```r
 prop.test(64, 100, p = 0.5)
@@ -343,6 +350,31 @@ prop.test(64, 100, p = 0.5)
 
 - p-value = 0.0069  
     Reject $H_0$.
+
+**R Code (Exact — preferred for small samples):**
+
+```r
+binom.test(64, 100, p = 0.5)
+```
+
+- p-value = 0.0105  
+    Reject $H_0$.
+
+### `binom.test` Arguments
+
+```r
+binom.test(x, n, p = 0.5, alternative = "two.sided")
+```
+
+- `x` — number of successes observed
+- `n` — number of trials
+- `p` — hypothesised probability of success under $H_0$
+- `alternative` — `"two.sided"`, `"less"`, or `"greater"`
+
+### When to Use Each
+
+- Use **`binom.test`** when $n$ is small (roughly $n < 30$), or when you need exact p-values.
+- Use **`prop.test`** for large samples; it also supports comparing two proportions (`prop.test(c(x1, x2), c(n1, n2))`).
 
 * * *
 
@@ -880,7 +912,8 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 | **One Sample t Test** | `t.test(x, mu=...)` | Mean vs constant | Unknown $\sigma$ |
 | **Independent t Test** | `t.test(x, y)` | Two groups | Welch default |
 | **Paired t Test** | `t.test(x, y, paired=TRUE)` | Before vs after | Uses differences |
-| **Proportion Test** | `prop.test(x, n)` | Test proportion | Large samples |
+| **Proportion Test** | `prop.test(x, n)` | Test proportion | Large samples ($n \ge 30$), normal approx |
+| **Exact Binomial Test** | `binom.test(x, n, p=...)` | Test proportion exactly | Small samples; exact binomial p-value |
 | **Chi Square Statistic** | $\chi^2 = \sum \frac{(O - E)^2}{E}$ | Categorical tests | Large = big difference |
 | **Goodness of Fit** | `chisq.test(x, p=probs)` | Match distribution | $df = k-1$ |
 | **Independence Test** | `chisq.test(matrix)` | Relationship test | $df = (r-1)(c-1)$ |
@@ -891,7 +924,6 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 | **Log Likelihood** | $\ell(\theta)=\log L(\theta)$ | Simplify math | Turns product into sum |
 | **MLE Normal Mean** | $\hat{\mu}=\bar{x}$ | Estimate mean | Same as sample mean |
 | **MLE Normal Variance** | $\hat{\sigma}^2=\frac{1}{n}\sum (x_i-\bar{x})^2$ | Estimate variance | Biased |
-| **Cohen d** | $d=\frac{\bar{x}_1-\bar{x}_2}{s}$ | t test effect size | 0.2 small, 0.5 med, 0.8 large |
 | **BFGS** | `optim(method="BFGS")` | General-purpose MLE optimization | Fast, robust, no second derivatives required |
 | **Nelder-Mead** | `optim(method="Nelder-Mead")` | Non-smooth likelihoods | Very robust but slower, weak in high dimensions |
 | **Negative Log-Likelihood** | $-\sum \log f(x_i \mid \theta)$ | Convert maximization to minimization | R minimizes by default |
