@@ -12,10 +12,13 @@ LATEX_HEADER = r"""
 
 % Redefine the 'quote' environment to use a framed box
 \renewenvironment{quote}{
+  \vspace{1em}                % <--- Adds space ABOVE the box
   \definecolor{shadecolor}{named}{quote-bg}
+  \setlength{\FrameSep}{10pt} % Internal padding (text to box edge)
   \begin{snugshade}
 }{
   \end{snugshade}
+  \vspace{0.5em}              % <--- Adds space BELOW the box
 }
 
 % Center Title and Subtitle vertically on Page 1
