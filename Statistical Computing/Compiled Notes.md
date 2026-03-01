@@ -779,7 +779,7 @@ summary(fit)
 
 ---
 
-# Week 4
+# Week 4: Advanced MLE & Numerical Methods
 
 ## Complex MLE & The Need for Optimization
 
