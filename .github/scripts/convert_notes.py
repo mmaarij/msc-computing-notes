@@ -10,15 +10,15 @@ LATEX_HEADER = r"""
 % Define the background color for the box
 \definecolor{quote-bg}{HTML}{F1F1F1}
 
-% Redefine the 'quote' environment to use a framed box
+% Redefine the 'quote' environment
 \renewenvironment{quote}{
-  \vspace{1em}                % <--- Adds space ABOVE the box
+  \vspace{10pt}                % Space ABOVE the box (external)
   \definecolor{shadecolor}{named}{quote-bg}
-  \setlength{\FrameSep}{10pt} % Internal padding (text to box edge)
+  \setlength{\FrameSep}{10pt} % Padding INSIDE the box (internal)
   \begin{snugshade}
 }{
   \end{snugshade}
-  \vspace{0.5em}              % <--- Adds space BELOW the box
+  \vspace{5pt}                 % Space BELOW the box (external)
 }
 
 % Center Title and Subtitle vertically on Page 1

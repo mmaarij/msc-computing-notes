@@ -968,7 +968,7 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
       $$\log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1 x_1 + \dots + \beta_p x_p$$
 
 > **Note on Probability and Odds Conversions:**
-> Converting between probability and odds is essential for interpretation. (Note: The formula for $p$ relies on addition in the denominator, correcting the subtraction noted in class).
+> Converting between probability and odds is essential for interpretation.
 >
 > * **Odds Formula:**
 >
