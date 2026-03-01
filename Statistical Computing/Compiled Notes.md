@@ -479,7 +479,7 @@ Using an independent t-test on paired data is incorrect and can increase the cha
 
 * * *
 
-# Week 3: Enumerative Data Analysis and MLE
+# Week 3: Enumerative Data Analysis & MLE
 
 ## Enumerative Data Analysis (Chi-Squared)
 
