@@ -4,6 +4,20 @@ from pathlib import Path
 
 LATEX_HEADER = r"""
 \usepackage{titling}
+\usepackage{xcolor}
+\usepackage{framed}
+
+% Define the background color for the box
+\definecolor{quote-bg}{HTML}{F1F1F1}
+
+% Redefine the 'quote' environment to use a framed box
+\renewenvironment{quote}{
+  \definecolor{shadecolor}{named}{quote-bg}
+  \begin{snugshade}
+}{
+  \end{snugshade}
+}
+
 % Center Title and Subtitle vertically on Page 1
 \pretitle{\begin{center}\vspace*{\fill}\Huge\bfseries}
 \posttitle{\end{center}}
