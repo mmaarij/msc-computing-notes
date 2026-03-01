@@ -902,6 +902,122 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 
 ---
 
+# Week 5: Generalised Linear Models
+
+## Linear Regression Review and Diagnostics
+
+* Unlike machine learning which focuses on prediction, this module focuses on inference to understand relationships, quantify uncertainty, and compare competing models.
+* **Linear Model:**
+
+    $$y = \beta_0 + \beta_1 x + \epsilon$$
+
+  where $\epsilon \sim N(0, \sigma^2)$.
+* Interpreting the summary output:
+
+  * The p-value tests the null hypothesis $H_0: \beta = 0$.
+  * While often informally described as the probability that the coefficient occurred by chance, it precisely measures the probability of observing an estimate this far from zero if the true coefficient were actually zero.
+  * The F-statistic tests whether all slope coefficients are simultaneously zero ($H_0: \beta_1 = \dots = \beta_p = 0$).
+
+* Diagnostic plots are critical for checking assumptions:
+
+  * **Residuals vs Fitted:** Looks for non-linear patterns; should display random scatter.
+  * **Normal Q-Q:** Checks if errors are normally distributed; points should follow the diagonal line.
+  * **Scale-Location:** Checks for constant variance (homoscedasticity); a funnel shape indicates a violation.
+  * **Residuals vs Leverage:** Identifies highly influential points pulling the regression line.
+
+---
+
+## Limitations of Linear Regression
+
+* Linear regression assumes the response $Y$ is continuous and unbounded.
+* It assumes a direct linear relationship between predictors and the mean response.
+* It assumes errors are normally distributed with constant variance.
+* Forcing binary data (pass/fail), count data, or positive right-skewed data into a linear model leads to invalid predictions and violated assumptions.
+
+---
+
+## Introduction to Generalised Linear Models (GLMs)
+
+* Introduced by Nelder and Wedderburn (1972), GLMs unify various regression models under one framework.
+* A GLM consists of three core components:
+
+  * **Random Component:** Specifies that the response $Y_i$ follows a distribution from the exponential family (e.g., Normal, Binomial, Poisson, Gamma).
+  * **Systematic Component:** The linear predictor combining the predictors.
+
+      $$\eta_i = \beta_0 + \beta_1 x_{i1} + \dots + \beta_p x_{ip}$$
+
+  * **Link Function:** Connects the mean $\mu_i$ to the linear predictor $\eta_i$.
+
+      $$g(\mu_i) = \eta_i$$
+
+### Common GLM Families
+
+* **Normal:** Uses the Identity link ($g(\mu) = \mu$) for continuous, roughly symmetric data.
+* **Binomial:** Uses the Logit link for binary responses or proportions.
+* **Poisson:** Uses the Log link ($g(\mu) = \log \mu$) for count data.
+* **Gamma:** Uses the Log link for positive, right-skewed continuous data.
+
+---
+
+## Logistic Regression
+
+* Used when the response $Y$ is binary, modelling the probability of success $p = P(Y=1)$.
+* It applies the logit (log-odds) transformation to ensure predictions remain within the valid $[0, 1]$ bounds.
+  * **Logit Link:**
+
+      $$\log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1 x_1 + \dots + \beta_p x_p$$
+
+> **Note on Probability and Odds Conversions:**
+> Converting between probability and odds is essential for interpretation. (Note: The formula for $p$ relies on addition in the denominator, correcting the subtraction noted in class).
+>
+> * **Odds Formula:**
+>
+>     $$\text{odds} = \frac{p}{1-p}$$
+>
+> * **Probability Formula:**
+>
+>     $$p = \frac{\text{odds}}{1+\text{odds}}$$
+
+### Interpreting Coefficients
+
+* Logistic regression coefficients are interpreted as Odds Ratios.
+  * **Odds Ratio:**
+
+      $$e^{\beta_j}$$
+
+* If $e^{\beta_j} > 1$: Increasing $x_j$ by 1 unit increases the odds of success.
+* If $e^{\beta_j} < 1$: Increasing $x_j$ by 1 unit decreases the odds of success.
+* If $e^{\beta_j} = 1$ ($\beta_j = 0$): The predictor has no effect.
+* To compute confidence intervals directly on the odds ratio scale in R, use `exp(confint(model))`.
+
+---
+
+## Nested Models and Interactions
+
+* **Likelihood Ratio Test (LRT):**
+
+  * Used to formally compare a reduced model ($H_0$) against a full model ($H_1$) to determine if adding predictors significantly improves the fit.
+  * In R, this is executed using the `anova()` function with a Chi-Squared test.
+    `anova(model1, model2, test="Chisq")`
+
+* **Interactions:**
+
+  * An interaction implies that the effect of one predictor depends on the level of another predictor.
+  * Specified in R using `*` (which includes both main effects and the interaction) or `:` (for the interaction term only).
+
+---
+
+## Fitting GLMs
+
+* GLMs are fitted using Maximum Likelihood Estimation (MLE).
+* The objective is to find the parameter values $\hat{\beta}$ that minimize the negative log-likelihood.
+* **Iteratively Reweighted Least Squares (IRLS):**
+
+  * This is the specific numerical algorithm used to optimize the log-likelihood for GLMs.
+  * R's `glm()` function uses IRLS, which converges more accurately and efficiently for these specific models than general-purpose optimizers like `mle()`.
+
+---
+
 ## Complete Exam Quick Reference Table
 
 | Concept / Test | Formula or R Function | Use Case | Key Exam Notes |
@@ -947,5 +1063,12 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 | **LRT Statistic** | $\Lambda = -2[\ell(\hat{\theta}_0) - \ell(\hat{\theta})]$ | Compare nested models | Based on log-likelihood difference |
 | **LRT Distribution** | $\Lambda \sim \chi^2_{df}$ | Compute p-values | df equals number of restrictions |
 | **Profile Confidence Intervals** | `confint(fit)` | Construct CIs via LRT | Does not rely on normal approximation |
-
+| **Linear F-Statistic** | $H_0: \beta_1 = \dots = \beta_p = 0$ | Overall model significance | Tests if at least one predictor matters |
+| **GLM Setup** | $g(\mu_i) = \eta_i$ | Linking mean to predictors | Connects distribution to linear equation |
+| **Logit Link** | $\log\left(\frac{p}{1-p}\right) = \eta$ | Logistic regression link | Bounds predictions to $[0,1]$ |
+| **Odds** | $\text{odds} = \frac{p}{1-p}$ | Probability to Odds | Ratio of success to failure |
+| **Probability from Odds** | $p = \frac{\text{odds}}{1+\text{odds}}$ | Odds to Probability | Reverses the odds calculation |
+| **Odds Ratio** | $e^{\beta_j}$ | Interpreting logistic coefficients | $>1$ increases odds, $<1$ decreases odds |
+| **Model Comparison (LRT)** | `anova(mod1, mod2, test="Chisq")` | Full vs Reduced model | Tests if added variables improve fit |
+| **GLM Fitting Algorithm** | Iteratively Reweighted Least Squares (IRLS) | Optimization in `glm()` | More efficient than standard `mle()` |
 ---

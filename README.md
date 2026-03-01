@@ -13,7 +13,7 @@ This repository contains my compiled notes for the ATU MSC Computing program. Fe
 <br>
 [![](https://img.shields.io/badge/📝%20Text%20%26%20Sequence%20Analytics-Week%204-D4E4BC?style=for-the-badge)](Text%20and%20Sequence%20Analytics/Compiled%20Notes.pdf)
 <br>
-[![](https://img.shields.io/badge/📊%20Statistical%20Computing-Week%204-F7D9D9?style=for-the-badge)](Statistical%20Computing/Compiled%20Notes.pdf)
+[![](https://img.shields.io/badge/📊%20Statistical%20Computing-Week%205-F7D9D9?style=for-the-badge)](Statistical%20Computing/Compiled%20Notes.pdf)
 <br>
 [![](https://img.shields.io/badge/🔎%20Stats%20Lab%20Notes-Week%204-FAE9DA?style=for-the-badge)](Statistical%20Computing/Lab%20Notes.pdf)
 
