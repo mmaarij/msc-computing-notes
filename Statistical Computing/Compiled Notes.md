@@ -1000,10 +1000,12 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
   * In R, this is executed using the `anova()` function with a Chi-Squared test.
     `anova(model1, model2, test="Chisq")`
 
-* **Interactions:**
+* **Interactions and R Formula Syntax (`+`, `*`, `:`):**
 
   * An interaction implies that the effect of one predictor depends on the level of another predictor.
-  * Specified in R using `*` (which includes both main effects and the interaction) or `:` (for the interaction term only).
+  * **`+` (Plus):** Adds independent main effects to the model without an interaction (e.g., `y ~ x1 + x2`).
+  * **`*` (Asterisk):** Specifies an interaction *and* automatically includes the corresponding main effects (e.g., `y ~ x1 * x2` is identical to `y ~ x1 + x2 + x1:x2`).
+  * **`:` (Colon):** Specifies *only* the interaction term between predictors without adding the main effects.
 
 ---
 
@@ -1071,4 +1073,7 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 | **Odds Ratio** | $e^{\beta_j}$ | Interpreting logistic coefficients | $>1$ increases odds, $<1$ decreases odds |
 | **Model Comparison (LRT)** | `anova(mod1, mod2, test="Chisq")` | Full vs Reduced model | Tests if added variables improve fit |
 | **GLM Fitting Algorithm** | Iteratively Reweighted Least Squares (IRLS) | Optimization in `glm()` | More efficient than standard `mle()` |
+| **Formula: +** | `y ~ x1 + x2` | Adding main effects | Adds independent predictors |
+| **Formula: *** | `y ~ x1 * x2` | Main effects + interaction | Shortcut for `x1 + x2 + x1:x2` |
+| **Formula: :** | `y ~ x1:x2` | Interaction term only | The effect of one depends on the other |
 ---
