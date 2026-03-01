@@ -98,17 +98,17 @@ P(B)              # P(B) = 2/6 = 0.333
 # Complement: P(A^c)
 P(setdiff(omega, A))          # 0.5
 
-# Intersection (AND): P(A ∩ B)
+# Intersection (AND): P(A & B)
 P(intersect(A, B))            # P({6}) = 1/6 = 0.167
 
-# Union (OR): P(A ∪ B)
+# Union (OR): P(A | B)
 P(union(A, B))                # P({2,4,5,6}) = 4/6 = 0.667
 
-# Conditional: P(B | A) = P(A ∩ B) / P(A)
+# Conditional: P(B | A) = P(A & B) / P(A)
 P(intersect(A, B)) / P(A)    # 0.333
 
-# Independence check: P(A ∩ B) == P(A) * P(B)?
-isTRUE(all.equal(P(intersect(A, B)), P(A) * P(B)))   # FALSE → dependent
+# Independence check: P(A & B) == P(A) * P(B)?
+isTRUE(all.equal(P(intersect(A, B)), P(A) * P(B)))   # FALSE -> dependent
 ```
 
 ---
@@ -134,10 +134,10 @@ B <- df$studied         # event B: student studied
 P_A <- mean(A)          # P(passed)        — mean() of logical = proportion
 P_B <- mean(B)          # P(studied)
 
-# Intersection: P(A ∩ B) — passed AND studied
+# Intersection: P(A & B) -- passed AND studied
 P_AB <- mean(A & B)
 
-# Union: P(A ∪ B) — passed OR studied (or both)
+# Union: P(A | B) -- passed OR studied (or both)
 P_AuB <- mean(A | B)
 
 # Complement: P(A^c) — did NOT pass
@@ -167,7 +167,7 @@ n <- sum(tbl)
 P_defective  <- sum(tbl["Defective", ]) / n   # P(Defective)
 P_machineA   <- sum(tbl[, "MachineA"]) / n    # P(Machine A)
 
-# Joint probability: P(Defective ∩ Machine A)
+# Joint probability: P(Defective & Machine A)
 P_def_and_A  <- tbl["Defective", "MachineA"] / n
 
 # Conditional: P(Defective | Machine A)
@@ -241,7 +241,7 @@ P(intersect(A, B))   # P({6}) = 1/6
 P(A) * P(B)          # only valid when independence holds
 
 # General multiplication rule:
-# P(A ∩ B) = P(B|A) * P(A)
+# P(A & B) = P(B|A) * P(A)
 P_B_given_A <- length(intersect(A, B)) / length(A)
 P_B_given_A * P(A)   # = 1/6
 ```
@@ -283,7 +283,7 @@ P <- function(event) length(event) / length(omega)
 P(intersect(A, B))          # 1/6 = 0.1667
 P(A) * P(B)                 # 0.5 * 0.333 = 0.1667
 
-isTRUE(all.equal(P(intersect(A, B)), P(A) * P(B)))   # TRUE → independent
+isTRUE(all.equal(P(intersect(A, B)), P(A) * P(B)))   # TRUE -> independent
 ```
 
 ---
