@@ -620,7 +620,13 @@ Where $w^t$ represents the weights at step $t$, $\alpha$ is the learning rate, a
 
 $$\frac{\partial L}{\partial w_1} = \frac{1}{m} \sum_{i=1}^{m} (-x_i)(y_i - w_1 x_i)$$
 
-> The $(-x_i)$ factor arises from the chain rule: differentiating the outer squared term gives $2(y_i - w_1 x_i)$ (which cancels with the $\frac{1}{2}$ in the MSE), and then the inner derivative of $(y_i - w_1 x_i)$ with respect to $w_1$ gives $-x_i$. This tells us the direction and magnitude by which $L$ changes as $w_1$ changes. This result is then plugged into the weight update rule above — the $-\alpha$ in that rule scales it and flips the direction so the weight moves downhill (reducing the loss).
+> The $(-x_i)$ factor arises from the chain rule: differentiating the outer squared term gives $2(y_i - w_1 x_i)$ (which cancels with the $\frac{1}{2}$ in the MSE), and then the inner derivative of $(y_i - w_1 x_i)$ with respect to $w_1$ gives $-x_i$. This tells us the direction and magnitude by which $L$ changes as $w_1$ changes. This result is then plugged into the weight update rule above, where the $-\alpha$ term scales it and flips the direction so the weight moves downhill (reducing the loss).
+
+* **Partial Derivative of Log Loss (Logistic Regression):** Gradient descent is not limited to MSE. It applies to any differentiable loss function. For logistic regression, we minimise the log loss (see Week 3) instead. Taking the partial derivative of log loss with respect to weight $w_j$ yields:
+
+$$\frac{\partial L}{\partial w_j} = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i) \, x_j^{(i)}$$
+
+where $\hat{y}_i = \sigma(w \cdot x^{(i)})$ is the sigmoid output. Despite coming from a completely different loss function, the gradient has the same intuitive structure as the MSE case (error times input feature), and is plugged into the same weight update rule to train the logistic regression model.
 
 * **Multivariate Weight Update:** Generalising to multiple weights, each weight $w_j$ is updated as:
 
@@ -645,7 +651,7 @@ Gradient descent varies based on how many training patterns (samples) are used t
 
 * **Batch Gradient Descent (Full Batch):** Uses every sample in the training set to calculate a single loss and performs one update. The batch size equals the entire training set size, so **one epoch equals exactly one weight update**.
 * **Stochastic Gradient Descent (SGD):** Updates the model after each individual sample (batch size = 1). With $m$ samples, this means **$m$ weight updates per epoch**. Introduces randomness and high variance into the loss trajectory.
-* **Mini-Batch Gradient Descent:** Divides the dataset into small batches and updates weights after each batch — the standard practical approach as it balances stability and speed. The number of updates per epoch is:
+* **Mini-Batch Gradient Descent:** Divides the dataset into small batches and updates weights after each batch. This is the standard practical approach as it balances stability and speed. The number of updates per epoch is:
 
     $$\text{Updates per Epoch} = \frac{\text{Total Sample Size}}{\text{Batch Size}}$$
 
