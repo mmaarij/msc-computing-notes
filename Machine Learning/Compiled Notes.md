@@ -331,31 +331,47 @@ The logit and logistic functions are inverses of each other.
 
 These are ways to measure the "magnitude" or distance of a vector, often used in calculating errors.
 
-- **L1 Norm (Manhattan):** The sum of absolute values. $||x||_1 = \sum |x_i|$
+- **L1 Norm (Manhattan):** The sum of absolute values.
 
-- **L2 Norm (Euclidean):** The square root of the sum of squared values (straight line distance). $||x||_2 = \sqrt{\sum x_i^2}$
+    $$||x||_1 = \sum |x_i|$$
+
+- **L2 Norm (Euclidean):** The square root of the sum of squared values (straight line distance).
+
+    $$||x||_2 = \sqrt{\sum x_i^2}$$
 
 ### Regression Metrics
 
 When evaluating regression models (predicting continuous values), we use several key metrics:
 
 - **MSE (Mean Squared Error):**
-  - **Formula:** $\frac{1}{n} \sum (y_i - \hat{y}_i)^2$
+  - **Formula:**
+
+      $$\frac{1}{n} \sum (y_i - \hat{y}_i)^2$$
+
   - **Use:** Standard for **Training** loss because it is differentiable (convex).
   - **Pros/Cons:** Highly sensitive to outliers because it squares the error (large errors become huge).
 
 - **RMSE (Root Mean Squared Error):**
-  - **Formula:** $\sqrt{MSE}$
+  - **Formula:**
+
+      $$\sqrt{MSE}$$
+
   - **Use:** **Model Evaluation**.
   - **Pros:** It returns the error to the same units as the target variable (e.g., dollars, minutes), making it easier to interpret.
 
 - **MAE (Mean Absolute Error):**
-  - **Formula:** $\frac{1}{n} \sum |y_i - \hat{y}_i|$
+  - **Formula:**
+
+      $$\frac{1}{n} \sum |y_i - \hat{y}_i|$$
+
   - **Use:** **Model Evaluation**.
   - **Pros/Cons:** Less sensitive to outliers than MSE. However, it is **not differentiable** at 0 (has a sharp "kink"), so it cannot be used as a loss function for training algorithms like Gradient Descent.
 
 - **$R^2$ (Coefficient of Determination):**
-  - **Formula:** $1 - \frac{\sum_{i=1}^{N} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{N} (y_i - \bar{y})^2}$
+  - **Formula:**
+
+      $$1 - \frac{\sum_{i=1}^{N} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{N} (y_i - \bar{y})^2}$$
+
   - **Interpretation:** Represents the proportion of variance in the dependent variable explained by the model (Unitless, max value is 1).
 
 ### Classification Metrics
@@ -488,8 +504,8 @@ To fix the curse of dimensionality before applying algorithms like kNN, we can u
 
 $$\text{Gini} = 1 - (p_{yes}^2 + p_{no}^2)$$
 
-* $0$ → perfectly pure node.
-* $0.5$ → maximum impurity (50/50 split).
+* $0$ $\to$ perfectly pure node.
+* $0.5$ $\to$ maximum impurity (50/50 split).
 * Lower Gini = better split.
 * For a full split, compute the **weighted average** of child-node Gini values and choose the lowest.
 
@@ -549,3 +565,108 @@ $$\text{Gini} = 1 - (p_{yes}^2 + p_{no}^2)$$
 
 * **Bagging:** Parallel, reduces variance, resistant to overfitting.
 * **Boosting:** Sequential, reduces bias, more prone to overfitting but often higher performance when tuned well.
+
+## AdaBoost (Adaptive Boosting)
+
+* **Weak Learner:** A model that performs only slightly better than random guessing.
+* **Instance Weighting:** Misclassified instances are assigned exponentially higher weights, forcing each subsequent learner to focus on the harder-to-predict samples.
+* **Model Weighting:** The final prediction is a weighted majority vote (classification) or weighted sum (regression), where learners with lower training error receive a higher weight.
+
+### Decision Stumps
+
+* **Definition:** A decision tree with exactly one split ($max\_depth=1$): one root node and two leaf nodes.
+* **Role in AdaBoost:** AdaBoost almost exclusively uses decision stumps as its base weak learners because they are fast to train and have high bias / low variance, inherently preventing overfitting at the individual learner level.
+* **The Problem with Deep Trees:** Deep trees overfit each individual training iteration, eliminating the error-correction mechanism of boosting and increasing the overall risk of overfitting.
+
+## AdaBoost vs. Random Forest
+
+> See Bagging vs. Boosting above for the parallel/sequential and bias/variance distinctions.
+
+* **Base Learner Complexity:**
+    * **AdaBoost:** Shallow decision stumps keep variance low; the sequential boosting process progressively reduces bias.
+    * **Random Forest:** Unpruned deep trees keep bias low; bagging and random feature selection reduce the resulting variance.
+* **Overfitting Risk:** Random Forests are highly robust and difficult to overfit. AdaBoost is sensitive to noisy data and outliers and can overfit if weak learners are too complex or the ensemble is left unchecked.
+
+# Week 5: Gradient Descent
+
+## Training and Loss Functions
+
+Models are trained by finding the parameters (weights) that minimize the error. While we evaluate models using performance metrics like accuracy or $R^2$, we cannot optimize these metrics directly using calculus. Instead, we define a loss function (or cost function) that measures the difference between model predictions and the correct answers.
+
+- **Mean Squared Error (MSE):**
+
+$$L = \frac{1}{2m} \sum_{i=1}^{m} (y^{(i)} - f_w(x^{(i)}))^2$$
+
+Minimizing this loss function minimizes the overall model error. The objective is to find the global minimum of this function.
+
+
+## The Gradient Descent Algorithm
+
+Gradient descent is an iterative optimization algorithm used when dealing with tens of thousands of parameters, making exact algebraic solutions computationally inefficient. 
+
+### Core Concepts
+
+* **Calculus and Optimization:** Finding the minimum of a function requires taking its partial derivatives with respect to the parameters.
+* **The Gradient:** The gradient is a vector formed by taking all the partial derivatives of the loss function with respect to each weight. It points in the direction of the greatest increase of the function.
+* **Descent:** Multiplying the gradient by $-1$ provides the direction of the greatest decrease (going "downhill").
+
+- **Weight Update Rule:**
+
+$$w^{t+1} = w^t - \alpha \nabla L(w^t)$$
+
+Where $w^t$ represents the weights at step $t$, $\alpha$ is the learning rate, and $\nabla L$ is the gradient of the loss function.
+
+### Algorithm Steps
+
+1. Initialize the weights to random values or zero.
+2. Calculate the loss function.
+3. Calculate the gradient of the loss function.
+4. Update all weights simultaneously using the weight update rule.
+5. Repeat the procedure iteratively until convergence (when the result stops changing).
+
+- **Multivariate Weight Update:**
+
+$$w_j \leftarrow w_j - \alpha \frac{1}{m} \sum_{i=1}^{m} x_j^{(i)} (f_w(x^{(i)}) - y^{(i)})$$
+
+### Potential Issues
+
+* **Local Minima:** In complex, multi-modal loss landscapes, the algorithm might converge to a local minimum instead of the optimal global minimum.
+
+
+## Gradient Descent Variations
+
+Gradient descent varies based on how many training patterns (samples) are used to calculate the error before updating the model weights. This creates a trade-off between computational efficiency and gradient stability.
+
+* **Batch Gradient Descent (Full Batch):** Uses every sample in the training set to calculate a single loss and performs one update. The batch size equals the entire training set size, so **one epoch equals exactly one weight update**.
+* **Stochastic Gradient Descent (SGD):** Updates the model after each individual sample (batch size = 1). With $m$ samples, this means **$m$ weight updates per epoch**. Introduces randomness and high variance into the loss trajectory.
+* **Mini-Batch Gradient Descent:** Divides the dataset into small batches and updates weights after each batch — the standard practical approach as it balances stability and speed. The number of updates per epoch is:
+
+    $$\text{Updates per Epoch} = \frac{\text{Total Sample Size}}{\text{Batch Size}}$$
+
+    > **Note on Naming:** Despite true SGD having a batch size of 1 (above), most modern ML frameworks (e.g., PyTorch's `torch.optim.SGD`, Keras) implement mini-batch gradient descent under the label "SGD". In practice, when someone says they are "using SGD", they almost always mean mini-batch.
+
+## Epochs, Batches, and Learning Rates
+
+### Hyperparameters
+
+* **Batch Size:** The number of samples processed before the model updates its weights.
+* **Epoch:** One complete pass through the entire training dataset, ensuring every individual sample has been seen by the model at least once. One epoch is comprised of one or more batches. Algorithms typically run for multiple epochs.
+* **Learning Rate ($\alpha$):** Determines the step size at each iteration while moving toward a minimum. 
+
+
+### Optimizing the Learning Rate
+
+Choosing the correct learning rate is critical for model convergence.
+
+* **Too High:** The algorithm steps too far, potentially overshooting the minimum and causing the loss to diverge.
+* **Too Low:** The algorithm takes tiny steps, requiring excessive epochs and computational time to converge.
+
+### Optimization Methods
+
+Various advanced optimization techniques build upon standard SGD to adjust learning rates and momentum for better performance and to avoid getting stuck in local minima:
+
+* SGD with Momentum
+* Nesterov Momentum
+* AdaGrad
+* RMSProp
+* Adam (The default solver in many libraries, such as Scikit-Learn)
