@@ -610,23 +610,29 @@ Gradient descent is an iterative optimization algorithm used when dealing with t
 * **The Gradient:** The gradient is a vector formed by taking all the partial derivatives of the loss function with respect to each weight. It points in the direction of the greatest increase of the function.
 * **Descent:** Multiplying the gradient by $-1$ provides the direction of the greatest decrease (going "downhill").
 
-- **Weight Update Rule:**
+* **Weight Update Rule:**
 
 $$w^{t+1} = w^t - \alpha \nabla L(w^t)$$
 
 Where $w^t$ represents the weights at step $t$, $\alpha$ is the learning rate, and $\nabla L$ is the gradient of the loss function.
 
+* **Partial Derivative of MSE Loss (single weight):** To compute the gradient, we differentiate $L$ with respect to each weight using the **chain rule**. For the MSE loss with a single weight $w_1$:
+
+$$\frac{\partial L}{\partial w_1} = \frac{1}{m} \sum_{i=1}^{m} (-x_i)(y_i - w_1 x_i)$$
+
+> The $(-x_i)$ factor arises from the chain rule: differentiating the outer squared term gives $2(y_i - w_1 x_i)$ (which cancels with the $\frac{1}{2}$ in the MSE), and then the inner derivative of $(y_i - w_1 x_i)$ with respect to $w_1$ gives $-x_i$. This tells us the direction and magnitude by which $L$ changes as $w_1$ changes. This result is then plugged into the weight update rule above — the $-\alpha$ in that rule scales it and flips the direction so the weight moves downhill (reducing the loss).
+
+* **Multivariate Weight Update:** Generalising to multiple weights, each weight $w_j$ is updated as:
+
+$$w_j \leftarrow w_j - \alpha \frac{1}{m} \sum_{i=1}^{m} x_j^{(i)} (f_w(x^{(i)}) - y^{(i)})$$
+
 ### Algorithm Steps
 
 1. Initialize the weights to random values or zero.
 2. Calculate the loss function.
-3. Calculate the gradient of the loss function.
+3. Calculate the gradient (partial derivative of the loss with respect to each weight).
 4. Update all weights simultaneously using the weight update rule.
 5. Repeat the procedure iteratively until convergence (when the result stops changing).
-
-- **Multivariate Weight Update:**
-
-$$w_j \leftarrow w_j - \alpha \frac{1}{m} \sum_{i=1}^{m} x_j^{(i)} (f_w(x^{(i)}) - y^{(i)})$$
 
 ### Potential Issues
 
