@@ -1,9 +1,8 @@
-# MSC Computing Notes
+# MSc Computing Notes
 
-This repository contains my compiled notes for the ATU MSC Computing program. Feel free to use these to help with your studies.
+This repository contains my compiled notes for the ATU MSc Computing program. Feel free to use these to help with your studies.
 
 > **Available in both Markdown and PDF formats**: PDFs are automatically generated from the markdown files.
-
 
 > **Update Schedule:** Notes are usually updated every weekend.
 
