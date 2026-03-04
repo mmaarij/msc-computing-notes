@@ -655,7 +655,9 @@ Gradient descent varies based on how many training patterns (samples) are used t
 
     $$\text{Updates per Epoch} = \frac{\text{Total Sample Size}}{\text{Batch Size}}$$
 
-    > **Note on Naming:** Despite true SGD having a batch size of 1 (above), most modern ML frameworks (e.g., PyTorch's `torch.optim.SGD`, Keras) implement mini-batch gradient descent under the label "SGD". In practice, when someone says they are "using SGD", they almost always mean mini-batch.
+> **What does "Stochastic" mean?** Stochastic means random. Both SGD and Mini-Batch GD are stochastic processes because they randomly sample data before computing the gradient. As long as you are randomly sampling (whether it is one row or a batch of 32), the gradient computed is an **estimate** of the true gradient rather than the exact value. Only Full Batch GD uses the entire dataset, making its gradient exact. This is the fundamental distinction: Full Batch computes the truth; SGD and Mini-Batch estimate it.
+
+> **Note on Naming:** Despite true SGD having a batch size of 1 (above), most modern ML frameworks (e.g., PyTorch's `torch.optim.SGD`, Keras) implement mini-batch gradient descent under the label "SGD". In practice, when someone says they are "using SGD", they almost always mean mini-batch.
 
 ## Epochs, Batches, and Learning Rates
 
