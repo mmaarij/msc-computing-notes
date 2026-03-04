@@ -108,9 +108,9 @@ Developed in the 1950s, Regex is the 'de facto' standard for pattern matching an
 
 | Symbol        | Meaning                         | Example              |
 |--------------|---------------------------------|----------------------|
-| `.`          | Any single character            | `a.b` → `acb`        |
-| `\d`         | Any digit (0-9)                 | `\d{4}` → `1970`     |
-| `\w`         | Word character (a-z, 0-9)       | `\w+` → `Hello123`   |
+| `.`          | Any single character            | `a.b` $\to$ `acb`        |
+| `\d`         | Any digit (0-9)                 | `\d{4}` $\to$ `1970`     |
+| `\w`         | Word character (a-z, 0-9)       | `\w+` $\to$ `Hello123`   |
 | `^` / `$`    | Start / End of string           | `^Hi` / `end$`       |
 | `[^a-zA-Z]`  | Match only letters              | Useful for removing numbers or symbols |
 
@@ -434,3 +434,189 @@ where:
 - $S'$ = bit score  
 
 A very small or zero E-value indicates a statistically significant match.
+
+# Week 5: Alignment-Free Sequence Similarity
+
+## Fundamentals of Alignment-Free Similarity
+
+Compare strings by token composition, ignoring positional information. Strings are represented as sets or bags of tokens (words, symbols, n-grams) rather than ordered sequences.
+
+* $O(n)$ vs $O(n^2)$ for DP/alignment-based methods.
+* Use **hashing** to convert variable-length tokens into fixed-length integers for ML pipelines.
+* Can produce false positives when strings share composition but not structure, as positional information is lost.
+* Token size (n-gram size) affects sensitivity: larger n-grams are more precise but sparser.
+* Applications: plagiarism detection, text classification, clustering, genomics.
+
+## Measures vs. Metrics
+
+A distance **measure** is not necessarily a **metric**. The four metric properties are covered in Week 4. The key point is that many alignment-free measures (e.g., Overlap coefficient) do not satisfy all four, so they are measures, not metrics.
+
+## Indices, Coefficients, and Distances
+
+* **Coefficient:** A ratio-based scaling factor between sets.
+* **Index:** A normalized similarity in $[0, 1]$, possibly combining multiple factors (e.g., Tversky Index of $0.8$ = 80% similar).
+* **Distance:** Dissimilarity score where $0$ implies identity.
+
+> **Key Relationship:** Similarity and distance are complementary. For any normalized similarity measure $\text{sim}(A, B)$, the corresponding distance is defined as:
+> $$d(A, B) = 1 - \text{sim}(A, B)$$
+> This applies to Cosine, Jaccard, Dice, Tversky, and Overlap measures.
+
+## Vector-Based Distances
+
+Text is converted into a high-dimensional vector space using character frequencies, n-gram counts, or word embeddings. BOW structures ensure uniform-length vectors.
+
+### Cosine Similarity and Distance
+
+Cosine of the angle between two $n$-dimensional vectors. Independent of magnitude. Used in transformers, clustering, and bioinformatics.
+
+- **Cosine Similarity:**
+
+$$\cos(s,t) = \frac{\sum_{i \in V} s_i t_i}{\sqrt{\sum_{i \in V} s_i^2} \sqrt{\sum_{i \in V} t_i^2}}$$
+
+- **Cosine Distance:**
+
+$$d_{cos}(s,t) = 1 - \cos(s,t)$$
+
+The similarity value is bounded between 0 and 1:
+- $\cos = 0$ ($90^\circ$): vectors are orthogonal (maximally dissimilar).
+- $\cos = 1$ ($0^\circ$): vectors are parallel (maximally similar).
+
+**Token size matters.** For two sentences with the same words in a different order:
+
+| Token Type | $\cos(A, B)$ | Why |
+|---|---|---|
+| 1-grams | $\approx 1.0$ | Same word counts, order ignored |
+| 3-grams (word) | $= 0$ | Phrases differ entirely |
+| 5-mers (char) | $= 0$ | Character windows differ entirely |
+
+### Euclidean Distance
+
+Straight-line distance between two points. Sensitive to scale and has no notion of ordering: anagrams like *listen* and *silent* have identical character frequencies, so $d_E = 0$ despite different meanings.
+
+$$d_{E}(s,t) = \sqrt{\sum_{i=1}^{n} (s_i - t_i)^2}$$
+
+### Manhattan Distance
+
+Also called $L_1$, city block, or taxicab distance. Sums the absolute difference at each vector coordinate.
+
+- **Manhattan Distance:**
+
+$$d_{M}(s,t) = \sum_{i=1}^{n} |s_i - t_i|$$
+
+Requires padding for strings of different lengths. Good when frequency differences matter more than order, e.g., spelling errors and anagram detection.
+
+### Canberra Distance
+
+Weighted Manhattan where each difference is normalized by the sum of the values, making it less sensitive to scale. Range: $[0, n]$.
+
+- **Canberra Distance:**
+
+$$d_{C}(s,t) = \sum_{i \in V} \frac{|s_i - t_i|}{|s_i| + |t_i|}$$
+
+Use when frequencies vary a lot in scale, or when small differences in small values are important. Prefer Manhattan when scale is consistent.
+
+### Chebyshev Distance
+
+Also called $L_\infty$ distance. Takes only the single largest difference between any coordinate, ignoring all others.
+
+- **Chebyshev Distance:**
+
+$$d_\infty(s,t) = \max_{i \in V} |s_i - t_i|$$
+
+Use when the worst-case difference is what matters. Good for anomaly detection and KNN.
+
+### Minkowski Distance
+
+Generalized distance that unifies Manhattan, Euclidean, and Chebyshev.
+
+- **Minkowski Distance:**
+
+$$d_p(s,t) = \left(\sum_{i \in V} |s_i - t_i|^p\right)^{\frac{1}{p}}$$
+
+* $p = 1$ is equivalent to Manhattan distance.
+* $p = 2$ is equivalent to Euclidean distance.
+* $p = \infty$ is equivalent to Chebyshev distance.
+
+Tune $p$ to change sensitivity: higher $p$ emphasizes the largest differences, at the cost of more computation.
+
+## Set-Based Similarities
+
+These methods measure the similarity between sets of tokens derived from text.
+
+### Jaccard Similarity
+
+Proposed by Paul Jaccard in 1901. Quantifies similarity by comparing shared elements against the total combined unique elements.
+
+- **Jaccard Index:**
+
+$$J(A,B) = \frac{|A \cap B|}{|A \cup B|} = \frac{|A \cap B|}{|A| + |B| - |A \cap B|}$$
+
+- **Jaccard Distance:**
+
+$$d_J(A,B) = 1 - J(A,B)$$
+
+### Overlap Distance
+
+Szymkiewicz-Simpson coefficient (1934/1960). Normalizes by the smaller set, making it useful for documents of very different sizes.
+
+- **Overlap Coefficient:**
+
+$$\text{overlap}(A,B) = \frac{|A \cap B|}{\min(|A|, |B|)}$$
+
+- **Overlap Distance:**
+
+$$d_{\text{overlap}}(A,B) = 1 - \text{overlap}(A,B)$$
+
+### Sørensen-Dice Similarity
+
+Weighted intersection, making it more sensitive to common elements. Smaller denominator penalizes mismatches less harshly than Jaccard. Better for short or variable-length texts.
+
+- **Dice Index:**
+
+$$\text{dice}(A,B) = \frac{2|A \cap B|}{|A| + |B|}$$
+
+- **Dice Distance:**
+
+$$d_{\text{dice}}(A,B) = 1 - \text{dice}(A,B)$$
+
+### Tversky Distance
+
+An asymmetric similarity measure that quantifies the degree of overlap while explicitly weighting false positives and false negatives.
+
+- **Tversky Index:**
+
+$$\text{Tversky}(A,B) = \frac{|A \cap B|}{|A \cap B| + \alpha|A \setminus B| + \beta|B \setminus A|}$$
+
+- **Tversky Distance:**
+
+$$d_{\text{Tversky}}(A,B) = 1 - \text{Tversky}(A,B)$$
+
+* Generalizes Jaccard when $\alpha = 1$ and $\beta = 1$.
+* Generalizes Sørensen-Dice when $\alpha = 0.5$ and $\beta = 0.5$.
+
+## MinHash Algorithm
+
+Developed by Andrei Broder (AltaVista, 1997). Represents each document as a signature of $k$ minimum hash values from $k$ different hash functions (using XOR and bit rotations). Scales Jaccard estimation to massive datasets.
+
+- **MinHash Approximation:**
+
+$$J(A,B) \approx \frac{n}{k}$$
+
+* $k$ is the total number of hash functions applied.
+* $n$ is the number of hash functions for which $h_{\min}(A) = h_{\min}(B)$.
+
+The **expected value** of the MinHash similarity between two sets equals the Jaccard Index:
+
+$$\mathbb{E}\left[\mathbf{1}[h_{\min}(A) = h_{\min}(B)]\right] = J(A, B)$$
+
+### MinHash Compatibility
+
+Only works for set-based similarity measures.
+
+| Measure | Compatible? | Notes |
+|---|---|---|
+| **Jaccard** | Yes | Directly estimated |
+| **Sørensen-Dice** | Yes (indirectly) | Derivable from Jaccard: $\text{Dice} = \frac{2J}{1+J}$ and $J = \frac{\text{Dice}}{2 - \text{Dice}}$ |
+| **Tversky** | Yes (when $\alpha = \beta = 1$) | Reduces to Jaccard in this case |
+| **Overlap** | No | Requires $\min(|A|, |B|)$, which MinHash cannot estimate |
+| **Cosine / Euclidean / Manhattan** | No | These require vector arithmetic, which cannot be accurately estimated from hash signatures |
