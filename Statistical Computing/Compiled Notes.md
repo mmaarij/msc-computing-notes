@@ -1020,6 +1020,166 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 
 ---
 
+# Week 6: Generalised Linear Models (Continued)
+
+## Model Evaluation and Deviance
+
+* Understanding Maximum Likelihood Estimation (MLE) provides a principled framework for comparing models, deriving standard errors, and evaluating overall model fit.
+
+* **Model Deviance:**
+
+    $$D = -2[l(\hat{\beta}) - l(\text{saturated model})]$$
+
+* A "saturated" model fits perfectly by using $n$ parameters for $n$ observations; deviance measures how much worse the fitted model is in comparison.
+
+* For Generalised Linear Models (GLMs), deviance plays the same role that the Residual Sum of Squares (RSS) plays in standard linear regression.
+
+* **Residual Deviance:** Represents the amount of unexplained variation remaining after fitting the model.
+
+* If a model fits well, the residual deviance should be approximately equal to the residual degrees of freedom ($n - p$, where $p$ is the number of estimated parameters).
+
+---
+
+## Model Comparison Tools
+
+### Likelihood Ratio Test (LRT)
+
+> The LRT formula ($\Lambda = -2[\ell(\hat{\theta}_0) - \ell(\hat{\theta})]$) and its $\chi^2$ distribution were introduced in Week 4. Its application to GLMs via `anova()` was covered in Week 5. See those sections for the full details.
+
+* In the GLM context, LRT compares two **nested models** where the reduced model is a special case of the full model. A large $\Lambda$ (small p-value) indicates the extra parameters significantly improve the fit.
+
+### Information Criteria (AIC and BIC)
+
+* Used for comparing **non-nested models** or for automated model selection. Both criteria penalise adding extra parameters to prevent overfitting.
+
+* **Akaike Information Criterion (AIC):**
+
+    $$AIC = -2l(\hat{\beta}) + 2k$$
+
+* **Bayesian Information Criterion (BIC):**
+
+    $$BIC = -2l(\hat{\beta}) + k \log n$$
+
+* For both metrics, a lower value indicates a better model. BIC applies a stronger penalty for complexity in large datasets, thereby favouring simpler models.
+
+---
+
+## Poisson Regression for Count Data
+
+* Designed for response variables that are non-negative integer counts (e.g., number of insurance claims, hospital admissions).
+
+* Applying standard linear regression to count data causes invalid predictions (negative counts), violates normality assumptions, and fails to capture that variance increases with the mean.
+
+* **Poisson Distribution Properties:** The expected mean and variance are identical ($E(Y) = \lambda$, $Var(Y) = \lambda$).
+
+* The Poisson GLM connects the log of the mean to the linear predictors.
+
+* **Systematic Component:**
+
+    $$\log(\lambda_i) = \beta_0 + \beta_1 x_{i1} + \dots + \beta_p x_{ip}$$
+
+### Offsets
+
+* Used when modelling a rate (e.g., claims per policyholder) rather than a raw total count across groups of differing sizes.
+
+* Using `offset(log(exposure))` in the model formula constrains the coefficient of the exposure variable to exactly 1.
+
+* **Offset Formula:**
+
+    $$\log\left(\frac{\lambda_i}{Exposure_i}\right) = \beta_0 + \beta_1 x_{i1} + \dots$$
+
+---
+
+## Handling Categorical Predictors in R
+
+* **Dummy Coding (N-1 Bits):** When dealing with categorical data, avoid standard "one-hot encoding" (e.g., representing 4 districts as 1000, 0100, 0010, 0001). Instead, R uses an $n-1$ bit representation to avoid multicollinearity. For a 4-level variable, level 1 acts as the baseline (000), and three indicator variables represent the rest (100, 010, 001).
+
+* **Orthogonal Polynomials:** For ordered factors, R automatically uses orthogonal polynomial contrasts (`.L` for linear, `.Q` for quadratic, `.C` for cubic trends). If standard dummy coding is preferred, it must be explicitly forced using `contr.treatment`.
+
+* **Formula Implementation:** Ensure categorical data is explicitly cast before modelling to trigger correct dummy coding (e.g., wrapping variables in `as.factor()` directly within the formula or dataset).
+
+---
+
+## Variance Functions and Overdispersion
+
+* In standard linear regression, variance is assumed constant. In GLMs, variance is a function of the mean.
+
+* **Variance Function:**
+
+    $$Var(Y_i) = \phi \cdot V(\mu_i)$$
+
+* For the Poisson and Binomial families, the dispersion parameter $\phi$ is theoretically fixed at 1.
+
+* **Overdispersion:** Occurs frequently in real-world data when the observed variance is strictly greater than the mean ($Var(Y) > \mu$).
+
+* Ignoring overdispersion results in standard errors that are too small, p-values that trigger false positives, and artificially narrow confidence intervals.
+
+### Checking for Overdispersion
+
+* **Dispersion Statistic ($\hat{\phi}$):**
+
+    $$\hat{\phi} = \frac{\text{Residual Deviance}}{\text{Residual df}}$$
+
+* **Evaluation Rules of Thumb:**
+
+    * $\hat{\phi} \approx 1$: The model fits the variance assumption perfectly.
+    * $\hat{\phi} \approx 2$: The fit is questionable; exploration of alternative models is recommended.
+    * $\hat{\phi} \ge 3$: Hard cut-off. The Poisson model is drastically overconfident, its p-values cannot be trusted, and it must be discarded in favour of an overdispersion-tolerant model.
+
+---
+
+
+## Dealing with Overdispersion
+
+### Quasi-Poisson Model
+
+* Relaxes the rigid assumption by estimating the dispersion parameter $\phi$ directly from the data.
+
+* The resulting coefficients remain completely identical to the standard Poisson model, but the standard errors are widened by multiplying them by $\sqrt{\hat{\phi}}$.
+
+* Because it relies on quasi-likelihood rather than true maximum likelihood, no AIC value is generated for model comparison.
+
+### Negative Binomial Regression
+
+* A fully parametric alternative specifically designed for overdispersed count data.
+
+* Introduces a dedicated dispersion parameter $r$.
+
+* **Negative Binomial Variance:**
+
+    $$Var(Y) = \mu + \frac{\mu^2}{r}$$
+
+* Unlike Quasi-Poisson, it provides a proper log-likelihood, enabling the use of AIC for direct model comparison.
+
+* Implemented in R using `glm.nb()` from the `MASS` package.
+
+---
+
+## Positive Continuous Responses (Gamma GLM)
+
+* Used when the response variable is strictly positive ($Y > 0$), exhibits a right-skewed distribution, and possesses a variance that increases with the mean (e.g., claim financial amounts, hospital lengths of stay).
+
+* **Gamma Variance:** Grows quadratically with the mean ($\mu^2 / \alpha$).
+
+* **Link Function:** While the canonical link for the Gamma distribution is the inverse ($1/\mu$), the **log link** ($\log(\mu)$) is almost always preferred in practice.
+
+* The log link guarantees strictly positive predictions and preserves a clean, multiplicative interpretation of the coefficients (identical to Poisson interpretation).
+
+* Must be explicitly specified in R: `family = Gamma(link = "log")`.
+
+---
+
+## Quick Reference: Coefficient Interpretation
+
+* For log-link models, coefficients must be exponentiated to evaluate their effect on the interpretable scale.
+
+| Model | Link Function | Interpretation of Exponentiated Coefficient ($e^{\hat{\beta}_j}$) |
+| --- | --- | --- |
+| **Logistic** | Logit | **Odds ratio:** The odds of $Y=1$ multiply by $e^{\hat{\beta}_j}$ per 1-unit increase in $X_j$. |
+| **Poisson** | Log | **Rate ratio:** The expected count multiplies by $e^{\hat{\beta}_j}$ per 1-unit increase in $X_j$. |
+| **Gamma** | Log | **Mean ratio:** The expected continuous positive response multiplies by $e^{\hat{\beta}_j}$. |
+| **Linear** | Identity | **Additive effect:** The expected response increases directly by the raw coefficient $\hat{\beta}_j$. |
+
 ## Complete Exam Quick Reference Table
 
 | Concept / Test | Formula or R Function | Use Case | Key Exam Notes |
@@ -1076,4 +1236,15 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 | **Formula: +** | `y ~ x1 + x2` | Adding main effects | Adds independent predictors |
 | **Formula: *** | `y ~ x1 * x2` | Main effects + interaction | Shortcut for `x1 + x2 + x1:x2` |
 | **Formula: :** | `y ~ x1:x2` | Interaction term only | The effect of one depends on the other |
+| **Model Deviance** | $D = -2[l(\hat{\beta}) - l(\text{saturated})]$ | Measure GLM fit | Like RSS for GLMs |
+| **AIC** | $AIC = -2l(\hat{\beta}) + 2k$ | Compare non-nested models | Lower is better |
+| **BIC** | $BIC = -2l(\hat{\beta}) + k\log n$ | Compare non-nested models | Stronger penalty than AIC |
+| **Poisson Regression** | `glm(y ~ x, family=poisson)` | Count data | Mean $=$ Variance ($\lambda$) |
+| **Offset (Rate Modelling)** | `offset(log(exposure))` | Model rates not totals | Constrains exposure coefficient to 1 |
+| **Dispersion Statistic** | $\hat{\phi} = \frac{\text{Residual Deviance}}{\text{Residual df}}$ | Check overdispersion | $\hat{\phi} \ge 3$: discard Poisson |
+| **Quasi-Poisson** | `glm(y ~ x, family=quasipoisson)` | Overdispersed counts | No AIC; SEs multiplied by $\sqrt{\hat{\phi}}$ |
+| **Negative Binomial** | `glm.nb(y ~ x)` from `MASS` | Overdispersed counts | Has AIC; variance $= \mu + \mu^2/r$ |
+| **Gamma GLM** | `glm(y ~ x, family=Gamma(link="log"))` | Positive right-skewed data | Variance $\propto \mu^2$ |
+| **Rate Ratio (Poisson/Gamma)** | $e^{\hat{\beta}_j}$ | Interpret log-link coefficients | $>1$ increases rate/mean, $<1$ decreases |
+| **Dummy Coding** | `as.factor(x)` in formula | Categorical predictors | R uses $n-1$ bits; avoids multicollinearity |
 ---
