@@ -712,3 +712,5 @@ $$IDF(q_i) = \log\left(\frac{N - n(q_i) + 0.5}{n(q_i) + 0.5}\right)$$
 * **Hidden Layer Node Calculation:**
 
 $$\text{Nodes} = \frac{|D|}{\alpha \times (N_{input} + N_{output})}$$
+
+* $|D|$ = number of training samples, $N_{input}$ = input neurons, $N_{output}$ = output neurons, $\alpha$ = scaling factor (typically 2–10).
