@@ -646,12 +646,20 @@ Before text can be processed by machine learning algorithms, it must be converte
 
 ## Text Encoding and Vectorization
 
-* **Bag of Words (BOW):** A multiset collection of words or n-grams and their corresponding frequencies within a text.
+### Bag of Words (BOW)
+
+* A multiset collection of words or n-grams and their corresponding frequencies within a text.
 * BOW implementations result in the complete loss of word order, grammar, and contextual information, meaning semantic polysemy cannot be handled.
 * BOW features may be constructed from words, n-grams, shingles, or sub-word tokens.
-* **Count Vectorization:** Creates a document-term matrix where each row is a document and each column represents a unique vocabulary word.
+
+### Count Vectorization
+
+* Creates a document-term matrix where each row is a document and each column represents a unique vocabulary word.
 * Count vectors can represent tokens using raw frequency counts, binary occurrence values (true/false), or weighted values.
-* **One-Hot Encoding:** Represents categorical data as binary vectors where the vector size is exactly equal to the vocabulary size.
+
+### One-Hot Encoding
+
+* Represents categorical data as binary vectors where the vector size is exactly equal to the vocabulary size.
 
 ## Term Frequency-Inverse Document Frequency
 
@@ -689,15 +697,18 @@ $$IDF(q_i) = \log\left(\frac{N - n(q_i) + 0.5}{n(q_i) + 0.5}\right)$$
 
 ## Feature Selection and Hashing
 
-* **Vector Hashing:** A technique used to eliminate the "curse of dimensionality" by hashing variable-sized inputs (like n-grams) into a fixed-size vector array.
-* This is achieved by taking the modulus of the hash against the target array size: $index = hash(f) \pmod{n}$.
-* Vector hashing is particularly useful for domains with extremely large combinatorial feature spaces, such as biological sequences.
+### Vector Hashing
+
+* A technique used to eliminate the "curse of dimensionality" by hashing variable-sized inputs (like n-grams) into a fixed-size vector array.
+* This is achieved by taking the modulus of the hash against the target array size: $index = hash(f) \ \% \ n$ (where $\%$ is the $mod$ operator).
+* Particularly useful for domains with extremely large combinatorial feature spaces, such as biological sequences.
 * For example, proteins built from 20 amino acids produce rapidly growing n-gram feature spaces:  
   1-grams = 20, 2-grams = 400, 3-grams = 8,000, 4-grams = 160,000, 5-grams = 3,200,000.
 * Hashing allows all such features to be compressed into a single fixed-length vector.
 
-* **Incremental Feature Selection:** A generate-and-test topology approach for neural networks to determine the optimal hidden layer configurations.
+### Incremental Feature Selection
 
+* A generate-and-test topology approach for neural networks to determine the optimal hidden layer configurations.
 * **Hidden Layer Node Calculation:**
 
 $$\text{Nodes} = \frac{|D|}{\alpha \times (N_{input} + N_{output})}$$
