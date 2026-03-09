@@ -715,7 +715,7 @@ $$MSE(w) = \frac{1}{2m} \sum_{i=1}^{m} (y_i - f_w(x_i))^2$$
 
 * **L2 Regularised Loss Function:**
 
-$$L(w) = \frac{1}{2m} \sum_{i=1}^{m} (y_i - f_w(x_i))^2 + \lambda \sum_{j=1}^{n} w_j^2$$
+$$L(w) = MSE(w) + \lambda \sum_{j=1}^{n} w_j^2$$
 
 * The bias term ($w_0$) is conventionally excluded from the regularisation penalty.
 * A trained L2 regularised model will be a slightly worse fit for the training data but will successfully avoid overtraining by adding bias and reducing variance.
