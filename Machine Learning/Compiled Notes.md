@@ -684,3 +684,103 @@ Various advanced optimization techniques build upon standard SGD to adjust learn
 * AdaGrad
 * RMSProp
 * Adam (The default solver in many libraries, such as Scikit-Learn)
+
+# Week 6: Regularisation and Support Vector Classifiers
+
+## Regularisation
+
+### Concept and Motivation
+
+* Definition: A technique used in machine learning models to reduce overfitting, improve model generalization, and manage model complexity by adding an additional penalty term to the error function.
+* Regularisation restricts fluctuating parameters so that coefficients do not take extreme values.
+* This technique is also referred to as a shrinkage method or weight decay (particularly in neural networks).
+* Overfitting implies the model has high variance, meaning the model will change significantly if the training data is altered.
+* Increased parameters and flexibility cause high variance.
+* Extremely large weights can change by massive amounts very quickly, making the model overly sensitive to small changes in features.
+* Regularisation solves this by adding a penalty to the loss function that scales with the size of the weights.
+
+### Mean Squared Error
+
+* The Mean Squared Error (MSE) is commonly used as a loss function for regression models.
+
+* **Mean Squared Error Formula:**
+
+$$MSE(w) = \frac{1}{2m} \sum_{i=1}^{m} (y_i - f_w(x_i))^2$$
+
+* Large weights may emerge when minimizing MSE, which can increase the importance of particular features and lead to overfitting.
+
+### L2 Regularisation (Ridge Regression)
+
+* L2 regularisation adds a penalty term based on the L2 norm (Euclidean distance) to the loss function to penalize large weights.
+
+* **L2 Regularised Loss Function:**
+
+$$L(w) = \frac{1}{2m} \sum_{i=1}^{m} (y_i - f_w(x_i))^2 + \lambda \sum_{j=1}^{n} w_j^2$$
+
+* The bias term ($w_0$) is conventionally excluded from the regularisation penalty.
+* A trained L2 regularised model will be a slightly worse fit for the training data but will successfully avoid overtraining by adding bias and reducing variance.
+* The hyperparameter $\lambda$ controls the trade-off between the original loss and the penalty:
+    * A small $\lambda$ prioritizes minimizing the original cost function, moving the model in the direction of overfitting.
+    * A large $\lambda$ prioritizes small weights, moving the model in the direction of underfitting.
+* Gradient descent still applies with regularisation, but the gradient includes an additional term caused by the regularisation penalty.
+
+### L1 Regularisation (Lasso Regression)
+
+* L1 regularisation adds a penalty term based on the L1 norm (Manhattan distance), using the absolute value of the coefficients rather than squaring them.
+
+* **L1 Regularised Loss Function:**
+
+$$L(w) = MSE(w) + \lambda \sum_{j=1}^{n} |w_j|$$
+
+* L1 norm corresponds to Manhattan distance, while L2 norm corresponds to Euclidean distance.
+* The key operational difference between L1 and L2 is that Lasso Regression can shrink weights of non-relevant features exactly to zero, effectively excluding them from the model.
+* This increases sparsity, making it highly effective for datasets with many irrelevant features (e.g., biomedical datasets with irrelevant biomarkers).
+* Ridge Regression generally performs better when the majority of variables are known to be useful.
+
+### Advantages of Regularisation
+
+* Regularisation generally improves model performance under the following conditions:
+    * Multicollinearity: When features are highly correlated, regularisation prevents overfitting.
+    * High Dimensionality: When there are a large number of features (especially when features outnumber observations), it shrinks coefficients and selects relevant features, keeping variance low despite limited data.
+    * Irrelevant Features: It forces the coefficients of non-contributing features toward zero.
+    * Noisy Data: It reduces the model's sensitivity to noise by preventing the model from over-adjusting to noisy feature variations.
+
+## Support Vector Classifiers
+
+### Generalised Linear Models and Geometry
+
+* The standard equation of a line ($y = mx + c$) can be generalized into a vector equation format.
+
+* **Linear Boundary Vector Equation:**
+
+$$w^T x + w_0 = 0$$
+
+* Evaluating a sample point $x$ using $w^T x + w_0$ yields a scalar value. The sign of this scalar (positive or negative) determines which side of the line the point falls on, which is the basis for classification.
+
+### Hyperplanes and Decision Boundaries
+
+* A linear classifier utilizes a linear boundary, known as a hyperplane, which separates the feature space into two half-spaces.
+* The geometric interpretation of a hyperplane depends on the dimensionality of the feature space:
+    * 1D space: A threshold point.
+    * 2D space: A line.
+    * 3D space: A flat plane.
+* The vector $w$ represents a normal vector that points orthogonally (perpendicularly) away from the hyperplane surface.
+
+* **Dot Product Orthogonality Condition:**
+
+$$a \cdot b = |a||b| \cos\theta$$
+
+* The dot product of two vectors is zero only if they are entirely orthogonal to one another.
+* The equation $w^T x = 0$ represents a hyperplane passing through the origin, while adding the bias term $w_0$ shifts the hyperplane away from the origin.
+
+### Separability and Margins
+
+* A classification problem is linearly separable if a hyperplane can be drawn that perfectly separates the classes.
+* Non-perfect separation in training data can be caused by:
+    * The chosen model being too simple to capture the relationship.
+    * Noise or mislabeled targets in the dataset.
+    * Simple features that fail to account for all data variations.
+* A robust decision boundary is selected by maximizing the margin between the boundary and the different classes.
+* Definition: The margin is defined as the shortest geometric distance between the closest observations and the separating hyperplane.
+* A Maximal Margin Classifier (or Hard Margin Classifier) enforces a strict boundary that strictly maximizes the distance between the classes without allowing any misclassifications.
+* Hard Margin Classifiers are highly sensitive to outliers and prone to severe overfitting, requiring relaxed constraints for functional real-world application.

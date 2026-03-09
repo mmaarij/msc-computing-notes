@@ -8,7 +8,7 @@ This repository contains my compiled notes for the ATU MSc Computing program. Fe
 
 #### Click any badge to jump to the notes - week numbers show the latest update.
 
-[![](https://img.shields.io/badge/🤖%20Machine%20Learning-Week%205-C3E0DD?style=for-the-badge)](Machine%20Learning/Compiled%20Notes.pdf)
+[![](https://img.shields.io/badge/🤖%20Machine%20Learning-Week%206-C3E0DD?style=for-the-badge)](Machine%20Learning/Compiled%20Notes.pdf)
 <br>
 [![](https://img.shields.io/badge/📝%20Text%20%26%20Sequence%20Analytics-Week%206-D4E4BC?style=for-the-badge)](Text%20and%20Sequence%20Analytics/Compiled%20Notes.pdf)
 <br>
