@@ -737,6 +737,11 @@ $$L(w) = MSE(w) + \lambda \sum_{j=1}^{n} |w_j|$$
 * This increases sparsity, making it highly effective for datasets with many irrelevant features (e.g., biomedical datasets with irrelevant biomarkers).
 * Ridge Regression generally performs better when the majority of variables are known to be useful.
 
+### Elastic Net Regularisation
+
+* Elastic Net is a third type of regularisation that combines both L1 (Lasso) and L2 (Ridge) penalties into a single loss function.
+* This allows the model to benefit from both feature selection (L1) and coefficient shrinkage (L2) simultaneously.
+
 ### Advantages of Regularisation
 
 * Regularisation generally improves model performance under the following conditions:
