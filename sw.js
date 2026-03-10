@@ -25,8 +25,8 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const url = new URL(e.request.url)
 
-  // PDFs and README: network-first so updates always come through
-  if (url.pathname.endsWith(".pdf") || url.pathname.endsWith("README.md")) {
+  // PDFs, README, and index.html: network-first so updates always come through
+  if (url.pathname.endsWith(".pdf") || url.pathname.endsWith("README.md") || url.pathname.endsWith("index.html") || url.pathname.endsWith("/")) {
     e.respondWith(
       fetch(e.request).then(res => {
         const clone = res.clone()

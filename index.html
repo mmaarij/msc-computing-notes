@@ -1,445 +1,837 @@
 <!DOCTYPE html>
 <html>
-   <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      <title>MSc Computing Notes Reader</title>
-      <link rel="manifest" href="manifest.json">
-      <meta name="theme-color" content="#111">
-      <meta name="apple-mobile-web-app-capable" content="yes">
-      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-      <link rel="icon" href="icon.svg" type="image/svg+xml">
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-      <style>
-         html,body{
-         margin:0;
-         height:100%;
-         overflow:hidden;
-         font-family:sans-serif;
-         background:#f2f2f2;
-         }
-         /* ── shelf ── */
-         #shelf{
-         height:100%;
-         overflow-y:auto;
-         padding:24px 16px 40px;
-         box-sizing:border-box;
-         }
-         #shelf h1{
-         text-align:center;
-         font-size:22px;
-         margin:0 0 6px;
-         letter-spacing:0.5px;
-         }
-         #shelf .subtitle{
-         text-align:center;
-         font-size:13px;
-         color:#666;
-         margin:0 0 28px;
-         }
-         .bookGrid{
-         display:grid;
-         grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-         gap:16px;
-         max-width:720px;
-         margin:0 auto;
-         }
-         .bookCard{
-         border-radius:12px;
-         padding:20px;
-         cursor:pointer;
-         transition:transform 0.15s ease,box-shadow 0.15s ease;
-         position:relative;
-         overflow:hidden;
-         }
-         .bookCard:hover{
-         transform:translateY(-3px);
-         box-shadow:0 8px 24px rgba(0,0,0,0.12);
-         }
-         .bookCard:active{
-         transform:scale(0.97);
-         }
-         .bookEmoji{
-         font-size:32px;
-         margin-bottom:10px;
-         }
-         .bookTitle{
-         font-size:16px;
-         font-weight:700;
-         margin-bottom:4px;
-         color:#1a1a1a;
-         }
-         .bookDesc{
-         font-size:12px;
-         color:#555;
-         margin-bottom:12px;
-         }
-         .bookProgress{
-         font-size:11px;
-         color:#333;
-         background:rgba(255,255,255,0.55);
-         display:inline-block;
-         padding:3px 8px;
-         border-radius:20px;
-         }
-         .bookBadge{
-         font-size:10px;
-         color:#fff;
-         background:rgba(0,0,0,0.25);
-         padding:3px 8px;
-         border-radius:20px;
-         position:absolute;
-         top:12px;
-         right:12px;
-         }
-         /* ── reader ── */
-         #readerView{
-         display:none;
-         height:100%;
-         }
-         #viewer{
-         display:flex;
-         align-items:center;
-         justify-content:center;
-         height:100%;
-         transition:transform 0.25s ease;
-         }
-         canvas{
-         max-width:100%;
-         max-height:100%;
-         box-shadow:0 6px 30px rgba(0,0,0,0.25);
-         border-radius:6px;
-         }
-         #controls{
-         position:fixed;
-         top:10px;
-         left:10px;
-         right:10px;
-         display:flex;
-         justify-content:space-between;
-         z-index:10;
-         pointer-events:none;
-         }
-         #controls button{
-         pointer-events:auto;
-         }
-         #rightControls{
-         display:flex;
-         gap:8px;
-         }
-         button{
-         padding:6px 10px;
-         border:none;
-         border-radius:6px;
-         background:#000;
-         color:white;
-         font-size:14px;
-         cursor:pointer;
-         }
-         #pageIndicator{
-         position:fixed;
-         bottom:14px;
-         right:14px;
-         background:#000a;
-         color:white;
-         padding:6px 10px;
-         border-radius:6px;
-         font-size:12px;
-         display:none;
-         }
-         /* ── dark mode ── */
-         .dark{
-         background:#111;
-         }
-         .dark #shelf h1{
-         color:#eee;
-         }
-         .dark #shelf .subtitle{
-         color:#888;
-         }
-         .dark .bookCard{
-         filter:brightness(0.85);
-         }
-         .dark .bookTitle{
-         color:#1a1a1a;
-         }
-         .dark canvas{
-         filter:invert(1) hue-rotate(180deg);
-         }
-      </style>
-   </head>
-   <body>
-      <!-- ── SHELF VIEW ── -->
-      <div id="shelf">
-         <h1>MSc Computing Notes</h1>
-         <p class="subtitle">Tap a book to start reading</p>
-         <div class="bookGrid" id="bookGrid"></div>
-      </div>
-      <!-- ── READER VIEW ── -->
-      <div id="readerView">
-         <div id="controls">
-            <button onclick="goToShelf()">← Shelf</button>
-            <div id="rightControls">
-               <button onclick="toggleDark()">Dark</button>
-            </div>
-         </div>
-         <div id="viewer">
-            <canvas id="pdfCanvas"></canvas>
-         </div>
-         <div id="pageIndicator"></div>
-      </div>
-      <script>
-         /* ── book catalogue ── */
-         
-         const BOOKS = [
-         {
-         id:"ml",
-         title:"Machine Learning",
-         emoji:"🤖",
-         desc:"Compiled lecture notes",
-         color:"#C3E0DD",
-         path:"Machine Learning/Compiled Notes.pdf"
-         },
-         {
-         id:"tsa",
-         title:"Text & Sequence Analytics",
-         emoji:"📝",
-         desc:"Compiled lecture notes",
-         color:"#D4E4BC",
-         path:"Text and Sequence Analytics/Compiled Notes.pdf"
-         },
-         {
-         id:"stats",
-         title:"Statistical Computing",
-         emoji:"📊",
-         desc:"Compiled lecture notes",
-         color:"#F7D9D9",
-         path:"Statistical Computing/Compiled Notes.pdf"
-         },
-         {
-         id:"statslab",
-         title:"Stats Lab Notes",
-         emoji:"🔎",
-         desc:"Lab exercises & walkthroughs",
-         color:"#FAE9DA",
-         path:"Statistical Computing/Lab Notes.pdf"
-         }
-         ]
-         
-         const DARK_KEY = "reader-dark"
-         let badgeMap = {}
-         
-         let currentBook = null
-         let pdfDoc = null
-         let pageNum = 1
-         let lastModified = null
-         let updateTimer = null
-         
-         const canvas = document.getElementById("pdfCanvas")
-         const ctx = canvas.getContext("2d")
-         
-         /* ── shelf rendering ── */
-         
-         function pageKey(book){
-         return "reader-page-" + book.id
-         }
-         
-         async function fetchBadges(){
-         try{
-         const res = await fetch("README.md?t=" + Date.now())
-         const text = await res.text()
-         const re = /badge\/.*?-([^-]+)-(\w+)\?[^\]]*\]\(([^)]+)\)/g
-         let m
-         while((m = re.exec(text)) !== null){
-         const label = decodeURIComponent(m[1]).replace(/%20/g," ")
-         const path = decodeURIComponent(m[3]).replace(/%20/g," ")
-         badgeMap[path] = label
-         }
-         }catch(e){}
-         }
-         
-         function renderShelf(){
-         
-         const grid = document.getElementById("bookGrid")
-         grid.innerHTML = ""
-         
-         BOOKS.forEach(book=>{
-         
-         const saved = localStorage.getItem(pageKey(book))
-         const badge = badgeMap[book.path]
-         const card = document.createElement("div")
-         card.className = "bookCard"
-         card.style.background = book.color
-         
-         card.innerHTML =
-         '<div class="bookEmoji">' + book.emoji + '</div>' +
-         '<div class="bookTitle">' + book.title + '</div>' +
-         '<div class="bookDesc">' + book.desc + '</div>' +
-         (saved ? '<div class="bookProgress">Page ' + saved + '</div>' : '<div class="bookProgress">New</div>') +
-         (badge ? '<span class="bookBadge">' + badge + '</span>' : '')
-         
-         card.addEventListener("click",()=> openBook(book))
-         grid.appendChild(card)
-         
-         })
-         
-         }
-         
-         /* ── open / close book ── */
-         
-         async function openBook(book){
-         
-         currentBook = book
-         pageNum = parseInt(localStorage.getItem(pageKey(book)) || "1")
-         lastModified = null
-         
-         document.getElementById("shelf").style.display = "none"
-         document.getElementById("readerView").style.display = "block"
-         document.getElementById("pageIndicator").style.display = "block"
-         
-         await loadPDF()
-         
-         updateTimer = setInterval(()=> checkUpdate(),60000)
-         
-         }
-         
-         function goToShelf(){
-         
-         if(updateTimer){
-         clearInterval(updateTimer)
-         updateTimer = null
-         }
-         
-         pdfDoc = null
-         currentBook = null
-         
-         document.getElementById("readerView").style.display = "none"
-         document.getElementById("pageIndicator").style.display = "none"
-         document.getElementById("shelf").style.display = "block"
-         
-         renderShelf()
-         
-         }
-         
-         /* ── pdf loading ── */
-         
-         async function loadPDF(){
-         
-         const url = currentBook.path + "?t=" + Date.now()
-         
-         pdfDoc = await pdfjsLib.getDocument(url).promise
-         
-         if(pageNum > pdfDoc.numPages) pageNum = pdfDoc.numPages
-         if(pageNum < 1) pageNum = 1
-         
-         renderPage(pageNum)
-         
-         }
-         
-         async function renderPage(num){
-         
-         const page = await pdfDoc.getPage(num)
-         const viewport = page.getViewport({scale:1.6})
-         
-         canvas.width = viewport.width
-         canvas.height = viewport.height
-         
-         await page.render({canvasContext:ctx,viewport:viewport}).promise
-         
-         document.getElementById("pageIndicator").innerText =
-         num + " / " + pdfDoc.numPages
-         
-         localStorage.setItem(pageKey(currentBook),num)
-         
-         }
-         
-         /* ── page turning ── */
-         
-         function animateSlide(dir){
-         document.getElementById("viewer").style.transform =
-         "translateX(" + (dir * 80) + "px)"
-         }
-         
-         function resetSlide(){
-         document.getElementById("viewer").style.transform = "translateX(0)"
-         }
-         
-         function nextPage(){
-         if(!pdfDoc || pageNum >= pdfDoc.numPages) return
-         animateSlide(-1)
-         pageNum++
-         setTimeout(()=>{renderPage(pageNum);resetSlide()},180)
-         }
-         
-         function prevPage(){
-         if(!pdfDoc || pageNum <= 1) return
-         animateSlide(1)
-         pageNum--
-         setTimeout(()=>{renderPage(pageNum);resetSlide()},180)
-         }
-         
-         /* ── dark mode ── */
-         
-         function toggleDark(){
-         document.body.classList.toggle("dark")
-         localStorage.setItem(DARK_KEY,document.body.classList.contains("dark"))
-         }
-         
-         function loadDark(){
-         if(localStorage.getItem(DARK_KEY) === "true"){
-         document.body.classList.add("dark")
-         }
-         }
-         
-         /* ── auto update ── */
-         
-         async function checkUpdate(){
-         if(!currentBook) return
-         try{
-         const res = await fetch(currentBook.path,{method:"HEAD"})
-         const mod = res.headers.get("last-modified")
-         if(!lastModified){lastModified = mod;return}
-         if(mod && mod !== lastModified){
-         lastModified = mod
-         const cur = pageNum
-         await loadPDF()
-         pageNum = cur
-         renderPage(pageNum)
-         }
-         }catch(e){}
-         }
-         
-         /* ── touch / keyboard ── */
-         
-         let startX = 0
-         
-         document.addEventListener("touchstart",e=>{
-         startX = e.touches[0].clientX
-         })
-         
-         document.addEventListener("touchend",e=>{
-         if(!currentBook) return
-         const dx = e.changedTouches[0].clientX - startX
-         if(Math.abs(dx) < 50) return
-         dx < 0 ? nextPage() : prevPage()
-         })
-         
-         document.addEventListener("keydown",e=>{
-         if(!currentBook) return
-         if(e.key === "ArrowRight") nextPage()
-         if(e.key === "ArrowLeft") prevPage()
-         if(e.key === "Escape") goToShelf()
-         })
-         
-         /* ── init ── */
-         
-         loadDark()
-         fetchBadges().then(()=> renderShelf())
-         
-         if("serviceWorker" in navigator){
-         navigator.serviceWorker.register("sw.js")
-         }
-         
-      </script>
-   </body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>MSc Computing Notes Reader</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+html,body{
+margin:0;
+height:100%;
+overflow:hidden;
+font-family:sans-serif;
+background:#f2f2f2;
+}
+
+/* ── shelf ── */
+
+#shelf{
+height:100%;
+overflow-y:auto;
+padding:24px 16px 40px;
+box-sizing:border-box;
+}
+#shelf h1{
+text-align:center;
+font-size:22px;
+margin:0 0 6px;
+letter-spacing:0.5px;
+}
+#shelf .subtitle{
+text-align:center;
+font-size:13px;
+color:#666;
+margin:0 0 28px;
+}
+.bookGrid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:16px;
+max-width:720px;
+margin:0 auto;
+}
+.bookCard{
+border-radius:12px;
+padding:20px;
+cursor:pointer;
+transition:transform 0.15s ease,box-shadow 0.15s ease;
+position:relative;
+overflow:hidden;
+}
+.bookCard:hover{
+transform:translateY(-3px);
+box-shadow:0 8px 24px rgba(0,0,0,0.12);
+}
+.bookCard:active{
+transform:scale(0.97);
+}
+.bookEmoji{
+font-size:32px;
+margin-bottom:10px;
+}
+.bookTitle{
+font-size:16px;
+font-weight:700;
+margin-bottom:4px;
+color:#1a1a1a;
+}
+.bookDesc{
+font-size:12px;
+color:#555;
+margin-bottom:12px;
+}
+.bookBadge{
+font-size:10px;
+color:#fff;
+background:rgba(0,0,0,0.25);
+padding:3px 8px;
+border-radius:20px;
+position:absolute;
+top:12px;
+right:12px;
+}
+
+/* ── reader ── */
+
+#readerView{
+display:none;
+height:100%;
+flex-direction:column;
+}
+
+#topBar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:8px 10px;
+z-index:20;
+flex-shrink:0;
+}
+
+#topBar button{
+padding:6px 10px;
+border:none;
+border-radius:6px;
+background:#000;
+color:white;
+font-size:14px;
+cursor:pointer;
+}
+
+#rightControls{
+display:flex;
+gap:8px;
+}
+
+#viewer{
+flex:1;
+overflow:auto;
+-webkit-overflow-scrolling:touch;
+display:flex;
+justify-content:center;
+padding:10px;
+box-sizing:border-box;
+transition:transform 0.25s ease;
+}
+
+#pageWrapper{
+position:relative;
+display:inline-block;
+flex-shrink:0;
+}
+
+#pageWrapper{
+transition:transform 0.15s ease;
+transform-origin:top center;
+}
+
+#pageWrapper canvas{
+display:block;
+box-shadow:0 6px 30px rgba(0,0,0,0.25);
+border-radius:6px;
+}
+
+#annotationLayer{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+}
+
+#annotationLayer a{
+position:absolute;
+display:block;
+}
+
+/* ── bottom bar ── */
+
+#bottomBar{
+display:flex;
+align-items:center;
+gap:10px;
+padding:8px 14px;
+flex-shrink:0;
+z-index:20;
+}
+
+#pageSlider{
+flex:1;
+height:4px;
+-webkit-appearance:none;
+appearance:none;
+background:#ccc;
+border-radius:4px;
+outline:none;
+cursor:pointer;
+}
+
+#pageSlider::-webkit-slider-thumb{
+-webkit-appearance:none;
+width:18px;
+height:18px;
+border-radius:50%;
+background:#000;
+cursor:pointer;
+}
+
+#pageSlider::-moz-range-thumb{
+width:18px;
+height:18px;
+border-radius:50%;
+background:#000;
+border:none;
+cursor:pointer;
+}
+
+#pageLabel{
+font-size:12px;
+color:#555;
+white-space:nowrap;
+min-width:60px;
+text-align:right;
+}
+
+/* ── sidebar ── */
+
+#sidebar{
+position:fixed;
+top:0;
+left:0;
+width:280px;
+max-width:80vw;
+height:100%;
+background:#fff;
+box-shadow:4px 0 20px rgba(0,0,0,0.15);
+z-index:100;
+transform:translateX(-100%);
+transition:transform 0.25s ease;
+display:flex;
+flex-direction:column;
+}
+
+#sidebar.open{
+transform:translateX(0);
+}
+
+#sidebarHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px 16px;
+border-bottom:1px solid #eee;
+font-weight:700;
+font-size:15px;
+flex-shrink:0;
+}
+
+#sidebarHeader button{
+background:none;
+color:#333;
+font-size:20px;
+padding:4px 8px;
+}
+
+#sidebarList{
+flex:1;
+overflow-y:auto;
+padding:8px 0;
+}
+
+.tocItem{
+display:block;
+padding:10px 16px;
+font-size:13px;
+color:#333;
+cursor:pointer;
+border:none;
+background:none;
+width:100%;
+text-align:left;
+}
+
+.tocItem:hover{
+background:#f0f0f0;
+}
+
+.tocItem.depth-1{padding-left:16px;font-weight:700;}
+.tocItem.depth-2{padding-left:30px;}
+.tocItem.depth-3{padding-left:44px;font-size:12px;color:#666;}
+.tocItem.depth-4{padding-left:58px;font-size:12px;color:#888;}
+
+#sidebarOverlay{
+position:fixed;
+top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,0.3);
+z-index:99;
+display:none;
+}
+
+/* ── dark mode ── */
+
+.dark{
+background:#111;
+}
+.dark #shelf h1{
+color:#eee;
+}
+.dark #shelf .subtitle{
+color:#888;
+}
+.dark .bookCard{
+filter:brightness(0.85);
+}
+.dark .bookTitle{
+color:#1a1a1a;
+}
+.dark #pageWrapper canvas{
+filter:invert(1) hue-rotate(180deg);
+}
+.dark #topBar button{
+background:#333;
+}
+.dark #pageLabel{
+color:#aaa;
+}
+.dark #pageSlider{
+background:#444;
+}
+.dark #pageSlider::-webkit-slider-thumb{
+background:#ccc;
+}
+.dark #pageSlider::-moz-range-thumb{
+background:#ccc;
+}
+.dark #sidebar{
+background:#1a1a1a;
+box-shadow:4px 0 20px rgba(0,0,0,0.5);
+}
+.dark #sidebarHeader{
+color:#eee;
+border-color:#333;
+}
+.dark #sidebarHeader button{
+color:#ccc;
+}
+.dark .tocItem{
+color:#ccc;
+}
+.dark .tocItem:hover{
+background:#2a2a2a;
+}
+.dark .tocItem.depth-3,.dark .tocItem.depth-4{
+color:#888;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ── SHELF VIEW ── -->
+<div id="shelf">
+<h1>MSc Computing Notes</h1>
+<p class="subtitle">Tap a book to start reading</p>
+<div class="bookGrid" id="bookGrid"></div>
+</div>
+
+<!-- ── SIDEBAR ── -->
+<div id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div id="sidebar">
+<div id="sidebarHeader">
+<span>Contents</span>
+<button onclick="closeSidebar()">✕</button>
+</div>
+<div id="sidebarList"></div>
+</div>
+
+<!-- ── READER VIEW ── -->
+<div id="readerView">
+
+<div id="topBar">
+<div style="display:flex;gap:8px">
+<button onclick="goToShelf()">← Shelf</button>
+<button onclick="openSidebar()">☰</button>
+</div>
+<div id="rightControls">
+<button onclick="prevPage()">◀</button>
+<button onclick="nextPage()">▶</button>
+<button onclick="zoomOut()" title="Zoom out">−</button>
+<button onclick="zoomFit()" title="Fit to screen">⊡</button>
+<button onclick="zoomIn()" title="Zoom in">+</button>
+<button onclick="toggleDark()">Dark</button>
+</div>
+</div>
+
+<div id="viewer">
+<div id="pageWrapper">
+<canvas id="pdfCanvas"></canvas>
+<div id="annotationLayer"></div>
+</div>
+</div>
+
+<div id="bottomBar">
+<input type="range" id="pageSlider" min="1" max="1" value="1">
+<span id="pageLabel">1 / 1</span>
+</div>
+
+</div>
+
+<script>
+
+/* ── book catalogue ── */
+
+const BOOKS = [
+{
+id:"ml",
+title:"Machine Learning",
+emoji:"🤖",
+desc:"Compiled lecture notes",
+color:"#C3E0DD",
+path:"Machine Learning/Compiled Notes.pdf"
+},
+{
+id:"tsa",
+title:"Text & Sequence Analytics",
+emoji:"📝",
+desc:"Compiled lecture notes",
+color:"#D4E4BC",
+path:"Text and Sequence Analytics/Compiled Notes.pdf"
+},
+{
+id:"stats",
+title:"Statistical Computing",
+emoji:"📊",
+desc:"Compiled lecture notes",
+color:"#F7D9D9",
+path:"Statistical Computing/Compiled Notes.pdf"
+},
+{
+id:"statslab",
+title:"Stats Lab Notes",
+emoji:"🔎",
+desc:"Lab exercises & walkthroughs",
+color:"#FAE9DA",
+path:"Statistical Computing/Lab Notes.pdf"
+}
+]
+
+const DARK_KEY = "reader-dark"
+let badgeMap = {}
+
+let currentBook = null
+let pdfDoc = null
+let pageNum = 1
+let lastModified = null
+let updateTimer = null
+let zoomLevel = 1.0
+const ZOOM_STEP = 0.25
+const ZOOM_MIN = 0.5
+const ZOOM_MAX = 3.0
+
+const canvas = document.getElementById("pdfCanvas")
+const ctx = canvas.getContext("2d")
+const slider = document.getElementById("pageSlider")
+
+/* ── shelf rendering ── */
+
+async function fetchBadges(){
+try{
+const res = await fetch("README.md?t=" + Date.now())
+const text = await res.text()
+const re = /badge\/.*?-([^-]+)-(\w+)\?[^\]]*\]\(([^)]+)\)/g
+let m
+while((m = re.exec(text)) !== null){
+const label = decodeURIComponent(m[1]).replace(/%20/g," ")
+const path = decodeURIComponent(m[3]).replace(/%20/g," ")
+badgeMap[path] = label
+}
+}catch(e){}
+}
+
+function renderShelf(){
+const grid = document.getElementById("bookGrid")
+grid.innerHTML = ""
+
+BOOKS.forEach(book=>{
+const badge = badgeMap[book.path]
+const card = document.createElement("div")
+card.className = "bookCard"
+card.style.background = book.color
+
+card.innerHTML =
+'<div class="bookEmoji">' + book.emoji + '</div>' +
+'<div class="bookTitle">' + book.title + '</div>' +
+'<div class="bookDesc">' + book.desc + '</div>' +
+(badge ? '<span class="bookBadge">' + badge + '</span>' : '')
+
+card.addEventListener("click",()=> openBook(book))
+grid.appendChild(card)
+})
+}
+
+/* ── open / close book ── */
+
+async function openBook(book){
+currentBook = book
+pageNum = 1
+lastModified = null
+
+document.getElementById("shelf").style.display = "none"
+document.getElementById("readerView").style.display = "flex"
+
+await loadPDF()
+await loadOutline()
+
+updateTimer = setInterval(()=> checkUpdate(),60000)
+}
+
+function goToShelf(){
+if(updateTimer){
+clearInterval(updateTimer)
+updateTimer = null
+}
+closeSidebar()
+pdfDoc = null
+currentBook = null
+
+document.getElementById("readerView").style.display = "none"
+document.getElementById("shelf").style.display = "block"
+
+renderShelf()
+}
+
+/* ── pdf loading ── */
+
+async function loadPDF(){
+const url = currentBook.path + "?t=" + Date.now()
+pdfDoc = await pdfjsLib.getDocument(url).promise
+
+if(pageNum > pdfDoc.numPages) pageNum = pdfDoc.numPages
+if(pageNum < 1) pageNum = 1
+
+slider.max = pdfDoc.numPages
+slider.value = pageNum
+
+renderPage(pageNum)
+}
+
+async function renderPage(num){
+const page = await pdfDoc.getPage(num)
+
+// HiDPI: render at higher resolution, CSS sizes the canvas down
+const dpr = window.devicePixelRatio || 1
+const baseScale = 2.0
+const scale = baseScale * dpr
+const viewport = page.getViewport({scale:scale})
+
+canvas.width = viewport.width
+canvas.height = viewport.height
+
+// Fit full page into the viewer area
+const viewer = document.getElementById("viewer")
+const vw = viewer.clientWidth - 20 // padding
+const vh = viewer.clientHeight - 20
+const cssW = viewport.width / dpr
+const cssH = viewport.height / dpr
+const fitScale = Math.min(vw / cssW, vh / cssH, 1)
+canvas.style.width = (cssW * fitScale) + "px"
+canvas.style.height = (cssH * fitScale) + "px"
+
+await page.render({canvasContext:ctx,viewport:viewport}).promise
+
+// Update slider & label
+slider.value = num
+document.getElementById("pageLabel").innerText = num + " / " + pdfDoc.numPages
+
+// Render clickable links
+await renderAnnotations(page, viewport, dpr)
+}
+
+/* ── clickable PDF links ── */
+
+async function renderAnnotations(page, viewport, dpr){
+const layer = document.getElementById("annotationLayer")
+layer.innerHTML = ""
+
+const annotations = await page.getAnnotations()
+
+annotations.forEach(ann=>{
+if(ann.subtype !== "Link") return
+
+const rect = ann.rect
+const vw = viewport.viewBox
+// Convert PDF coords to CSS pixel positions
+const x1 = (rect[0] - vw[0]) / (vw[2] - vw[0]) * 100
+const y1 = (1 - (rect[3] - vw[1]) / (vw[3] - vw[1])) * 100
+const x2 = (rect[2] - vw[0]) / (vw[2] - vw[0]) * 100
+const y2 = (1 - (rect[1] - vw[1]) / (vw[3] - vw[1])) * 100
+
+const a = document.createElement("a")
+a.style.left = x1 + "%"
+a.style.top = y1 + "%"
+a.style.width = (x2 - x1) + "%"
+a.style.height = (y2 - y1) + "%"
+
+if(ann.url){
+// External URL
+a.href = ann.url
+a.target = "_blank"
+a.rel = "noopener"
+} else if(ann.dest){
+// Internal link (named destination)
+a.href = "#"
+a.addEventListener("click",async(e)=>{
+e.preventDefault()
+try{
+const dest = typeof ann.dest === "string"
+? await pdfDoc.getDestination(ann.dest)
+: ann.dest
+if(dest){
+const idx = await pdfDoc.getPageIndex(dest[0])
+goToPage(idx + 1)
+}
+}catch(ex){}
+})
+} else if(ann.newWindow === undefined && ann.action){
+// GoTo action
+a.href = "#"
+a.addEventListener("click",async(e)=>{
+e.preventDefault()
+try{
+if(ann.action.dest){
+const dest = typeof ann.action.dest === "string"
+? await pdfDoc.getDestination(ann.action.dest)
+: ann.action.dest
+if(dest){
+const idx = await pdfDoc.getPageIndex(dest[0])
+goToPage(idx + 1)
+}
+}
+}catch(ex){}
+})
+} else {
+return
+}
+
+layer.appendChild(a)
+})
+}
+
+/* ── outline / chapters sidebar ── */
+
+async function loadOutline(){
+const list = document.getElementById("sidebarList")
+list.innerHTML = ""
+
+if(!pdfDoc) return
+
+const outline = await pdfDoc.getOutline()
+if(!outline || outline.length === 0){
+list.innerHTML = '<div style="padding:16px;color:#999;font-size:13px">No chapters found</div>'
+return
+}
+
+async function buildItems(items, depth){
+for(const item of items){
+const btn = document.createElement("button")
+btn.className = "tocItem depth-" + Math.min(depth, 4)
+btn.textContent = item.title
+
+btn.addEventListener("click",async()=>{
+try{
+const dest = typeof item.dest === "string"
+? await pdfDoc.getDestination(item.dest)
+: item.dest
+if(dest){
+const idx = await pdfDoc.getPageIndex(dest[0])
+goToPage(idx + 1)
+closeSidebar()
+}
+}catch(ex){}
+})
+
+list.appendChild(btn)
+
+if(item.items && item.items.length > 0){
+await buildItems(item.items, depth + 1)
+}
+}
+}
+
+await buildItems(outline, 1)
+}
+
+function openSidebar(){
+document.getElementById("sidebar").classList.add("open")
+document.getElementById("sidebarOverlay").style.display = "block"
+}
+
+function closeSidebar(){
+document.getElementById("sidebar").classList.remove("open")
+document.getElementById("sidebarOverlay").style.display = "none"
+}
+
+/* ── zoom ── */
+
+function applyZoom(){
+document.getElementById("pageWrapper").style.transform = "scale(" + zoomLevel + ")"
+}
+
+function zoomIn(){
+zoomLevel = Math.min(ZOOM_MAX, zoomLevel + ZOOM_STEP)
+applyZoom()
+}
+
+function zoomOut(){
+zoomLevel = Math.max(ZOOM_MIN, zoomLevel - ZOOM_STEP)
+applyZoom()
+}
+
+function zoomFit(){
+zoomLevel = 1.0
+applyZoom()
+document.getElementById("viewer").scrollTo(0,0)
+}
+
+/* ── page navigation ── */
+
+function animateSlide(dir){
+document.getElementById("viewer").style.transform = "translateX(" + (dir * 80) + "px)"
+}
+
+function resetSlide(){
+document.getElementById("viewer").style.transform = "translateX(0)"
+}
+
+function goToPage(num){
+if(!pdfDoc) return
+if(num < 1) num = 1
+if(num > pdfDoc.numPages) num = pdfDoc.numPages
+pageNum = num
+zoomFit()
+renderPage(pageNum)
+document.getElementById("viewer").scrollTo(0,0)
+}
+
+function nextPage(){
+if(!pdfDoc || pageNum >= pdfDoc.numPages) return
+animateSlide(-1)
+pageNum++
+setTimeout(()=>{
+zoomFit()
+renderPage(pageNum)
+document.getElementById("viewer").scrollTo(0,0)
+resetSlide()
+},180)
+}
+
+function prevPage(){
+if(!pdfDoc || pageNum <= 1) return
+animateSlide(1)
+pageNum--
+setTimeout(()=>{
+zoomFit()
+renderPage(pageNum)
+document.getElementById("viewer").scrollTo(0,0)
+resetSlide()
+},180)
+}
+
+/* ── slider ── */
+
+slider.addEventListener("input",()=>{
+const num = parseInt(slider.value)
+document.getElementById("pageLabel").innerText = num + " / " + (pdfDoc ? pdfDoc.numPages : "?")
+})
+
+slider.addEventListener("change",()=>{
+goToPage(parseInt(slider.value))
+})
+
+/* ── dark mode ── */
+
+function toggleDark(){
+document.body.classList.toggle("dark")
+localStorage.setItem(DARK_KEY,document.body.classList.contains("dark"))
+}
+
+function loadDark(){
+if(localStorage.getItem(DARK_KEY) === "true"){
+document.body.classList.add("dark")
+}
+}
+
+/* ── auto update ── */
+
+async function checkUpdate(){
+if(!currentBook) return
+try{
+const res = await fetch(currentBook.path,{method:"HEAD"})
+const mod = res.headers.get("last-modified")
+if(!lastModified){lastModified = mod;return}
+if(mod && mod !== lastModified){
+lastModified = mod
+const cur = pageNum
+await loadPDF()
+pageNum = cur
+renderPage(pageNum)
+}
+}catch(e){}
+}
+
+/* ── touch / swipe ── */
+
+let startX = 0
+
+document.addEventListener("touchstart",e=>{
+startX = e.touches[0].clientX
+})
+
+document.addEventListener("touchend",e=>{
+if(!currentBook) return
+const dx = e.changedTouches[0].clientX - startX
+if(Math.abs(dx) < 50) return
+dx < 0 ? nextPage() : prevPage()
+})
+
+/* ── keyboard ── */
+
+document.addEventListener("keydown",e=>{
+if(!currentBook) return
+if(e.key === "ArrowRight") nextPage()
+if(e.key === "ArrowLeft") prevPage()
+if(e.key === "Escape") goToShelf()
+if(e.key === "+" || e.key === "=") zoomIn()
+if(e.key === "-") zoomOut()
+if(e.key === "0") zoomFit()
+})
+
+/* ── init ── */
+
+loadDark()
+fetchBadges().then(()=> renderShelf())
+
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("sw.js")
+}
+
+</script>
+
+</body>
 </html>
