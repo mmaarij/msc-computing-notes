@@ -1,4 +1,4 @@
-const CACHE = "notes-reader-v1"
+const CACHE = "notes-reader-v2"
 
 const SHELL = [
   "./index.html",

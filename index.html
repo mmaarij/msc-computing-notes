@@ -9,14 +9,21 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 html,body{
 margin:0;
 height:100%;
 overflow:hidden;
-font-family:sans-serif;
-background:#f2f2f2;
+font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+background:#f5f5f5;
+}
+
+.material-symbols-rounded{
+font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+vertical-align:middle;
+font-size:20px;
 }
 
 /* ── shelf ── */
@@ -47,8 +54,8 @@ max-width:720px;
 margin:0 auto;
 }
 .bookCard{
-border-radius:12px;
-padding:20px;
+border-radius:14px;
+padding:22px;
 cursor:pointer;
 transition:transform 0.15s ease,box-shadow 0.15s ease;
 position:relative;
@@ -61,9 +68,19 @@ box-shadow:0 8px 24px rgba(0,0,0,0.12);
 .bookCard:active{
 transform:scale(0.97);
 }
-.bookEmoji{
-font-size:32px;
-margin-bottom:10px;
+.bookIcon{
+width:40px;
+height:40px;
+border-radius:10px;
+background:rgba(0,0,0,0.08);
+display:flex;
+align-items:center;
+justify-content:center;
+margin-bottom:12px;
+}
+.bookIcon .material-symbols-rounded{
+font-size:22px;
+color:#1a1a1a;
 }
 .bookTitle{
 font-size:16px;
@@ -99,24 +116,82 @@ flex-direction:column;
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:8px 10px;
+padding:6px 8px;
 z-index:20;
 flex-shrink:0;
 }
 
-#topBar button{
-padding:6px 10px;
+.iconBtn{
+width:36px;
+height:36px;
 border:none;
-border-radius:6px;
-background:#000;
-color:white;
+border-radius:10px;
+background:rgba(0,0,0,0.06);
+color:#333;
 font-size:14px;
 cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:0;
+transition:background 0.12s;
+}
+
+.iconBtn:hover{
+background:rgba(0,0,0,0.12);
+}
+
+.iconBtn .material-symbols-rounded{
+font-size:20px;
+}
+
+.textBtn{
+border:none;
+border-radius:10px;
+background:rgba(0,0,0,0.06);
+color:#333;
+font-size:13px;
+font-weight:600;
+cursor:pointer;
+padding:7px 12px;
+transition:background 0.12s;
+display:flex;
+align-items:center;
+gap:5px;
+}
+
+.textBtn:hover{
+background:rgba(0,0,0,0.12);
+}
+
+.textBtn .material-symbols-rounded{
+font-size:18px;
 }
 
 #rightControls{
 display:flex;
-gap:8px;
+gap:4px;
+}
+
+.btnGroup{
+display:flex;
+gap:2px;
+background:rgba(0,0,0,0.04);
+border-radius:10px;
+padding:2px;
+}
+
+.btnGroup .iconBtn{
+background:transparent;
+border-radius:8px;
+}
+
+.btnGroup .iconBtn:hover{
+background:rgba(0,0,0,0.1);
+}
+
+.separator{
+width:8px;
 }
 
 #viewer{
@@ -185,19 +260,22 @@ cursor:pointer;
 
 #pageSlider::-webkit-slider-thumb{
 -webkit-appearance:none;
-width:18px;
-height:18px;
+width:16px;
+height:16px;
 border-radius:50%;
-background:#000;
+background:#333;
 cursor:pointer;
+border:2px solid #fff;
+box-shadow:0 1px 4px rgba(0,0,0,0.2);
 }
 
 #pageSlider::-moz-range-thumb{
-width:18px;
-height:18px;
+width:16px;
+height:16px;
 border-radius:50%;
-background:#000;
-border:none;
+background:#333;
+border:2px solid #fff;
+box-shadow:0 1px 4px rgba(0,0,0,0.2);
 cursor:pointer;
 }
 
@@ -215,16 +293,17 @@ text-align:right;
 position:fixed;
 top:0;
 left:0;
-width:280px;
-max-width:80vw;
+width:300px;
+max-width:85vw;
 height:100%;
 background:#fff;
-box-shadow:4px 0 20px rgba(0,0,0,0.15);
+box-shadow:4px 0 24px rgba(0,0,0,0.12);
 z-index:100;
 transform:translateX(-100%);
 transition:transform 0.25s ease;
 display:flex;
 flex-direction:column;
+border-radius:0 16px 16px 0;
 }
 
 #sidebar.open{
@@ -235,18 +314,15 @@ transform:translateX(0);
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:14px 16px;
+padding:16px 16px 14px;
 border-bottom:1px solid #eee;
 font-weight:700;
-font-size:15px;
+font-size:16px;
 flex-shrink:0;
 }
 
-#sidebarHeader button{
+#sidebarHeader .iconBtn{
 background:none;
-color:#333;
-font-size:20px;
-padding:4px 8px;
 }
 
 #sidebarList{
@@ -265,16 +341,23 @@ border:none;
 background:none;
 width:100%;
 text-align:left;
+transition:background 0.1s;
+border-radius:0;
 }
 
 .tocItem:hover{
-background:#f0f0f0;
+background:#f5f5f5;
 }
 
 .tocItem.depth-1{padding-left:16px;font-weight:700;}
 .tocItem.depth-2{padding-left:30px;}
 .tocItem.depth-3{padding-left:44px;font-size:12px;color:#666;}
 .tocItem.depth-4{padding-left:58px;font-size:12px;color:#888;}
+
+.tocItem.active.depth-1{background:rgba(0,0,0,0.08);color:#000;}
+.tocItem.active.depth-2{background:rgba(0,0,0,0.05);color:#000;}
+.tocItem.active.depth-3{background:rgba(0,0,0,0.04);color:#333;}
+.tocItem.active.depth-4{background:rgba(0,0,0,0.03);color:#555;}
 
 #sidebarOverlay{
 position:fixed;
@@ -304,8 +387,21 @@ color:#1a1a1a;
 .dark #pageWrapper canvas{
 filter:invert(1) hue-rotate(180deg);
 }
-.dark #topBar button{
-background:#333;
+.dark .iconBtn,.dark .textBtn{
+background:rgba(255,255,255,0.1);
+color:#ddd;
+}
+.dark .iconBtn:hover,.dark .textBtn:hover{
+background:rgba(255,255,255,0.18);
+}
+.dark .btnGroup{
+background:rgba(255,255,255,0.06);
+}
+.dark .btnGroup .iconBtn{
+background:transparent;
+}
+.dark .btnGroup .iconBtn:hover{
+background:rgba(255,255,255,0.12);
 }
 .dark #pageLabel{
 color:#aaa;
@@ -315,19 +411,21 @@ background:#444;
 }
 .dark #pageSlider::-webkit-slider-thumb{
 background:#ccc;
+border-color:#222;
 }
 .dark #pageSlider::-moz-range-thumb{
 background:#ccc;
+border-color:#222;
 }
 .dark #sidebar{
 background:#1a1a1a;
-box-shadow:4px 0 20px rgba(0,0,0,0.5);
+box-shadow:4px 0 24px rgba(0,0,0,0.5);
 }
 .dark #sidebarHeader{
 color:#eee;
 border-color:#333;
 }
-.dark #sidebarHeader button{
+.dark #sidebarHeader .iconBtn{
 color:#ccc;
 }
 .dark .tocItem{
@@ -339,6 +437,10 @@ background:#2a2a2a;
 .dark .tocItem.depth-3,.dark .tocItem.depth-4{
 color:#888;
 }
+.dark .tocItem.active.depth-1{background:rgba(255,255,255,0.1);color:#fff;}
+.dark .tocItem.active.depth-2{background:rgba(255,255,255,0.07);color:#eee;}
+.dark .tocItem.active.depth-3{background:rgba(255,255,255,0.05);color:#ccc;}
+.dark .tocItem.active.depth-4{background:rgba(255,255,255,0.04);color:#aaa;}
 </style>
 </head>
 
@@ -346,6 +448,9 @@ color:#888;
 
 <!-- ── SHELF VIEW ── -->
 <div id="shelf">
+<div style="display:flex;justify-content:flex-end;padding:8px 8px 0">
+<button class="iconBtn" onclick="toggleDark()" title="Dark mode"><span id="shelfDarkIcon" class="material-symbols-rounded">dark_mode</span></button>
+</div>
 <h1>MSc Computing Notes</h1>
 <p class="subtitle">Tap a book to start reading</p>
 <div class="bookGrid" id="bookGrid"></div>
@@ -356,7 +461,7 @@ color:#888;
 <div id="sidebar">
 <div id="sidebarHeader">
 <span>Contents</span>
-<button onclick="closeSidebar()">✕</button>
+<button class="iconBtn" onclick="closeSidebar()"><span class="material-symbols-rounded">close</span></button>
 </div>
 <div id="sidebarList"></div>
 </div>
@@ -365,17 +470,23 @@ color:#888;
 <div id="readerView">
 
 <div id="topBar">
-<div style="display:flex;gap:8px">
-<button onclick="goToShelf()">← Shelf</button>
-<button onclick="openSidebar()">☰</button>
+<div style="display:flex;gap:4px">
+<button class="textBtn" onclick="goToShelf()"><span class="material-symbols-rounded">arrow_back</span> Shelf</button>
+<button class="iconBtn" onclick="openSidebar()" title="Contents"><span class="material-symbols-rounded">menu</span></button>
 </div>
 <div id="rightControls">
-<button onclick="prevPage()">◀</button>
-<button onclick="nextPage()">▶</button>
-<button onclick="zoomOut()" title="Zoom out">−</button>
-<button onclick="zoomFit()" title="Fit to screen">⊡</button>
-<button onclick="zoomIn()" title="Zoom in">+</button>
-<button onclick="toggleDark()">Dark</button>
+<div class="btnGroup">
+<button class="iconBtn" onclick="prevPage()" title="Previous page"><span class="material-symbols-rounded">chevron_left</span></button>
+<button class="iconBtn" onclick="nextPage()" title="Next page"><span class="material-symbols-rounded">chevron_right</span></button>
+</div>
+<div class="separator"></div>
+<div class="btnGroup">
+<button class="iconBtn" onclick="zoomOut()" title="Zoom out"><span class="material-symbols-rounded">remove</span></button>
+<button class="iconBtn" onclick="zoomFit()" title="Fit to screen"><span class="material-symbols-rounded">fit_screen</span></button>
+<button class="iconBtn" onclick="zoomIn()" title="Zoom in"><span class="material-symbols-rounded">add</span></button>
+</div>
+<div class="separator"></div>
+<button class="iconBtn" onclick="toggleDark()" title="Dark mode"><span id="darkIcon" class="material-symbols-rounded">dark_mode</span></button>
 </div>
 </div>
 
@@ -401,7 +512,7 @@ const BOOKS = [
 {
 id:"ml",
 title:"Machine Learning",
-emoji:"🤖",
+icon:"smart_toy",
 desc:"Compiled lecture notes",
 color:"#C3E0DD",
 path:"Machine Learning/Compiled Notes.pdf"
@@ -409,7 +520,7 @@ path:"Machine Learning/Compiled Notes.pdf"
 {
 id:"tsa",
 title:"Text & Sequence Analytics",
-emoji:"📝",
+icon:"edit_note",
 desc:"Compiled lecture notes",
 color:"#D4E4BC",
 path:"Text and Sequence Analytics/Compiled Notes.pdf"
@@ -417,7 +528,7 @@ path:"Text and Sequence Analytics/Compiled Notes.pdf"
 {
 id:"stats",
 title:"Statistical Computing",
-emoji:"📊",
+icon:"bar_chart",
 desc:"Compiled lecture notes",
 color:"#F7D9D9",
 path:"Statistical Computing/Compiled Notes.pdf"
@@ -425,7 +536,7 @@ path:"Statistical Computing/Compiled Notes.pdf"
 {
 id:"statslab",
 title:"Stats Lab Notes",
-emoji:"🔎",
+icon:"search",
 desc:"Lab exercises & walkthroughs",
 color:"#FAE9DA",
 path:"Statistical Computing/Lab Notes.pdf"
@@ -441,6 +552,7 @@ let pageNum = 1
 let lastModified = null
 let updateTimer = null
 let zoomLevel = 1.0
+let tocEntries = []
 const ZOOM_STEP = 0.25
 const ZOOM_MIN = 0.5
 const ZOOM_MAX = 3.0
@@ -476,7 +588,7 @@ card.className = "bookCard"
 card.style.background = book.color
 
 card.innerHTML =
-'<div class="bookEmoji">' + book.emoji + '</div>' +
+'<div class="bookIcon"><span class="material-symbols-rounded">' + book.icon + '</span></div>' +
 '<div class="bookTitle">' + book.title + '</div>' +
 '<div class="bookDesc">' + book.desc + '</div>' +
 (badge ? '<span class="bookBadge">' + badge + '</span>' : '')
@@ -492,6 +604,8 @@ async function openBook(book){
 currentBook = book
 pageNum = 1
 lastModified = null
+zoomLevel = 1.0
+applyZoom()
 
 document.getElementById("shelf").style.display = "none"
 document.getElementById("readerView").style.display = "flex"
@@ -562,6 +676,8 @@ document.getElementById("pageLabel").innerText = num + " / " + pdfDoc.numPages
 
 // Render clickable links
 await renderAnnotations(page, viewport, dpr)
+
+highlightToc()
 }
 
 /* ── clickable PDF links ── */
@@ -639,6 +755,7 @@ layer.appendChild(a)
 async function loadOutline(){
 const list = document.getElementById("sidebarList")
 list.innerHTML = ""
+tocEntries = []
 
 if(!pdfDoc) return
 
@@ -654,17 +771,23 @@ const btn = document.createElement("button")
 btn.className = "tocItem depth-" + Math.min(depth, 4)
 btn.textContent = item.title
 
-btn.addEventListener("click",async()=>{
+let tocPage = null
 try{
 const dest = typeof item.dest === "string"
 ? await pdfDoc.getDestination(item.dest)
 : item.dest
 if(dest){
-const idx = await pdfDoc.getPageIndex(dest[0])
-goToPage(idx + 1)
-closeSidebar()
+tocPage = await pdfDoc.getPageIndex(dest[0]) + 1
 }
 }catch(ex){}
+
+tocEntries.push({btn:btn, page:tocPage, depth:depth})
+
+btn.addEventListener("click",async()=>{
+if(tocPage !== null){
+goToPage(tocPage)
+closeSidebar()
+}
 })
 
 list.appendChild(btn)
@@ -676,6 +799,25 @@ await buildItems(item.items, depth + 1)
 }
 
 await buildItems(outline, 1)
+highlightToc()
+}
+
+function highlightToc(){
+if(!tocEntries.length) return
+
+// Clear all
+tocEntries.forEach(e => e.btn.classList.remove("active"))
+
+// For each depth, find the last entry whose page <= current page
+const activeByDepth = {}
+tocEntries.forEach(e => {
+if(e.page !== null && e.page <= pageNum){
+activeByDepth[e.depth] = e
+}
+})
+
+// Highlight the active item at each depth level
+Object.values(activeByDepth).forEach(e => e.btn.classList.add("active"))
 }
 
 function openSidebar(){
@@ -725,7 +867,6 @@ if(!pdfDoc) return
 if(num < 1) num = 1
 if(num > pdfDoc.numPages) num = pdfDoc.numPages
 pageNum = num
-zoomFit()
 renderPage(pageNum)
 document.getElementById("viewer").scrollTo(0,0)
 }
@@ -735,7 +876,6 @@ if(!pdfDoc || pageNum >= pdfDoc.numPages) return
 animateSlide(-1)
 pageNum++
 setTimeout(()=>{
-zoomFit()
 renderPage(pageNum)
 document.getElementById("viewer").scrollTo(0,0)
 resetSlide()
@@ -747,7 +887,6 @@ if(!pdfDoc || pageNum <= 1) return
 animateSlide(1)
 pageNum--
 setTimeout(()=>{
-zoomFit()
 renderPage(pageNum)
 document.getElementById("viewer").scrollTo(0,0)
 resetSlide()
@@ -767,15 +906,23 @@ goToPage(parseInt(slider.value))
 
 /* ── dark mode ── */
 
+function updateDarkIcon(){
+const icon = document.body.classList.contains("dark") ? "light_mode" : "dark_mode"
+document.getElementById("darkIcon").textContent = icon
+document.getElementById("shelfDarkIcon").textContent = icon
+}
+
 function toggleDark(){
 document.body.classList.toggle("dark")
 localStorage.setItem(DARK_KEY,document.body.classList.contains("dark"))
+updateDarkIcon()
 }
 
 function loadDark(){
 if(localStorage.getItem(DARK_KEY) === "true"){
 document.body.classList.add("dark")
 }
+updateDarkIcon()
 }
 
 /* ── auto update ── */
