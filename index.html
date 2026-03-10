@@ -36,15 +36,18 @@ box-sizing:border-box;
 }
 #shelf h1{
 text-align:center;
-font-size:22px;
-margin:0 0 6px;
-letter-spacing:0.5px;
+font-size:28px;
+font-weight:800;
+margin:0 0 8px;
+letter-spacing:-0.5px;
+color:#1a1a1a;
 }
 #shelf .subtitle{
 text-align:center;
-font-size:13px;
-color:#666;
-margin:0 0 28px;
+font-size:14px;
+color:#888;
+margin:0 0 32px;
+font-weight:400;
 }
 .bookGrid{
 display:grid;
@@ -376,7 +379,10 @@ background:#111;
 color:#eee;
 }
 .dark #shelf .subtitle{
-color:#888;
+color:#666;
+}
+.dark .shelfFooter{
+color:#444;
 }
 .dark .bookCard{
 filter:brightness(0.85);
@@ -452,7 +458,7 @@ color:#888;
 <button class="iconBtn" onclick="toggleDark()" title="Dark mode"><span id="shelfDarkIcon" class="material-symbols-rounded">dark_mode</span></button>
 </div>
 <h1>MSc Computing Notes</h1>
-<p class="subtitle">Tap a book to start reading</p>
+<p class="subtitle">Pick a notebook to start reading</p>
 <div class="bookGrid" id="bookGrid"></div>
 </div>
 
@@ -513,7 +519,7 @@ const BOOKS = [
 id:"ml",
 title:"Machine Learning",
 icon:"smart_toy",
-desc:"Compiled lecture notes",
+desc:"Compiled Lecture Notes",
 color:"#C3E0DD",
 path:"Machine Learning/Compiled Notes.pdf"
 },
@@ -521,7 +527,7 @@ path:"Machine Learning/Compiled Notes.pdf"
 id:"tsa",
 title:"Text & Sequence Analytics",
 icon:"edit_note",
-desc:"Compiled lecture notes",
+desc:"Compiled Lecture Notes",
 color:"#D4E4BC",
 path:"Text and Sequence Analytics/Compiled Notes.pdf"
 },
@@ -529,7 +535,7 @@ path:"Text and Sequence Analytics/Compiled Notes.pdf"
 id:"stats",
 title:"Statistical Computing",
 icon:"bar_chart",
-desc:"Compiled lecture notes",
+desc:"Compiled Lecture Notes",
 color:"#F7D9D9",
 path:"Statistical Computing/Compiled Notes.pdf"
 },
@@ -537,7 +543,7 @@ path:"Statistical Computing/Compiled Notes.pdf"
 id:"statslab",
 title:"Stats Lab Notes",
 icon:"search",
-desc:"Lab exercises & walkthroughs",
+desc:"R Focused Lab Notes",
 color:"#FAE9DA",
 path:"Statistical Computing/Lab Notes.pdf"
 }
