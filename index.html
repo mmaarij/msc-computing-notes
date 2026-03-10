@@ -79,6 +79,16 @@
          padding:3px 8px;
          border-radius:20px;
          }
+         .bookBadge{
+         font-size:10px;
+         color:#fff;
+         background:rgba(0,0,0,0.25);
+         padding:3px 8px;
+         border-radius:20px;
+         position:absolute;
+         top:12px;
+         right:12px;
+         }
          /* ── reader ── */
          #readerView{
          display:none;
@@ -214,6 +224,7 @@
          ]
          
          const DARK_KEY = "reader-dark"
+         let badgeMap = {}
          
          let currentBook = null
          let pdfDoc = null
@@ -230,6 +241,20 @@
          return "reader-page-" + book.id
          }
          
+         async function fetchBadges(){
+         try{
+         const res = await fetch("README.md?t=" + Date.now())
+         const text = await res.text()
+         const re = /badge\/.*?-([^-]+)-(\w+)\?[^\]]*\]\(([^)]+)\)/g
+         let m
+         while((m = re.exec(text)) !== null){
+         const label = decodeURIComponent(m[1]).replace(/%20/g," ")
+         const path = decodeURIComponent(m[3]).replace(/%20/g," ")
+         badgeMap[path] = label
+         }
+         }catch(e){}
+         }
+         
          function renderShelf(){
          
          const grid = document.getElementById("bookGrid")
@@ -238,6 +263,7 @@
          BOOKS.forEach(book=>{
          
          const saved = localStorage.getItem(pageKey(book))
+         const badge = badgeMap[book.path]
          const card = document.createElement("div")
          card.className = "bookCard"
          card.style.background = book.color
@@ -246,7 +272,8 @@
          '<div class="bookEmoji">' + book.emoji + '</div>' +
          '<div class="bookTitle">' + book.title + '</div>' +
          '<div class="bookDesc">' + book.desc + '</div>' +
-         (saved ? '<div class="bookProgress">Page ' + saved + '</div>' : '<div class="bookProgress">New</div>')
+         (saved ? '<div class="bookProgress">Page ' + saved + '</div>' : '<div class="bookProgress">New</div>') +
+         (badge ? '<span class="bookBadge">' + badge + '</span>' : '')
          
          card.addEventListener("click",()=> openBook(book))
          grid.appendChild(card)
@@ -404,7 +431,7 @@
          /* ── init ── */
          
          loadDark()
-         renderShelf()
+         fetchBadges().then(()=> renderShelf())
          
       </script>
    </body>
