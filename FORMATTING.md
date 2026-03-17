@@ -36,3 +36,4 @@ Fix the markdown formatting in the notes file(s) I provide. Apply ALL of the fol
 - Do not rename, reword, reorder, or remove any content
 - Apply changes to every week/section in the file
 - After editing, confirm which sections were changed
+- Remove cite blocks

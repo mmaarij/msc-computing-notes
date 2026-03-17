@@ -1180,6 +1180,118 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 | **Gamma** | Log | **Mean ratio:** The expected continuous positive response multiplies by $e^{\hat{\beta}_j}$. |
 | **Linear** | Identity | **Additive effect:** The expected response increases directly by the raw coefficient $\hat{\beta}_j$. |
 
+# Week 7: Density Estimation
+
+## Motivation and Introduction to Density Estimation
+
+* In previous weeks, we relied on known mathematical density functions (e.g., Normal, Gamma, Chi-Squared) to describe data, replacing parameters like $\mu$ and $\sigma^2$ with sample estimates.
+* This standard approach is called the parametric approach.
+* However, real-world sample data often does not resemble any known standard distribution, making the parametric approach invalid.
+* Density estimation aims to approximate the probability density function (pdf) of a random variable directly from the data, allowing the data to "speak for themselves" through non-parametric procedures.
+
+## Histograms and Local Averages
+
+* Histograms act as a basic form of density estimation by counting and plotting the number of observations in defined bins.
+* Histograms have limitations: the bins must be defined, and the resulting shape can be very blocky depending on the chosen bin width.
+* We can formally estimate the density $f_X(x)$ using a local average of points falling within a small window $\delta x$.
+
+* **Local Average Estimate:**
+
+    $$\hat{f}_{X}(x)=\frac{1}{n\delta x}\sum_{i=1}^{n}I(|x-x_{i}|<\delta x/2)$$
+
+* Because the local average uses a strict rectangular function $I(\cdot)$, the resulting plot remains quite blocky.
+
+## Kernel Density Estimation (KDE)
+
+* To fix the blocky nature of local averages, we replace the rectangular indicator function $I(\cdot)$ with a tapering kernel function $K(\cdot)$, producing a locally weighted average.
+
+* **Kernel Density Estimator:**
+
+    $$\hat{f}_{X}(x)=\frac{1}{nh}\sum_{i=1}^{n}K\left(\frac{x-x_{i}}{h}\right)$$
+
+* In this formula, $h$ acts as the width of the window and is known as the bandwidth.
+* A valid kernel density estimate must be a true density (non-negative and integrating to 1), which is guaranteed if the chosen kernel $K$ is itself a valid probability density function.
+* **PDF Properties:** A valid density must satisfy $f(x) \ge 0$ and $\int f(x)\,dx = 1$.
+* **KDE Interpretation:** KDE can be viewed as a sum of small "bumps" (kernels) centred at each data point; the final estimate is the average of these contributions.
+
+### Choice of Kernel
+
+* **Rectangular Kernel:** Corresponds to the basic moving average ($K(t) = 1/2$ for $|t| < 1$).
+* **Triangular Kernel:** Produces a less blocky result than the rectangular kernel.
+* **Normal (Gaussian) Kernel:** A highly popular choice based on the standard normal distribution.
+* **Epanechnikov Kernel:** Theoretically the most efficient kernel.
+* Efficiency refers to how accurately the kernel estimates the true underlying density while minimizing variance; all the above kernels have high efficiency (greater than 90%).
+
+### Choice of Bandwidth
+
+* The bandwidth $h$ controls the smoothness of the estimate; too small creates an "undersmoothed" jagged line, while too large creates an "oversmoothed" flat line.
+
+* **Silverman's Rule of Thumb:**
+
+    $$h \approx 1.06 \sigma n^{-1/5}$$
+
+* The rule of thumb assumes the true underlying distribution is Normal, and R uses a pragmatic variant of this ($h = 0.9 \min(s, R/1.34) n^{-1/5}$) as its default `bw="nrd0"`.
+* **Cross-Validation:** An alternative method that minimizes the integrated square error by leaving out one observation at a time.
+* In R, unbiased cross-validation is called using `bw.ucv`, and biased cross-validation is called using `bw.bcv`.
+
+* **Cross-Validation Formula:** Bandwidth can be chosen by minimising:
+
+    $$M(h) = \int \hat{f}(x)^2\,dx - \frac{2}{n} \sum_{i=1}^{n} \hat{f}_{-i}(x_i)$$
+
+### Edge Effects
+
+* KDE performs poorly near boundaries (e.g. data $\ge 0$).
+* Can be improved using transformations (e.g. log transform).
+
+### Special Data Types
+
+* **Periodic data** (e.g. angles): require periodic kernels.
+* **Positive-only data:** often handled via transformations.
+
+## Computational Complexity
+
+* A naive implementation of KDE evaluates the kernel at $m$ grid points for every $n$ observation, resulting in $O(nm)$ operations, which is very slow for large datasets.
+* KDE is fundamentally a convolution of the kernel and a binned histogram.
+* By using the Fast Fourier Transform (FFT), convolutions can be computed in $O(m \log m)$ operations, making it independent of the sample size $n$.
+* R's built-in `density()` function utilizes this FFT method internally for rapid performance.
+
+## Applications (Bayesian Classification)
+
+* Beyond displaying data, density estimation can be used to construct non-parametric classifiers.
+* Using Bayes' theorem, we can classify the probability of a condition $C$ given a test measurement $X$.
+
+* **Posterior Probability (Bayes Classifier):**
+
+    $$P(C|X) = \frac{f(X|C)P(C)}{f(X)}$$
+
+* The densities $f(X|C)$ (e.g., blood pressure given diseased vs. healthy) can be estimated directly using KDE.
+* **Mixture vs. Marginal Denominator:** The denominator $f(X)$ can be calculated in two ways.
+  * *Mixture:* Theoretically correct, built from the conditional densities using the Law of Total Probability: $p f_1(x) + (1-p) f_0(x)$.
+  * *Marginal:* The density estimated directly from all combined patient data.
+* **Mixture vs. Marginal Insight:** Theoretically equivalent, but in practice they differ slightly due to smoothing/estimation error.
+
+## Multivariate Densities
+
+* Density estimation scales to higher dimensions; for 2D data, a two-dimensional kernel is placed at each data point, and the results are averaged.
+* In R, 2D density estimation is handled by the `kde2d` function from the `MASS` package.
+* By default, `kde2d` selects bandwidths for each dimension independently using the rule of thumb; more principled matrix-valued bandwidth selection is available via the `ks` package.
+* **Multivariate Bandwidth Detail:** Separate bandwidths for each dimension provide basic flexibility; a full bandwidth matrix (e.g. the `ks` package) allows for correlation-aware smoothing.
+
+### R Functions to Know
+
+* `density()` -- uses FFT internally
+* `bw.nrd0` -- rule of thumb
+* `bw.ucv`, `bw.bcv` -- cross-validation
+* `geom_density()` -- ggplot
+* `kde2d()` -- 2D KDE in `MASS`
+
+## Collinearity Review
+
+* Collinearity occurs when there is a strong correlation between two predictor variables, violating the desire for independent explanatory variables.
+* High collinearity leads to unstable coefficients, difficult interpretation, and high variance in standard errors (making p-values unreliable).
+* When creating dummy variables for categorical data, including all categories creates "perfect multicollinearity" because one category can be perfectly predicted by the absence of the others.
+* The solution is to always exclude one level to serve as the baseline/reference category.
+
 ## Complete Exam Quick Reference Table
 
 | Concept / Test | Formula or R Function | Use Case | Key Exam Notes |
@@ -1247,4 +1359,12 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 | **Gamma GLM** | `glm(y ~ x, family=Gamma(link="log"))` | Positive right-skewed data | Variance $\propto \mu^2$ |
 | **Rate Ratio (Poisson/Gamma)** | $e^{\hat{\beta}_j}$ | Interpret log-link coefficients | $>1$ increases rate/mean, $<1$ decreases |
 | **Dummy Coding** | `as.factor(x)` in formula | Categorical predictors | R uses $n-1$ bits; avoids multicollinearity |
+| **KDE** | $\hat{f}(x)=\frac{1}{nh}\sum K\!\left(\frac{x-x_i}{h}\right)$ | Non-parametric density estimation | Kernel + bandwidth; must integrate to 1 |
+| **Silverman's Rule** | $h \approx 1.06\,\sigma\,n^{-1/5}$ | Default bandwidth | Assumes Normal; R: `bw.nrd0` |
+| **Cross-Validation (BW)** | `bw.ucv` / `bw.bcv` | Data-driven bandwidth | Minimises integrated square error |
+| **Epanechnikov Kernel** | Optimal efficiency kernel | KDE kernel choice | Most efficient; all common kernels $>90\%$ |
+| **`density()`** | `density(x)` | Compute KDE in R | Uses FFT; $O(m \log m)$ |
+| **Bayes Classifier** | $P(C \mid X) = \frac{f(X \mid C)P(C)}{f(X)}$ | Non-parametric classification | Estimate $f(X \mid C)$ via KDE |
+| **2D KDE** | `kde2d()` from `MASS` | Bivariate density | Separate bandwidths per dimension |
+| **Collinearity** | Correlated predictors | Unstable coefficients | Drop one dummy level as baseline |
 ---
