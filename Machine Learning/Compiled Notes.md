@@ -789,3 +789,128 @@ $$a \cdot b = |a||b| \cos\theta$$
 * Definition: The margin is defined as the shortest geometric distance between the closest observations and the separating hyperplane.
 * A Maximal Margin Classifier (or Hard Margin Classifier) enforces a strict boundary that strictly maximizes the distance between the classes without allowing any misclassifications.
 * Hard Margin Classifiers are highly sensitive to outliers and prone to severe overfitting, requiring relaxed constraints for functional real-world application.
+
+# Week 7: Support Vector Classifiers and Machines
+
+## Margins and Decision Boundaries
+
+* **Margin:** The shortest geometric distance between the closest observations and the separating hyperplane.
+* **Support Vectors:** The specific training samples that lie closest to the decision boundary. They are the only points that influence the position of the hyperplane.
+* The goal of a Support Vector Classifier (SVC) is to find a decision boundary that maximises this distance to both classes.
+
+- **Distance from a Point to the Decision Boundary:**
+
+$$D(x) = \frac{w^T x + w_0}{||w||}$$
+
+- **Margin Equation:**
+
+$$m = \frac{2}{||w||}$$
+
+- **Hyperplane Scaling Insight:** We can rescale the hyperplane so that support vectors lie on:
+
+$$w^T x + w_0 = \pm 1$$
+
+- **Hard Margin Optimisation Problem:**
+
+$$\min_{w} ||w||^2 \text{ such that } y^{(i)}(w^T x^{(i)} + w_0) \ge 1$$
+
+* A Hard Margin Classifier strictly maximises the margin while maintaining zero misclassifications, making it highly sensitive to outliers and prone to overfitting.
+
+## Soft Margin Classifiers and Slack Variables
+
+* To prevent overfitting and handle noisy data, the strict constraints of a hard margin can be relaxed using a Soft Margin Classifier.
+* There is a fundamental **trade-off between maximising the margin and minimising classification error**.
+
+- **Soft Margin Optimisation Problem:**
+
+$$\min_{w} ||w||^2 + C \sum_{i=1}^{N} \xi_i$$
+
+- **Constraints:**
+
+$$y^{(i)}(w^T x^{(i)} + w_0) \ge 1 - \xi_i, \quad \xi_i \ge 0$$
+
+* **Slack Variables ($\xi_i$):** Added to each sample to allow for margin violations.
+
+    * If $\xi = 0$: The point is on the correct side of the margin
+    * If $0 < \xi \le 1$: The point violates the margin but is still correctly classified
+    * If $\xi \ge 1$: The point is misclassified
+
+* **Regularisation Parameter ($C$):** Controls the trade-off between maximising the margin and minimising classification errors.
+
+    * Small $C$: Constraints are easily ignored, resulting in a wider margin
+    * Large $C$: Constraints are strictly enforced, resulting in a narrow margin
+    * $C \to \infty$: Enforces all constraints, reverting to a Hard Margin Classifier
+    * Larger $C$ can also increase computational cost during training
+
+## Hinge Loss
+
+* Support Vector Machines utilize the Hinge Loss function to evaluate classification error.
+
+- **Hinge Loss Function:**
+
+$$L(y^{(i)}, f(x^{(i)})) = \max(0, 1 - y^{(i)}(w^T x^{(i)} + b))$$
+
+- **Connection to Slack Variables:**
+
+$$\xi_i \ge 1 - y^{(i)}(w^T x^{(i)} + b)$$
+
+## Support Vector Machines and Higher Dimensions
+
+* Some classification problems are not linearly separable in their original feature space.
+* **Mapping:** By projecting the data into a higher-dimensional space using a transformation function $\Phi(x)$, a linear hyperplane can often be found to separate the classes.
+* Example: XOR problem (not linearly separable in 2D, but separable in higher dimensions)
+* However, explicitly converting points to a high-dimensional space significantly increases computational complexity and time.
+
+## The Kernel Trick
+
+* The Kernel Trick allows the algorithm to learn a classifier in a high-dimensional feature space without ever explicitly mapping the points into that space.
+* It relies on converting the optimisation problem from its Primal form to its Dual form.
+
+- **Primal Form Classifier:**
+
+$$f(x) = w^T x + b$$
+
+- **Dual Form Classifier:**
+
+$$f(x) = \sum_{i=1}^{N} \alpha_i y_i (x_i^T x) + b$$
+
+- **Dual Constraints:**
+
+$$0 \le \alpha_i \le C, \quad \sum_{i=1}^{N} \alpha_i y_i = 0$$
+
+* In the Dual form, the calculation only depends on the dot product of the input vectors ($x_i^T x_j$).
+* Only points with $\alpha_i \ne 0$ contribute to the classifier — these are the **support vectors**.
+* The Kernel Function $k(x_i, x_j)$ directly computes this dot product in the higher-dimensional space without performing the expensive transformation.
+
+- **Kernel Example:**
+
+$$k(x_i, x_j) = (x_i^T x_j)^2$$
+
+* **Complexity:** Learning complexity relies on $N$ (the number of training samples) rather than $D$ (the dimensionality), making the process highly efficient.
+
+## Types of Kernels
+
+* **Linear Kernel:** Standard dot product, used when data is linearly separable.
+
+    * $k(x_1, x_2) = x_1^T x_2$
+
+* **Polynomial Kernel:** Contains all polynomial terms up to a specified degree $d$.
+
+    * $k(x_1, x_2) = (x_1^T x_2 + c)^d$
+    * The hyperparameter $c$ controls the influence of non-linear terms versus linear terms
+    * Larger $c$ increases the influence of lower-order (smoother) terms
+
+* **Radial Basis Function (RBF) / Gaussian Kernel:** Maps data into an infinite-dimensional feature space.
+
+    * $k(x_1, x_2) = \exp(-\gamma ||x_1 - x_2||^2)$
+    * The hyperparameter $\gamma$ (derived from variance $\sigma$) dictates how closely the model behaves like a nearest-neighbour classifier
+    * Large $\gamma$ $\to$ very local decision boundary (similar to nearest neighbour)
+
+* **Sigmoid Kernel:**
+
+    * $k(x_1, x_2) = \tanh(x_1^T x_2 + \theta)$
+
+## Implementation Tips
+
+* **Scaling:** SVMs are not scale-invariant. You must normalize or scale your data (e.g., using `StandardScaler` or `MinMaxScaler`) to ensure features have equal weighting.
+* **Parameter Tuning:** Identifying the optimal kernel type, $\gamma$, and $C$ parameter is crucial. Tools like `GridSearchCV` are typically used to test combinations efficiently via Cross-Validation.
