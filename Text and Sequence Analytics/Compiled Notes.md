@@ -714,3 +714,170 @@ $$IDF(q_i) = \log\left(\frac{N - n(q_i) + 0.5}{n(q_i) + 0.5}\right)$$
 $$\text{Nodes} = \frac{|D|}{\alpha \times (N_{input} + N_{output})}$$
 
 * $|D|$ = number of training samples, $N_{input}$ = input neurons, $N_{output}$ = output neurons, $\alpha$ = scaling factor (typically 2–10).
+
+# Week 7: Advanced Text Features & Introduction to Text Classification
+
+## Text Feature Vectorization
+
+Before machine learning algorithms can process text, it must be vectorized into structured, fixed-size numerical formats.
+
+* **Data Set vs Data Frame:**
+  * A dataset is a general collection of data (structured, unstructured, or semi-structured).
+  * A data frame is a structured 2D matrix (rows + columns) used for ML, with defined data types.
+
+* **Bag of Words (BOW):**
+  * A multiset of tokens and their frequencies within a document.
+  * Can be extended to n-grams, shingles, or sub-words.
+  * **Limitation:** Loses word order → no contextual/semantic meaning.
+
+* **Count Vectorization:** Creates a document-term matrix where each dimension corresponds to a specific token from the corpus.
+  * Values can represent raw frequencies, binary occurrences, or weighted measures.
+  * **Process:**
+    1. Build a vocabulary (unique tokens across corpus)
+    2. Create document-term matrix
+    3. Encode each document as a vector
+
+* **Shingles (n-grams):** Help preserve local semantics and partial word order.
+
+* **One-Hot Encoding:** Primarily used for categorical data rather than full text, this technique represents data as binary vectors where the vector length equals the total vocabulary size.
+
+## TF-IDF Model
+
+The Term Frequency-Inverse Document Frequency (TF-IDF) model normalizes token frequencies by considering their relevance across the entire corpus, filtering out low-entropy "noise" words.
+
+* **Term Frequency (TF):** Measures how frequently a term appears within a specific document relative to its length.
+
+- **Term Frequency Formula:**
+$$tf(t,d) = \frac{f(t,d)}{len(d)}$$
+
+* **Inverse Document Frequency (IDF):** Measures the rarity and overall importance of a term across all documents.
+
+- **Inverse Document Frequency Formula:**
+$$idf(t,D) = \log\left(\frac{D}{n}\right)$$
+
+* **TF-IDF Calculation:** The final weight is the product of TF and IDF, which highlights terms that are highly distinctive to a specific document.
+
+- **TF-IDF Formula:**
+$$tfidf(t,d,D) = \frac{f(t,d)}{len(d)} \times \log\left(\frac{D}{n}\right)$$
+
+## Advanced Feature Selection & Ranking
+
+High-dimensional vector spaces often suffer from the "curse of dimensionality," requiring mathematical optimization to reduce processing overhead.
+
+* **Incremental / Generate-and-Test Feature Selection:**
+  * Try different feature sets and/or models
+  * Evaluate performance iteratively
+  * Common approach in ML experimentation
+
+* **Vector Hashing:** Hashes variable-sized inputs (like n-grams) into a fixed-size vector array to drastically reduce vocabulary tracking.
+  * Converts variable-length input into fixed-length vectors
+  * Especially useful for text and high-dimensional data
+
+- **Modulo Hash Index:**
+$$index = hash(f) \pmod{n}$$
+
+* **Okapi BM25:**
+  * A ranking function used in information retrieval systems (e.g. search engines)
+  * Balances:
+    * Term frequency
+    * Document length normalization
+    * Term rarity (IDF)
+  * Short documents are boosted, long documents are penalized
+
+- **BM25 Score:**
+$$score(D,Q) = \sum_{i=1}^{n} IDF(q_i) \cdot \frac{f(q_i, D) \cdot (k_1 + 1)}{f(q_i, D) + k_1 \cdot \left(1 - b + b \cdot \frac{|D|}{avgdl}\right)}$$
+
+* **BM25 Optimizations:**
+  * Inverted indices (term → list of documents)
+  * Document partitioning (parallel processing)
+  * Early termination (stop when enough good results found)
+
+## Dimensionality Reduction
+
+To manage the sparsity and extreme dimensionality of text features, dimensionality reduction algorithms are commonly applied before classification.
+
+* **Principal Component Analysis (PCA):** An unsupervised technique that projects data onto orthogonal axes to maximize variance.
+* **Linear Discriminant Analysis (LDA):** A supervised technique that maximizes class separability.
+
+## Fundamentals of Text Classification
+
+Text classification is the automated categorization of documents into predefined classes using machine learning models.
+
+* **Applications:** Spam filtering, sentiment analysis, document organization, topic modelling
+
+* **Process Pipeline:**
+  1. Preprocessing (cleaning, normalization)
+  2. Feature extraction (BOW, TF-IDF, embeddings)
+  3. Train/test split
+  4. Model training
+  5. Evaluation using statistical validation methods
+
+* **Model Types:**
+  * Supervised (requires labeled data)
+  * Unsupervised (e.g. clustering)
+
+* **Properties of Text Data:**
+  * High-dimensional
+  * Sparse feature space
+
+* **Explainability:** Techniques like Shapley Values and LIME can help interpret models, though some remain black boxes.
+
+## Supervised Classification Models
+
+Different machine learning algorithms offer various trade-offs for text classification tasks.
+
+### Logistic Regression
+
+A statistical model that applies the sigmoid function to predict the probability of a binary outcome.
+
+* **Advantages:** Highly interpretable, efficient, handles sparse high-dimensional data well, outputs probabilities
+
+- **Logistic Function:**
+$$P(y=1|x) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \dots + \beta_n X_n)}}$$
+
+### Naive Bayes
+
+A probabilistic classifier based on Bayes' theorem that assumes independence between features.
+
+* **Advantages:** Very fast, simple, strong baseline for text classification
+
+- **Probability Equation:**
+$$P(doc|class) = P(word_1|class) \times P(word_2|class) \times \dots \times P(word_n|class)$$
+
+### Support Vector Machines (SVM)
+
+SVMs map data into high-dimensional space and find an optimal separating hyperplane.
+
+* **Mechanism:**
+  * Maximizes margin between classes
+  * Uses support vectors (closest points)
+* **Multiclass Handling:** One-vs-Rest (OvR)
+* **Advantages:** Effective for medium-sized datasets with clear separation
+
+### Ensemble Methods & Random Forests
+
+* **Ensemble Methods:**
+  * Combine multiple models to improve performance
+  * Reduce variance (bagging) and bias (boosting)
+
+* **Random Forest:**
+  * Collection of decision trees trained on random subsets
+  * Final prediction via majority vote
+  * Reduces overfitting and improves generalization
+
+## Unsupervised Learning (Clustering)
+
+### K-Means Clustering
+
+* Groups documents into k clusters based on similarity
+* Each cluster defined by a centroid
+* Distance typically computed using Euclidean or cosine similarity
+
+* **Choosing k:**
+  * Elbow Method
+  * Sum of Squared Errors (SSE)
+
+* **Applications:**
+  * Topic modelling
+  * Document grouping
+  * Sentiment clustering
