@@ -729,9 +729,8 @@ $$\text{Nodes} = \frac{|D|}{\alpha \times (N_{input} + N_{output})}$$
 * Hashes variable-sized inputs (like n-grams) into a fixed-size vector array to drastically reduce vocabulary tracking.
 * Converts variable-length input into fixed-length vectors
 * Especially useful for text and high-dimensional data
-
-- **Modulo Hash Index:** $index = hash(f) \ \% \ n$ (where $\%$ is the $mod$ operator)
-
+* This is achieved by taking the modulus of the hash against the target array size.
+* **Modulo Hash Index:** $index = hash(f) \ \% \ n$ (where $\%$ is the $mod$ operator)
 * Particularly useful for domains with extremely large combinatorial feature spaces, such as biological sequences.
 * For example, proteins built from 20 amino acids produce rapidly growing n-gram feature spaces:  
   1-grams = 20, 2-grams = 400, 3-grams = 8,000, 4-grams = 160,000, 5-grams = 3,200,000.
