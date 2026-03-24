@@ -639,8 +639,8 @@ Before text can be processed by machine learning algorithms, it must be converte
 
 ## Data Sets and Data Frames
 
-* A data set is any collection of data (structured, unstructured, or semi-structured) across various formats like SQL, CSV, or raw text.
-* A data frame is a highly structured, two-dimensional matrix with labelled columns and rows tailored for machine learning.
+* A dataset is a general collection of data (structured, unstructured, or semi-structured).
+* A data frame is a structured 2D matrix (rows + columns) used for ML, with defined data types.
 * Within a data frame, continuous variables are typically normalized (rescaled between a minimum and maximum) or standardized (rescaled around a mean of zero and a standard deviation of one).
 * Categorical or discrete variables are typically processed using one-hot encoding.
 
@@ -648,102 +648,30 @@ Before text can be processed by machine learning algorithms, it must be converte
 
 ### Bag of Words (BOW)
 
-* A multiset collection of words or n-grams and their corresponding frequencies within a text.
-* BOW implementations result in the complete loss of word order, grammar, and contextual information, meaning semantic polysemy cannot be handled.
-* BOW features may be constructed from words, n-grams, shingles, or sub-word tokens.
+* A multiset of tokens and their frequencies within a document.
+* Can be extended to n-grams, shingles, or sub-words.
+* **Limitation:** Loses word order $\to$ no contextual/semantic meaning.
 
 ### Count Vectorization
 
-* Creates a document-term matrix where each row is a document and each column represents a unique vocabulary word.
-* Count vectors can represent tokens using raw frequency counts, binary occurrence values (true/false), or weighted values.
+* Creates a document-term matrix where each dimension corresponds to a specific token from the corpus.
+* Values can represent raw frequencies, binary occurrences, or weighted measures.
+* **Process:**
+  1. Build a vocabulary (unique tokens across corpus)
+  2. Create document-term matrix
+  3. Encode each document as a vector
+
+### Shingles (n-grams)
+
+* Help preserve local semantics and partial word order.
 
 ### One-Hot Encoding
 
-* Represents categorical data as binary vectors where the vector size is exactly equal to the vocabulary size.
+* Primarily used for categorical data rather than full text, this technique represents data as binary vectors where the vector length equals the total vocabulary size.
 
 ## Term Frequency-Inverse Document Frequency
 
-The TF-IDF model resolves the limitations of raw frequency counts by normalizing the importance of a token based on its rarity across the entire corpus.
-
-* **Term Frequency (TF):**
-
-$$tf(t,d) = \frac{f(t,d)}{len(d)}$$
-
-* **Inverse Document Frequency (IDF):**
-
-$$idf(t,D) = \log\left(\frac{D}{n}\right)$$
-
-* **TF-IDF Formula:**
-
-$$tfidf(t,d,D) = \frac{f(t,d)}{len(d)} \times \log\left(\frac{D}{n}\right)$$
-
-* TF-IDF reduces the weight of very common terms across documents (e.g., stop words) while increasing the relative importance of rarer, more informative tokens.
-
-## Okapi BM25
-
-BM25 is an advanced Bag of Words retrieval function that balances term frequency, document length, and term rarity to rank document relevance against a search query.
-
-* Long documents heavily penalize term weights in the denominator, while shorter documents increase the term weight.
-* Parameter $k_1$ controls the scaling of term frequency, while $b$ controls the strength of document length normalization.
-* Computational complexity is historically $O(QC)$, but it is optimized in practice using inverted indices, document partitioning, and early termination heuristics.
-
-* **Okapi BM25 Score:**
-
-$$score(D,Q) = \sum_{i=1}^{n} IDF(q_i) \cdot \frac{f(q_i, D) \cdot (k_1 + 1)}{f(q_i, D) + k_1 \cdot \left(1 - b + b \cdot \frac{|D|}{avgdl}\right)}$$
-
-* **Okapi BM25 IDF:**
-
-$$IDF(q_i) = \log\left(\frac{N - n(q_i) + 0.5}{n(q_i) + 0.5}\right)$$
-
-## Feature Selection and Hashing
-
-### Vector Hashing
-
-* A technique used to eliminate the "curse of dimensionality" by hashing variable-sized inputs (like n-grams) into a fixed-size vector array.
-* This is achieved by taking the modulus of the hash against the target array size: $index = hash(f) \ \% \ n$ (where $\%$ is the $mod$ operator).
-* Particularly useful for domains with extremely large combinatorial feature spaces, such as biological sequences.
-* For example, proteins built from 20 amino acids produce rapidly growing n-gram feature spaces:  
-  1-grams = 20, 2-grams = 400, 3-grams = 8,000, 4-grams = 160,000, 5-grams = 3,200,000.
-* Hashing allows all such features to be compressed into a single fixed-length vector.
-
-### Incremental Feature Selection
-
-* A generate-and-test topology approach for neural networks to determine the optimal hidden layer configurations.
-* **Hidden Layer Node Calculation:**
-
-$$\text{Nodes} = \frac{|D|}{\alpha \times (N_{input} + N_{output})}$$
-
-* $|D|$ = number of training samples, $N_{input}$ = input neurons, $N_{output}$ = output neurons, $\alpha$ = scaling factor (typically 2–10).
-
-# Week 7: Advanced Text Features & Introduction to Text Classification
-
-## Text Feature Vectorization
-
-Before machine learning algorithms can process text, it must be vectorized into structured, fixed-size numerical formats.
-
-* **Data Set vs Data Frame:**
-  * A dataset is a general collection of data (structured, unstructured, or semi-structured).
-  * A data frame is a structured 2D matrix (rows + columns) used for ML, with defined data types.
-
-* **Bag of Words (BOW):**
-  * A multiset of tokens and their frequencies within a document.
-  * Can be extended to n-grams, shingles, or sub-words.
-  * **Limitation:** Loses word order → no contextual/semantic meaning.
-
-* **Count Vectorization:** Creates a document-term matrix where each dimension corresponds to a specific token from the corpus.
-  * Values can represent raw frequencies, binary occurrences, or weighted measures.
-  * **Process:**
-    1. Build a vocabulary (unique tokens across corpus)
-    2. Create document-term matrix
-    3. Encode each document as a vector
-
-* **Shingles (n-grams):** Help preserve local semantics and partial word order.
-
-* **One-Hot Encoding:** Primarily used for categorical data rather than full text, this technique represents data as binary vectors where the vector length equals the total vocabulary size.
-
-## TF-IDF Model
-
-The Term Frequency-Inverse Document Frequency (TF-IDF) model normalizes token frequencies by considering their relevance across the entire corpus, filtering out low-entropy "noise" words.
+The TF-IDF model normalizes token frequencies by considering their relevance across the entire corpus, filtering out low-entropy "noise" words.
 
 * **Term Frequency (TF):** Measures how frequently a term appears within a specific document relative to its length.
 
@@ -760,37 +688,54 @@ $$idf(t,D) = \log\left(\frac{D}{n}\right)$$
 - **TF-IDF Formula:**
 $$tfidf(t,d,D) = \frac{f(t,d)}{len(d)} \times \log\left(\frac{D}{n}\right)$$
 
-## Advanced Feature Selection & Ranking
+* TF-IDF reduces the weight of very common terms across documents (e.g., stop words) while increasing the relative importance of rarer, more informative tokens.
 
-High-dimensional vector spaces often suffer from the "curse of dimensionality," requiring mathematical optimization to reduce processing overhead.
+## Okapi BM25
 
-* **Incremental / Generate-and-Test Feature Selection:**
-  * Try different feature sets and/or models
-  * Evaluate performance iteratively
-  * Common approach in ML experimentation
-
-* **Vector Hashing:** Hashes variable-sized inputs (like n-grams) into a fixed-size vector array to drastically reduce vocabulary tracking.
-  * Converts variable-length input into fixed-length vectors
-  * Especially useful for text and high-dimensional data
-
-- **Modulo Hash Index:**
-$$index = hash(f) \pmod{n}$$
-
-* **Okapi BM25:**
-  * A ranking function used in information retrieval systems (e.g. search engines)
-  * Balances:
-    * Term frequency
-    * Document length normalization
-    * Term rarity (IDF)
-  * Short documents are boosted, long documents are penalized
+* A ranking function used in information retrieval systems (e.g. search engines)
+* Balances:
+  * Term frequency
+  * Document length normalization
+  * Term rarity (IDF)
+* Short documents are boosted, long documents are penalized
+* Long documents heavily penalize term weights in the denominator, while shorter documents increase the term weight.
+* Parameter $k_1$ controls the scaling of term frequency, while $b$ controls the strength of document length normalization.
+* Computational complexity is historically $O(QC)$, but it is optimized in practice using inverted indices, document partitioning, and early termination heuristics.
 
 - **BM25 Score:**
 $$score(D,Q) = \sum_{i=1}^{n} IDF(q_i) \cdot \frac{f(q_i, D) \cdot (k_1 + 1)}{f(q_i, D) + k_1 \cdot \left(1 - b + b \cdot \frac{|D|}{avgdl}\right)}$$
 
+* **Okapi BM25 IDF:**
+$$IDF(q_i) = \log\left(\frac{N - n(q_i) + 0.5}{n(q_i) + 0.5}\right)$$
+
 * **BM25 Optimizations:**
-  * Inverted indices (term → list of documents)
+  * Inverted indices (term $\to$ list of documents)
   * Document partitioning (parallel processing)
   * Early termination (stop when enough good results found)
+
+## Feature Selection and Hashing
+
+### Incremental Feature Selection
+
+* A generate-and-test topology approach for neural networks to determine the optimal hidden layer configurations.
+* **Hidden Layer Node Calculation:**
+
+$$\text{Nodes} = \frac{|D|}{\alpha \times (N_{input} + N_{output})}$$
+
+* $|D|$ = number of training samples, $N_{input}$ = input neurons, $N_{output}$ = output neurons, $\alpha$ = scaling factor (typically 2–10).
+
+### Vector Hashing
+
+* Hashes variable-sized inputs (like n-grams) into a fixed-size vector array to drastically reduce vocabulary tracking.
+* Converts variable-length input into fixed-length vectors
+* Especially useful for text and high-dimensional data
+
+- **Modulo Hash Index:** $index = hash(f) \ \% \ n$ (where $\%$ is the $mod$ operator)
+
+* Particularly useful for domains with extremely large combinatorial feature spaces, such as biological sequences.
+* For example, proteins built from 20 amino acids produce rapidly growing n-gram feature spaces:  
+  1-grams = 20, 2-grams = 400, 3-grams = 8,000, 4-grams = 160,000, 5-grams = 3,200,000.
+* Hashing allows all such features to be compressed into a single fixed-length vector.
 
 ## Dimensionality Reduction
 
@@ -798,6 +743,8 @@ To manage the sparsity and extreme dimensionality of text features, dimensionali
 
 * **Principal Component Analysis (PCA):** An unsupervised technique that projects data onto orthogonal axes to maximize variance.
 * **Linear Discriminant Analysis (LDA):** A supervised technique that maximizes class separability.
+
+# Week 7: Advanced Text Features & Introduction to Text Classification
 
 ## Fundamentals of Text Classification
 
