@@ -743,7 +743,7 @@ To manage the sparsity and extreme dimensionality of text features, dimensionali
 * **Principal Component Analysis (PCA):** An unsupervised technique that projects data onto orthogonal axes to maximize variance.
 * **Linear Discriminant Analysis (LDA):** A supervised technique that maximizes class separability.
 
-# Week 7: Advanced Text Features & Introduction to Text Classification
+# Week 7: Introduction to Text Classification
 
 ## Fundamentals of Text Classification
 
