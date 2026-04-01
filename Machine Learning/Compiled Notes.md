@@ -914,3 +914,209 @@ $$k(x_i, x_j) = (x_i^T x_j)^2$$
 
 * **Scaling:** SVMs are not scale-invariant. You must normalize or scale your data (e.g., using `StandardScaler` or `MinMaxScaler`) to ensure features have equal weighting.
 * **Parameter Tuning:** Identifying the optimal kernel type, $\gamma$, and $C$ parameter is crucial. Tools like `GridSearchCV` are typically used to test combinations efficiently via Cross-Validation.
+
+# Week 8: Neural Networks and Deep Learning Frameworks
+
+## Artificial Neural Networks
+
+* Artificial Neural Networks (ANNs) are machine learning models inspired by the biological structure of human and animal brains. 
+* The human brain consists of approximately $10^{11}$ neurons, each communicating with thousands of other neurons. ANNs attempt to replicate this highly interconnected computational power mathematically.
+* While inspired by biology, modern neural network design prioritizes mathematical efficiency and predictive performance over strict biological plausibility.
+* Neural networks excel at solving complex, non-linear problems that traditional algorithms struggle with, such as image recognition, natural language processing, and advanced pattern recognition.
+* The foundational architecture for many of these tasks is the Multi-Layer Perceptron (MLP).
+
+## The Single Perceptron
+
+* The perceptron is the fundamental computational unit (neuron) of an artificial neural network.
+* It receives one or more input values, computes a weighted sum of these inputs, adds a bias term, and passes the result through an activation function to produce an output.
+
+- **Perceptron Linear Combination:**
+
+$$z = \sum_{i=1}^{n} w_i x_i + b$$
+
+* $x_i$ represents the input features.
+* $w_i$ represents the learned weights, determining the importance of each input.
+* $b$ represents the bias term, which shifts the activation function allowing the model to fit data that does not pass through the origin.
+* $z$ is the resulting linear output, which is then fed into an activation function.
+
+## Activation Functions
+
+* Activation functions introduce non-linear properties to the network. Without them, a neural network, regardless of its depth, would simply behave as a linear regression model.
+
+### Threshold Function (Step Function)
+
+* A simple binary function that outputs $1$ if the input exceeds a certain threshold, and $0$ otherwise.
+* It is rarely used in modern deep learning because it is not differentiable, preventing the use of gradient descent for training.
+
+### Sigmoid Function
+
+* Squeezes input values into a continuous range between $0$ and $1$.
+* Historically popular, especially for binary classification output layers (representing probability).
+* Suffers from the vanishing gradient problem, where large positive or negative inputs cause the gradient to approach zero, stalling the learning process in deep networks.
+
+### Hyperbolic Tangent (tanh)
+
+* Similar to the sigmoid function but squeezes inputs to a range between $-1$ and $1$.
+* Because it is zero-centered, it generally performs better than the sigmoid function for hidden layers, though it still suffers from vanishing gradients at extreme values.
+
+### Rectified Linear Unit (ReLU)
+
+* Currently the most widely used activation function for hidden layers in deep learning.
+* It outputs the input directly if it is positive; otherwise, it outputs zero.
+
+- **ReLU Function:**
+
+$$f(z) = \max(0, z)$$
+
+* Advantages: Computationally highly efficient and significantly accelerates the convergence of gradient descent compared to sigmoid or tanh.
+* Disadvantages: Can suffer from the "dying ReLU" problem, where neurons get pushed into states where they output zero for all inputs and stop updating completely. Variations like "Leaky ReLU" are used to mitigate this.
+
+## Network Topology
+
+* Neural networks are organized into distinct layers of interconnected nodes.
+* **Input Layer:** Receives the raw initial data. The number of nodes corresponds to the number of features in the dataset.
+* **Hidden Layers:** Intermediate layers where the core computations and feature extractions occur. A network with multiple hidden layers is referred to as a "Deep" Neural Network.
+* **Output Layer:** Produces the final prediction. The structure depends on the task (e.g., one node with a sigmoid activation for binary classification, multiple nodes with softmax for multi-class classification).
+* **Feedforward Mechanism:** Data flows strictly in one direction, from the input layer, through the hidden layers, to the output layer, without looping back.
+
+## Deep Learning Frameworks: TensorFlow and Keras
+
+### TensorFlow
+
+* An open-source symbolic mathematics library developed by Google Brain.
+* It is the dominant, industry-standard framework for building and training neural networks.
+* It is highly optimized for executing fast, large-scale linear algebra operations (especially matrix multiplications) using CPUs, GPUs, or TPUs.
+
+### Keras
+
+* A high-level, open-source neural network API written in Python.
+* Designed for human usability, providing a consistent and simple interface that abstracts away the complex, low-level mathematics of the backend engine.
+* Keras typically runs on top of TensorFlow as its default backend computation engine.
+
+## Building and Training Models in Keras
+
+### Compiling the Model
+
+* Before a model can be trained, it must be compiled with specific configurations.
+* **Optimizer:** The algorithm used to update the network weights (e.g., Adam, Stochastic Gradient Descent).
+* **Loss Function:** The mathematical metric the optimizer attempts to minimize (e.g., `binary_crossentropy` for binary classification, `mean_squared_error` for regression).
+* **Metrics:** Human-readable metrics used to evaluate the model's performance during training and testing (e.g., `accuracy`).
+
+### Fitting the Model (Training)
+
+* The `model.fit()` method initiates the training process.
+* **Epochs:** A hyperparameter defining the number of complete passes the learning algorithm makes through the entire training dataset.
+* **Batch Size:** The number of training samples processed simultaneously before the model's internal parameters (weights) are updated.
+* **Validation Split:** A parameter that reserves a specified fraction of the training data to evaluate the loss and metrics at the end of each epoch. 
+    * *Warning:* Keras takes the validation split directly from the end of the provided dataset without shuffling. If the data is sequentially ordered, this will result in poor validation metrics. Data must be shuffled prior to this step.
+
+### Evaluating and Predicting
+
+* **Evaluation:** The `model.evaluate()` method tests the fully trained model against an unseen testing dataset to calculate the final loss and metrics. This operation is computationally faster than fitting.
+* **Prediction:** The `model.predict()` method takes a new vector of features ($X_{new}$) and outputs the network's calculated predictions (e.g., class probabilities or continuous regression values).
+
+# Week 9: Convolutional Neural Networks
+
+## Background and Motivation
+
+* **The Curse of Dimensionality:** Images contain a massive amount of data, making them extremely high-dimensional problems. For example, a tiny $32\times32\times3$ color image represents a $3072$-dimensional problem. 
+* **Spatial Invariance:** In images, features are not independent of their position; the 2D structure matters. If an object is in the image, it should be recognized regardless of its location. Convolutional Neural Networks (CNNs) leverage this by using spatial invariance.
+* **Intuition of Representation Learning (The Clock Example):**
+    * If we want a model to read the time from an image of a clock, using raw pixels requires an extremely complex model.
+    * A better representation (using edge detection) extracts the coordinates of the clock hands.
+    * An even *better* representation extracts the mathematical angles ($\theta$) of the hands.
+    * Deep learning aims to automatically discover these intermediate representations layer-by-layer, rather than making the jump from raw pixels to the final answer in one step.
+* **Representation Learning:** Unlike conventional approaches that use hand-crafted algorithms to detect edges (Sobel, Canny) or corners (Harris, SIFT), Deep Learning allows the algorithm to learn its own intermediate representations. 
+* **Transfer Learning:** Lower-level features learned by CNNs are often universally useful for similar tasks, allowing models to be fine-tuned for new tasks without training from scratch.
+
+## CNN Concepts and Layers
+
+A ConvNet transforms an input 3D volume to an output 3D volume using differentiable functions across multiple layers. These networks closely resemble the early parts of the human visual cortex.
+
+### Convolutional Layer
+
+* **Filters and Sliding:** The layer uses small filters (kernels) that slide across the width and height of the image, computing the dot product at each position.
+* **Weight Sharing:** The weights of the filter are shared across all positions, meaning the filter learns the best response taking every position into account.
+* **Multiple Filters:** A single filter looks for one specific feature. CNNs use multiple filters (e.g., 10 filters) to produce multiple activation maps, transforming the depth of the representation.
+* **Voxels:** While standard 2D images use pixels, the 3D grid structures (width, height, depth) processed within CNN volumes can be conceptualized as being made up of voxels (3D pixels).
+* **Zero Padding:** Zeros are added around the border of the input to control the spatial size of the output volumes and ensure the filter can process edge pixels properly.
+* **Stride:** The number of steps the convolutional filter moves across the input feature map. A larger stride results in less overlap and a smaller output volume.
+
+**Output Width Calculation:**
+
+$$W_l = \frac{W_{l-1} - F_l + 2P_{l-1}}{S_l} + 1$$
+
+**Output Height Calculation:**
+
+$$H_l = \frac{H_{l-1} - F_l + 2P_{l-1}}{S_l} + 1$$
+
+**Output Depth Calculation:**
+
+$$D_l = K_l$$
+
+Where $W$ is width, $H$ is height, $D$ is depth, $F$ is filter size, $P$ is padding, $S$ is stride, $K$ is the number of filters, and $l$ is the layer number.
+
+* **Popular Filter Sizes & 1x1 Convolutions:**
+    * The most common filter sizes are $3\times3$ and $5\times5$. Filters of $7\times7$ or larger are rarely used.
+    * **$1\times1$ Filters:** While a $1\times1$ filter has no spatial spread, it is highly useful. Because convolution applies to the full depth of the previous layer, a $1\times1$ filter acts as a weighted average of the activation maps from the previous layer. It is essentially a dimensionality reduction tool along the depth axis.
+
+### Pooling Layer
+
+* **Dimensionality Reduction:** CNNs progressively reduce the spatial dimensions of the representation to reduce the number of parameters and computational complexity.
+* **Max-Pooling:** Takes the maximum value from a defined region (e.g., $2\times2$ grid with a stride of 2). This is most popular in recognition and classification networks.
+* **Average-Pooling:** Takes the average value from a defined region. More common in generative networks.
+
+### Fully Connected Layer
+
+* **Purpose:** After extracting features and reducing dimensionality through convolutional and pooling layers, the data is flattened and passed into Fully Connected (Dense) layers.
+* **Classification:** These layers map the learned representation to the final output, typically feeding into a multi-class classifier (like softmax) or an SVM.
+
+## CNN Training and Overfitting Prevention
+
+Due to the massive number of parameters, CNNs are prone to overfitting. Standard techniques like regularisation and early stopping are used, along with specific deep learning strategies.
+
+### Data Augmentation
+
+* **Definition:** Expanding the training dataset by creating modified copies of the original images. 
+* **Techniques:** Random cropping, scaling, rotations, translations, adding noise, and lens distortions. 
+* **Benefit:** Exposes the model to more variations, making it robust and less likely to memorize the exact training images.
+
+### Dropout
+
+* **Definition:** Randomly dropping out (setting to zero) a percentage of output units (e.g., 20% or 40%) in a layer during the training process.
+* **Benefit:** Prevents the network from becoming overly reliant on specific neurons or filters, forcing it to learn redundant and robust representations.
+* **Inference:** Dropout is disabled during testing/prediction; all units are active.
+
+## Famous Architectures
+
+### LeNet
+
+* **Year:** 1989 (Published 1998).
+* **Significance:** First successful use of a CNN, created by Yann LeCun. Used extensively by postal services to read handwritten zip codes.
+
+### AlexNet
+
+* **Year:** 2012.
+* **Significance:** The major breakthrough for CNNs, winning the ImageNet challenge by a huge margin. It proved the viability of deep CNNs.
+* **Structure:** Comprised 8 layers ($227\times227\times3$ input) using ReLU activations, heavy data augmentation, and Dropout. It had to be split across two GPUs due to hardware constraints.
+
+### VGGNet
+
+* **Year:** 2014.
+* **Significance:** Standardized the architecture by using uniform $3\times3$ convolutions (stride 1, pad 1) and $2\times2$ max-pooling. 
+* **Depth:** Went deeper, ranging from 11 to 19 layers (VGG-16 is highly popular). The fully connected layer weights are widely used today as a baseline feature extractor for transfer learning.
+
+### GoogLeNet (Inception)
+
+* **Year:** 2014.
+* **Significance:** Won the 2014 ImageNet competition by drastically reducing the number of parameters from 60 million (AlexNet) to just 4 million, improving computational efficiency.
+
+### ResNet
+
+* **Year:** 2015.
+* **Significance:** Introduced Residual Networks by Microsoft to solve the vanishing gradient problem associated with extreme depth.
+* **Depth:** Successfully trained networks with 50, 101, and 152 layers. It was the first model to beat human-level performance on the ImageNet dataset.
+* **The Degradation Problem (Why ResNet was needed):**
+    * Empirical evidence showed that simply stacking more layers does *not* necessarily mean better accuracy. 
+    * A famous experiment compared a 20-layer network to a 56-layer network. The 56-layer network had significantly higher training and test errors.
+    * ResNet solved this "vanishing gradient" / degradation problem by introducing **Residual Learning** (skip connections), allowing networks to successfully train at extreme depths (up to 152 layers).
