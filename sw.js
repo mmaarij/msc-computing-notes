@@ -1,9 +1,10 @@
-const CACHE = "notes-reader-v2"
+const CACHE = "notes-reader-v12"
 
 const SHELL = [
   "./index.html",
   "./icon.svg",
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css"
 ]
 
 self.addEventListener("install", e => {

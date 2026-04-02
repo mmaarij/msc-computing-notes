@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 html,body{
@@ -202,8 +203,6 @@ flex:1;
 overflow:auto;
 -webkit-overflow-scrolling:touch;
 display:flex;
-justify-content:center;
-align-items:center;
 padding:10px;
 box-sizing:border-box;
 transition:transform 0.25s ease;
@@ -213,6 +212,7 @@ transition:transform 0.25s ease;
 position:relative;
 display:inline-block;
 flex-shrink:0;
+margin:auto;
 }
 
 #pageWrapper{
@@ -224,6 +224,34 @@ transform-origin:top center;
 display:block;
 box-shadow:0 6px 30px rgba(0,0,0,0.25);
 border-radius:6px;
+position:relative;
+z-index:1;
+}
+
+#textLayer{
+z-index:2;
+opacity:1;
+}
+
+#textLayer ::selection {
+background: rgba(33, 150, 243, 0.35);
+color: transparent;
+}
+
+#searchLayer{
+position:absolute;
+top:0;
+left:0;
+right:0;
+bottom:0;
+z-index:2;
+pointer-events:none;
+}
+
+.search-hit{
+position:absolute;
+background:rgba(255,235,59,0.38);
+border-radius:2px;
 }
 
 #annotationLayer{
@@ -232,11 +260,45 @@ top:0;
 left:0;
 width:100%;
 height:100%;
+z-index:3;
+pointer-events:none;
 }
 
 #annotationLayer a{
 position:absolute;
 display:block;
+pointer-events:auto;
+}
+
+#searchBar{
+display:none;
+align-items:center;
+gap:8px;
+padding:6px 10px;
+margin:0 10px 8px;
+border-radius:12px;
+background:rgba(0,0,0,0.06);
+}
+
+#searchInput{
+flex:1;
+border:none;
+outline:none;
+padding:8px 10px;
+border-radius:8px;
+background:#fff;
+font-size:13px;
+}
+
+#searchCount{
+font-size:12px;
+color:#666;
+min-width:90px;
+text-align:center;
+}
+
+.search-active{
+background:rgba(255,193,7,0.72);
 }
 
 /* ── bottom bar ── */
@@ -409,6 +471,16 @@ background:transparent;
 .dark .btnGroup .iconBtn:hover{
 background:rgba(255,255,255,0.12);
 }
+.dark #searchBar{
+background:rgba(255,255,255,0.1);
+}
+.dark #searchInput{
+background:#222;
+color:#eee;
+}
+.dark #searchCount{
+color:#bbb;
+}
 .dark #pageLabel{
 color:#aaa;
 }
@@ -477,7 +549,7 @@ color:#888;
 
 <div id="topBar">
 <div style="display:flex;gap:4px">
-<button class="textBtn" onclick="goToShelf()"><span class="material-symbols-rounded">arrow_back</span> Shelf</button>
+<button class="textBtn" onclick="goToShelf()"><span class="material-symbols-rounded">arrow_back</span></button>
 <button class="iconBtn" onclick="openSidebar()" title="Contents"><span class="material-symbols-rounded">menu</span></button>
 </div>
 <div id="rightControls">
@@ -492,13 +564,27 @@ color:#888;
 <button class="iconBtn" onclick="zoomIn()" title="Zoom in"><span class="material-symbols-rounded">add</span></button>
 </div>
 <div class="separator"></div>
+<button class="iconBtn" onclick="openSearchBar()" title="Search"><span class="material-symbols-rounded">search</span></button>
+<div class="separator"></div>
 <button class="iconBtn" onclick="toggleDark()" title="Dark mode"><span id="darkIcon" class="material-symbols-rounded">dark_mode</span></button>
 </div>
+</div>
+
+<div id="searchBar">
+<input id="searchInput" type="text" placeholder="Search this PDF">
+<span id="searchCount">0 matches</span>
+<div class="btnGroup">
+<button class="iconBtn" onclick="searchPrev()" title="Previous"><span class="material-symbols-rounded">keyboard_arrow_up</span></button>
+<button class="iconBtn" onclick="searchNext()" title="Next"><span class="material-symbols-rounded">keyboard_arrow_down</span></button>
+</div>
+<button class="iconBtn" onclick="closeSearchBar()" title="Close search"><span class="material-symbols-rounded">close</span></button>
 </div>
 
 <div id="viewer">
 <div id="pageWrapper">
 <canvas id="pdfCanvas"></canvas>
+<div id="textLayer" class="textLayer"></div>
+<div id="searchLayer"></div>
 <div id="annotationLayer"></div>
 </div>
 </div>
@@ -566,6 +652,21 @@ const ZOOM_MAX = 3.0
 const canvas = document.getElementById("pdfCanvas")
 const ctx = canvas.getContext("2d")
 const slider = document.getElementById("pageSlider")
+const textLayer = document.getElementById("textLayer")
+const searchLayer = document.getElementById("searchLayer")
+const searchBar = document.getElementById("searchBar")
+const searchInput = document.getElementById("searchInput")
+
+let textLayerMatches = []
+let activeMatchIndex = -1
+let searchQuery = ""
+const pageTextCache = new Map()
+let pendingSearchFocus = false
+let docMatchCount = 0
+let currentPageTextContent = null
+let currentPageViewport = null
+const measureCanvas = document.createElement("canvas")
+const measureCtx = measureCanvas.getContext("2d")
 
 /* ── shelf rendering ── */
 
@@ -611,6 +712,7 @@ currentBook = book
 pageNum = 1
 lastModified = null
 zoomLevel = 1.0
+clearSearchState()
 applyZoom()
 
 document.getElementById("shelf").style.display = "none"
@@ -630,6 +732,8 @@ updateTimer = null
 closeSidebar()
 pdfDoc = null
 currentBook = null
+closeSearchBar()
+clearSearchState()
 
 document.getElementById("readerView").style.display = "none"
 document.getElementById("shelf").style.display = "block"
@@ -642,6 +746,7 @@ renderShelf()
 async function loadPDF(){
 const url = currentBook.path + "?t=" + Date.now()
 pdfDoc = await pdfjsLib.getDocument(url).promise
+pageTextCache.clear()
 
 if(pageNum > pdfDoc.numPages) pageNum = pdfDoc.numPages
 if(pageNum < 1) pageNum = 1
@@ -649,46 +754,86 @@ if(pageNum < 1) pageNum = 1
 slider.max = pdfDoc.numPages
 slider.value = pageNum
 
-renderPage(pageNum)
+await renderPage(pageNum)
+if (typeof scrollToTopMiddle === "function") scrollToTopMiddle()
 }
 
 async function renderPage(num){
 const page = await pdfDoc.getPage(num)
 
-// HiDPI: render at higher resolution, CSS sizes the canvas down
+// Render at device resolution based on fit + user zoom for crisp text.
 const dpr = window.devicePixelRatio || 1
-const baseScale = 2.0
-const scale = baseScale * dpr
-const viewport = page.getViewport({scale:scale})
-
-canvas.width = viewport.width
-canvas.height = viewport.height
-
-// Fit full page into the viewer area
+const baseViewport = page.getViewport({scale:1})
 const viewer = document.getElementById("viewer")
 const vw = viewer.clientWidth - 20 // padding
 const vh = viewer.clientHeight - 20
-const cssW = viewport.width / dpr
-const cssH = viewport.height / dpr
-const fitScale = Math.min(vw / cssW, vh / cssH, 1)
-canvas.style.width = (cssW * fitScale) + "px"
-canvas.style.height = (cssH * fitScale) + "px"
+const fitScale = Math.min(vw / baseViewport.width, vh / baseViewport.height, 1)
+const displayScale = fitScale * zoomLevel
 
-await page.render({canvasContext:ctx,viewport:viewport}).promise
+const viewport = page.getViewport({scale:displayScale})
+const qualityBoost = 1.25
+const zoomBoost = Math.min(1.25, Math.max(1.0, zoomLevel * 0.25 + 1.0))
+const renderPixelScale = Math.min(3.25, dpr * qualityBoost * zoomBoost)
+
+canvas.width = Math.floor(viewport.width * renderPixelScale)
+canvas.height = Math.floor(viewport.height * renderPixelScale)
+canvas.style.width = viewport.width + "px"
+canvas.style.height = viewport.height + "px"
+
+ctx.setTransform(1,0,0,1,0,0)
+ctx.clearRect(0,0,canvas.width,canvas.height)
+ctx.imageSmoothingEnabled = true
+ctx.imageSmoothingQuality = "high"
+
+await page.render({
+canvasContext:ctx,
+viewport:viewport,
+transform: renderPixelScale !== 1
+? [renderPixelScale,0,0,renderPixelScale,0,0]
+: null
+}).promise
+
+currentPageTextContent = await renderTextLayer(page, displayScale)
+currentPageViewport = viewport
 
 // Update slider & label
 slider.value = num
 document.getElementById("pageLabel").innerText = num + " / " + pdfDoc.numPages
 
 // Render clickable links
-await renderAnnotations(page, viewport, dpr)
+await renderAnnotations(page, viewport)
+
+updateSearchHighlights(pendingSearchFocus)
+pendingSearchFocus = false
 
 highlightToc()
 }
 
+async function renderTextLayer(page, displayScale){
+textLayer.innerHTML = ""
+
+const viewport = page.getViewport({scale:displayScale})
+textLayer.style.width = viewport.width + "px"
+textLayer.style.height = viewport.height + "px"
+textLayer.style.setProperty("--scale-factor", displayScale)
+
+const textContent = await page.getTextContent()
+const task = pdfjsLib.renderTextLayer({
+container: textLayer,
+textContentSource: textContent,
+viewport: viewport
+})
+
+if(task && task.promise){
+await task.promise
+}
+
+return textContent
+}
+
 /* ── clickable PDF links ── */
 
-async function renderAnnotations(page, viewport, dpr){
+async function renderAnnotations(page, viewport){
 const layer = document.getElementById("annotationLayer")
 layer.innerHTML = ""
 
@@ -838,8 +983,22 @@ document.getElementById("sidebarOverlay").style.display = "none"
 
 /* ── zoom ── */
 
-function applyZoom(){
-document.getElementById("pageWrapper").style.transform = "scale(" + zoomLevel + ")"
+async function applyZoom(){
+if(pdfDoc){
+const viewer = document.getElementById("viewer")
+let sx = 0, sy = 0
+if(viewer.scrollWidth > 0 && viewer.scrollHeight > 0) {
+sx = (viewer.scrollLeft + viewer.clientWidth / 2) / viewer.scrollWidth
+sy = (viewer.scrollTop + viewer.clientHeight / 2) / viewer.scrollHeight
+}
+
+await renderPage(pageNum)
+
+if(sx > 0 || sy > 0) {
+viewer.scrollLeft = sx * viewer.scrollWidth - viewer.clientWidth / 2
+viewer.scrollTop = sy * viewer.scrollHeight - viewer.clientHeight / 2
+}
+}
 }
 
 function zoomIn(){
@@ -852,13 +1011,272 @@ zoomLevel = Math.max(ZOOM_MIN, zoomLevel - ZOOM_STEP)
 applyZoom()
 }
 
-function zoomFit(){
+async function zoomFit(){
 zoomLevel = 1.0
-applyZoom()
-document.getElementById("viewer").scrollTo(0,0)
+await applyZoom()
+if (typeof scrollToTopMiddle === "function") scrollToTopMiddle()
+}
+
+/* ── search ── */
+
+function clearSearchState(){
+searchQuery = ""
+textLayerMatches = []
+activeMatchIndex = -1
+pendingSearchFocus = false
+docMatchCount = 0
+searchLayer.innerHTML = ""
+updateSearchCount(0)
+}
+
+function openSearchBar(){
+searchBar.style.display = "flex"
+searchInput.focus()
+searchInput.select()
+updateSearchHighlights(false)
+}
+
+function closeSearchBar(){
+searchBar.style.display = "none"
+searchInput.value = ""
+clearSearchState()
+updateSearchHighlights(false)
+}
+
+function updateSearchCount(count){
+const countEl = document.getElementById("searchCount")
+if(!searchQuery){
+countEl.textContent = "0 matches"
+return
+}
+countEl.textContent = textLayerMatches.length + " on page / " + count + " total"
+}
+
+function updateSearchHighlights(focusFirst){
+searchLayer.innerHTML = ""
+textLayerMatches = []
+activeMatchIndex = -1
+
+if(!searchQuery || !currentPageTextContent || !currentPageViewport){
+updateSearchCount(docMatchCount)
+return
+}
+
+const styles = currentPageTextContent.styles || {}
+currentPageTextContent.items.forEach(item=>{
+const raw = item.str || ""
+if(!raw) return
+
+const lower = raw.toLowerCase()
+let from = 0
+while(true){
+const idx = lower.indexOf(searchQuery, from)
+if(idx === -1) break
+
+const box = getItemMatchBox(item, idx, idx + searchQuery.length, styles, currentPageViewport)
+if(box){
+const hit = document.createElement("div")
+hit.className = "search-hit"
+hit.style.left = box.left + "px"
+hit.style.top = box.top + "px"
+hit.style.width = box.width + "px"
+hit.style.height = box.height + "px"
+searchLayer.appendChild(hit)
+textLayerMatches.push(hit)
+}
+
+from = idx + Math.max(1, searchQuery.length)
+}
+})
+
+updateSearchCount(docMatchCount)
+
+if(focusFirst && textLayerMatches.length){
+activeMatchIndex = 0
+focusActiveMatch()
+}
+}
+
+function focusActiveMatch(){
+if(activeMatchIndex < 0 || activeMatchIndex >= textLayerMatches.length) return
+textLayerMatches.forEach(s => s.classList.remove("search-active"))
+const el = textLayerMatches[activeMatchIndex]
+el.classList.add("search-active")
+el.scrollIntoView({block:"center",inline:"nearest",behavior:"smooth"})
+}
+
+function getItemMatchBox(item, start, end, styles, viewport){
+const text = item.str || ""
+if(!text || start < 0 || end <= start || end > text.length) return null
+
+const style = styles[item.fontName] || {}
+const tx = pdfjsLib.Util.transform(viewport.transform, item.transform)
+const x = tx[4]
+const y = tx[5]
+const fontHeight = Math.max(1, Math.hypot(tx[2], tx[3]))
+const ascent = style.ascent !== undefined ? style.ascent : 0.8
+const descent = style.descent !== undefined ? style.descent : -0.2
+const fontFamily = style.fontFamily || "sans-serif"
+
+measureCtx.font = fontHeight + "px " + fontFamily
+
+const totalMeasured = measureCtx.measureText(text).width
+const prefixMeasured = measureCtx.measureText(text.slice(0, start)).width
+const matchMeasured = measureCtx.measureText(text.slice(start, end)).width
+
+const fallbackTotal = Math.max(1, Math.abs(item.width * viewport.scale))
+const totalWidth = totalMeasured > 0 ? totalMeasured : fallbackTotal
+const prefixWidth = totalMeasured > 0
+? prefixMeasured
+: fallbackTotal * (start / text.length)
+const matchWidth = totalMeasured > 0
+? Math.max(1, matchMeasured)
+: Math.max(1, fallbackTotal * ((end - start) / text.length))
+
+const height = Math.max(2, fontHeight * (ascent - descent))
+const top = y - fontHeight * ascent
+const left = x + (prefixWidth * (fallbackTotal / totalWidth))
+const width = Math.max(1, matchWidth * (fallbackTotal / totalWidth))
+
+return {left, top, width, height}
+}
+
+async function getPageText(num){
+if(pageTextCache.has(num)) return pageTextCache.get(num)
+const page = await pdfDoc.getPage(num)
+const content = await page.getTextContent()
+const text = content.items.map(i => i.str || "").join(" ").toLowerCase()
+pageTextCache.set(num, text)
+return text
+}
+
+async function findPageWithMatch(query, startPage, dir){
+if(!pdfDoc) return null
+let page = startPage
+for(let i = 0; i < pdfDoc.numPages; i++){
+if(page < 1) page = pdfDoc.numPages
+if(page > pdfDoc.numPages) page = 1
+const txt = await getPageText(page)
+if(txt.includes(query)) return page
+page += dir
+}
+return null
+}
+
+async function runSearch(fromCurrentPage){
+if(!pdfDoc) return
+searchQuery = searchInput.value.trim().toLowerCase()
+if(!searchQuery){
+updateSearchHighlights(false)
+return
+}
+
+const totalMatches = await countMatchesInDocument(searchQuery)
+docMatchCount = totalMatches
+updateSearchCount(docMatchCount)
+
+if(fromCurrentPage){
+updateSearchHighlights(true)
+if(textLayerMatches.length) return
+}
+
+const target = await findPageWithMatch(searchQuery, pageNum, 1)
+if(target === null){
+docMatchCount = 0
+updateSearchCount(0)
+return
+}
+
+pendingSearchFocus = true
+if(target === pageNum){
+updateSearchHighlights(true)
+} else {
+goToPage(target)
+}
+}
+
+async function searchNext(){
+if(!searchQuery){
+await runSearch(true)
+return
+}
+
+if(textLayerMatches.length && activeMatchIndex < textLayerMatches.length - 1){
+activeMatchIndex++
+focusActiveMatch()
+return
+}
+
+const target = await findPageWithMatch(searchQuery, pageNum + 1, 1)
+if(target === null) return
+pendingSearchFocus = true
+goToPage(target)
+}
+
+async function searchPrev(){
+if(!searchQuery){
+await runSearch(true)
+return
+}
+
+if(textLayerMatches.length && activeMatchIndex > 0){
+activeMatchIndex--
+focusActiveMatch()
+return
+}
+
+const target = await findPageWithMatch(searchQuery, pageNum - 1, -1)
+if(target === null) return
+pendingSearchFocus = true
+goToPage(target)
+}
+
+searchInput.addEventListener("input",()=>{
+runSearch(true)
+})
+
+searchInput.addEventListener("keydown",e=>{
+if(e.key === "Enter"){
+e.preventDefault()
+if(e.shiftKey) searchPrev()
+else searchNext()
+}
+if(e.key === "Escape"){
+e.preventDefault()
+closeSearchBar()
+}
+})
+
+async function countMatchesInDocument(query){
+if(!pdfDoc) return 0
+let count = 0
+for(let i = 1; i <= pdfDoc.numPages; i++){
+const text = await getPageText(i)
+count += countOccurrences(text, query)
+}
+return count
+}
+
+function countOccurrences(text, query){
+if(!query) return 0
+let count = 0
+let pos = 0
+while(true){
+const idx = text.indexOf(query, pos)
+if(idx === -1) break
+count++
+pos = idx + Math.max(1, query.length)
+}
+return count
 }
 
 /* ── page navigation ── */
+
+function scrollToTopMiddle(){
+const viewer = document.getElementById("viewer")
+viewer.scrollLeft = (viewer.scrollWidth - viewer.clientWidth) / 2
+viewer.scrollTop = 0
+}
 
 function animateSlide(dir){
 document.getElementById("viewer").style.transform = "translateX(" + (dir * 80) + "px)"
@@ -868,22 +1286,22 @@ function resetSlide(){
 document.getElementById("viewer").style.transform = "translateX(0)"
 }
 
-function goToPage(num){
+async function goToPage(num){
 if(!pdfDoc) return
 if(num < 1) num = 1
 if(num > pdfDoc.numPages) num = pdfDoc.numPages
 pageNum = num
-renderPage(pageNum)
-document.getElementById("viewer").scrollTo(0,0)
+await renderPage(pageNum)
+scrollToTopMiddle()
 }
 
 function nextPage(){
 if(!pdfDoc || pageNum >= pdfDoc.numPages) return
 animateSlide(-1)
 pageNum++
-setTimeout(()=>{
-renderPage(pageNum)
-document.getElementById("viewer").scrollTo(0,0)
+setTimeout(async ()=>{
+await renderPage(pageNum)
+scrollToTopMiddle()
 resetSlide()
 },180)
 }
@@ -892,9 +1310,9 @@ function prevPage(){
 if(!pdfDoc || pageNum <= 1) return
 animateSlide(1)
 pageNum--
-setTimeout(()=>{
-renderPage(pageNum)
-document.getElementById("viewer").scrollTo(0,0)
+setTimeout(async ()=>{
+await renderPage(pageNum)
+scrollToTopMiddle()
 resetSlide()
 },180)
 }
@@ -968,6 +1386,16 @@ dx < 0 ? nextPage() : prevPage()
 
 document.addEventListener("keydown",e=>{
 if(!currentBook) return
+if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f"){
+e.preventDefault()
+openSearchBar()
+return
+}
+if(searchBar.style.display === "flex" && e.key === "Escape"){
+e.preventDefault()
+closeSearchBar()
+return
+}
 if(e.key === "ArrowRight") nextPage()
 if(e.key === "ArrowLeft") prevPage()
 if(e.key === "Escape") goToShelf()
