@@ -749,24 +749,20 @@ To manage the sparsity and extreme dimensionality of text features, dimensionali
 
 Text classification is the automated categorization of documents into predefined classes using machine learning models.
 
-* **Applications:** Spam filtering, sentiment analysis, document organization, topic modelling
+* **Applications:** Spam filtering, document organization, sentiment analysis, and topic modelling.
+* **Model Types:** Classifiers can be supervised or unsupervised, and binary or multiclass.
+* **Properties of Text Data:** Text is feature-rich and inherently high-dimensional.
+* **Explainability (XAI):** Important but not always possible. Techniques like Shapley Values and LIME can help explain specific models, though some, like Neural Networks, remain black boxes.
 
 * **Process Pipeline:**
-  1. Preprocessing (cleaning, normalization)
-  2. Feature extraction (BOW, TF-IDF, embeddings)
-  3. Train/test split
-  4. Model training
-  5. Evaluation using statistical validation methods
 
-* **Model Types:**
-  * Supervised (requires labeled data)
-  * Unsupervised (e.g. clustering)
+  1. Preprocessing (cleaning and normalization).
+  2. Feature extraction (BOW, TF-IDF, embeddings, hashing).
+  3. Train/test split using a labeled corpus of documents.
+  4. Model training and validation using standard ML statistical methods.
+  5. Process, predict, and evaluate.
 
-* **Properties of Text Data:**
-  * High-dimensional
-  * Sparse feature space
-
-* **Explainability:** Techniques like Shapley Values and LIME can help interpret models, though some remain black boxes.
+***
 
 ## Supervised Classification Models
 
@@ -774,56 +770,377 @@ Different machine learning algorithms offer various trade-offs for text classifi
 
 ### Logistic Regression
 
-A statistical model that applies the sigmoid function to predict the probability of a binary outcome.
+A statistical model that predicts the probability of a binary outcome.
 
-* **Advantages:** Highly interpretable, efficient, handles sparse high-dimensional data well, outputs probabilities
+* **Advantages:** Highly interpretable (coefficients directly indicate feature importance), computationally efficient, and handles sparse high-dimensional data well.
+* **Mechanism:** Applies the sigmoid function to a linear combination of features to output a probability between 0 and 1.
 
 - **Logistic Function:**
+
 $$P(y=1|x) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \dots + \beta_n X_n)}}$$
 
 ### Naive Bayes
 
-A probabilistic classifier based on Bayes' theorem that assumes independence between features.
+A probabilistic classifier based on Bayes' theorem that assumes naive independence between features.
 
-* **Advantages:** Very fast, simple, strong baseline for text classification
+* **Advantages:** Very fast, simple, and serves as a strong computational baseline for text classification.
+* **Mechanism:** Calculates probability based on word frequencies within a specific class. The independence assumption rarely holds true in natural language, but the model remains surprisingly effective.
 
 - **Probability Equation:**
-$$P(doc|class) = P(word_1|class) \times P(word_2|class) \times \dots \times P(word_n|class)$$
+
+$$P(\text{doc}|\text{class}) = P(\text{word}_1|\text{class}) \times P(\text{word}_2|\text{class}) \times \dots \times P(\text{word}_n|\text{class})$$
 
 ### Support Vector Machines (SVM)
 
-SVMs map data into high-dimensional space and find an optimal separating hyperplane.
+Developed in 1995, SVMs map data into a high-dimensional space to find an optimal separating hyperplane.
 
-* **Mechanism:**
-  * Maximizes margin between classes
-  * Uses support vectors (closest points)
-* **Multiclass Handling:** One-vs-Rest (OvR)
-* **Advantages:** Effective for medium-sized datasets with clear separation
+* **Mechanism:** Maximizes the margin between classes using support vectors (the specific data points closest to the hyperplane boundary).
+* **Multiclass Handling:** Naturally a binary classifier, but handles multiclass environments using One-vs-Rest (OvR).
+* **Advantages:** Highly effective for medium-sized datasets where a clear margin of separation exists, but computationally intensive for very large datasets.
 
 ### Ensemble Methods & Random Forests
 
-* **Ensemble Methods:**
-  * Combine multiple models to improve performance
-  * Reduce variance (bagging) and bias (boosting)
+Combines multiple machine learning models into a single predictive model to improve overall accuracy, stability, and generalization capacity ("wisdom of crowds").
 
-* **Random Forest:**
-  * Collection of decision trees trained on random subsets
-  * Final prediction via majority vote
-  * Reduces overfitting and improves generalization
+* **Mechanisms:**
+  * **Bagging:** Reduces variance by training multiple models on random subsets of the training data with replacement.
+  * **Boosting:** Reduces bias by building models sequentially, with each new model focusing on correcting the errors of the previous ones.
+* **Random Forest:** An ensemble of decision trees where each tree is trained on a random data subset and makes an independent prediction. The forest's final prediction is determined by a majority vote. This significantly reduces the overfitting that individual trees are prone to.
+
+***
+
+## Neural Networks (NN)
+
+A mathematical model designed to simulate the structure and function of a biological neural network.
+
+* **Structure:** Consists of highly interconnected layers of information-processing units called neurons.
+* **Weights:** The knowledge of the network is stored in the weighted edges connecting nodes across layers. These weights are initialized randomly and updated during training.
+* **Inputs and Outputs:**
+  * All inputs must be converted into a fixed-sized feature vector before processing.
+  * Each neuron receives multiple inputs, sums them, applies an activation function, and produces exactly one output.
+  * A single neuron alone can only learn linearly separable tasks.
+
+***
+
+## Activation Functions
+
+Used by a neuron to compute its activation level based on inputs and weights. Activation functions should ideally be computationally simple (avoiding complex exponents) to maximize processing speed during training iterations.
+
+* **Primary Activation Functions:**
+  * **Softmax:** Widely used in the output layer for multi-class classification. It transforms raw output scores (logits) into a probability distribution where all scores sum to 1. It pairs naturally with cross-entropy loss.
+  * **Sigmoid:** A soft limiter operating smoothly within bounds of $[-4, 4]$ but optimally in $[-1, 1]$.
+  * **Hyperbolic Tangent (Tanh):** A soft limiter that outputs values bounded between 0 and 1.
+  * **ReLU (Rectified Linear Unit):** Computationally lightweight and heavily relied upon in deep learning.
+  * **Leaky ReLU:** A variation of standard ReLU designed to prevent "dead" unrecoverable neurons.
+* **Secondary Functions:** Step, Identity, LogSig, Gaussian, ELU, SELU, Softplus, Softsign, Swish, and Sinc.
+
+***
+
+## Data Normalization
+
+Normalizing data squashes inputs into a consistent, restricted range (typically $[-2, 2]$) to ensure network stability.
+
+* **Importance:** Prevents extreme input values from immediately driving neuron outputs to absolute highs or lows, which is crucial for the stability of activation functions.
+* **Application:** Normalization is strictly applied to the columns of a dataset, not the rows. It is generally unnecessary when using Tree-based ML models.
+* **De-normalization:** Training a network on normalized data means it will produce normalized outputs, which must often be de-normalized for human interpretation.
+
+***
+
+## Gradient Descent & Accelerated Learning
+
+Gradient descent algorithms iteratively minimize training error by locating the lowest possible point on an error surface.
+
+* **Learning Rate ($\alpha$):**
+  * Small $\alpha$: Results in smaller weight adjustments, slower learning speeds, and a smooth, stable learning curve.
+  * Large $\alpha$: Accelerates learning drastically but risks inducing instability and oscillation within the network.
+* **Momentum ($\beta$):** A parameter added to the delta rule to accelerate convergence, commonly set to $\beta \approx 0.95$.
+* **Optimizers:** Categorized fundamentally into gradient-based systems (Momentum, Nesterov) and learning-rate-based systems (AdaGrad, RMSProp, Adam, AdaDelta).
+
+***
+
+## Network Topology
+
+The internal architecture of a neural network must be precisely tailored to the specific problem being solved.
+
+* **Design Approach:** Topology design is empirical; there is no universal Standard Operating Procedure (SOP) that fits all datasets.
+* **Node Allocation:**
+  * Classification tasks require one output node (for binary) or multiple output nodes equal to the number of classes.
+  * Regression tasks strictly require one output node.
+* **Starvation vs. Saturation:**
+  * **Starvation:** Occurs when a network possesses too many weights but receives insufficient training data to update them accurately.
+  * **Saturation:** Occurs when a network receives massive amounts of data but lacks sufficient internal weights to model the complexity.
+
+***
 
 ## Unsupervised Learning (Clustering)
 
+Algorithms designed to identify hidden patterns, relationships, or structures in unlabelled data without explicit external guidance.
+
 ### K-Means Clustering
 
-* Groups documents into k clusters based on similarity
-* Each cluster defined by a centroid
-* Distance typically computed using Euclidean or cosine similarity
+Developed by Stuart Lloyd in 1957, K-Means groups text documents into $k$ distinct clusters based on content similarity.
 
-* **Choosing k:**
-  * Elbow Method
-  * Sum of Squared Errors (SSE)
+* **Applications:** Topic modelling, large-scale document grouping, sentiment clustering, and language identification.
+* **Mechanism:** Randomly places $k$ initial centroids, assigns each document to the closest centroid, and iteratively recalculates the new centroid positions until the clusters stabilize.
+* **Distance Metrics:** The distance is generally computed using standard Euclidean distance or normalized cosine distance.
 
-* **Applications:**
-  * Topic modelling
-  * Document grouping
-  * Sentiment clustering
+### Computing the Value of K
+
+The scalar value of $k$ dictates the precise number of clusters (or classification types) the algorithm will generate.
+
+* **Heuristics:** Setting $k = 1$ merges all data into a single cluster; setting $k = |\text{Data Frame}|$ creates a dedicated cluster for every single point. A common baseline heuristic is $k = \frac{|\text{Data Frame}|}{2}$.
+* **The Elbow Method:** A technique that involves incrementally increasing the value of $k$ to measure the resulting Sum of Squared Errors (SSE).
+* **SSE:** Represents the sum of the squared distances between a given centroid and all elements assigned to its specific cluster.
+* **Inflection Point:** The optimal $k$ (the "elbow") is the exact inflection point on the graph where increasing $k$ further yields no significant mathematical reduction in the error rate.
+
+# Week 8: Introduction to Word Embeddings
+
+## Fundamentals of Word Embeddings
+
+**Word embeddings** are dense, low-dimensional numerical representations of words. Unlike sparse methods (BOW, TF-IDF) that result in vectors the size of the vocabulary, embeddings represent words as fixed-size vectors of real numbers (typically 50 to 300 dimensions).
+
+- **Semantic Encoding:** Captures the meaning of a word such that words used in similar contexts have similar vectors.
+- **Similarity Computation:** Enables calculating similarity scores (e.g., Cosine Similarity) between words. It identifies not just synonyms, but also related concepts (e.g., "Galway" and "Ireland").
+- **The 2013 Revolution:** The release of **Word2Vec** by Google transformed NLP by moving from discrete atomic symbols to continuous vector spaces.
+
+- **Feature Representation:** A word embedding is a vector of numbers representing features of a word.
+- **Fixed Vector Size:** Feature width is fixed (typically 50 to 300) and learned by a neural network.
+- **Efficiency Gain:** Reduces comparison complexity from $O(n^2)$ to $O(n)$.
+- **Storage:** Can be stored and queried efficiently in vector databases.
+- **Latent Features:** Embedding dimensions capture hidden relationships that are not explicitly interpretable (unlike n-grams).
+
+***
+
+## Static vs. Context-Sensitive Embeddings
+
+- **Static Embeddings:** Every word has a single fixed vector regardless of context.
+
+  - *Examples:* Word2Vec, GloVe, FastText.
+  - *Limitation:* Cannot distinguish between polysemous words (e.g., "bank" of a river vs. "bank" for money).
+
+- **Context-Sensitive Embeddings:** The vector for a word changes based on the surrounding words in a sentence.
+
+  - *Examples:* BERT, ELMo, GPT.
+
+***
+
+## Geometric Properties & Word Analogies
+
+One of the most powerful features of word embeddings is that they capture linguistic relationships through vector arithmetic.
+
+- **Analogy Logic:** The relationship between "Man" and "Woman" is geometrically similar to the relationship between "King" and "Queen".
+
+- **Vector Arithmetic:**
+
+    $$V_{\text{King}} - V_{\text{Man}} + V_{\text{Woman}} \approx V_{\text{Queen}}$$
+
+- **Distance Metrics:**
+
+  - Cosine similarity (most common, range [-1, 1])
+  - Euclidean distance
+  - Manhattan distance
+  - Hamming distance
+  - Minkowski distance
+
+***
+
+## One-Hot Encoding vs. Dense Embeddings
+
+- **One-Hot Encoding:**
+
+  - Vector size = Vocabulary size ($|V|$).
+  - Categorical and sparse (mostly zeros).
+  - **Weakness:** No notion of similarity. The dot product of any two distinct one-hot vectors is always 0.
+
+- **Dense Embeddings:**
+
+  - Vector size = Fixed hyperparameter (e.g., 100).
+  - Continuous and dense.
+  - **Strength:** Captures "closeness" in a high-dimensional manifold.
+
+***
+
+## Word2Vec Architecture
+
+Word2Vec is a predictive model that learns embeddings by trying to predict a word based on its neighbors (or vice versa).
+
+- **Context Window:** A fixed-sized window of $n$ words surrounding a target word.
+- **Sliding Window:**
+
+  - Moves across text to generate training data.
+  - Produces (input, output) training pairs.
+  - All words inside the window share the same context.
+  - Window size controls context scope and number of training samples.
+
+- **The Model:**
+
+  - Input layer: One-hot encoded vector of size $|V|$.
+  - Hidden layer: Linear projection (embedding layer).
+  - Output layer: Softmax over vocabulary.
+
+- **Weights as Embeddings:**
+
+  - After training, the output layer is discarded.
+  - The input $\to$ hidden weight matrix becomes the embedding lookup table.
+
+- **Embedding Dimension:** Equal to the number of hidden layer units.
+
+- **Scalability Issue:**
+
+  - Weight matrix size = $|V| \times d$
+  - Example: 31,218 words × 300 features $\approx$ 9.3 million weights
+  - Makes training computationally expensive.
+
+***
+
+# Week 9: Word2Vec Methods & Skip-Gram vs. CBOW
+
+## Continuous Bag of Words (CBOW)
+
+The CBOW model predicts a **target word** based on its surrounding **context words**.
+
+- **Goal:** Predict $w_t$ given $\{w_{t-n}, \dots, w_{t-1}, w_{t+1}, \dots, w_{t+n}\}$.
+
+- **Mechanism:**
+
+  - Multiple context words are one-hot encoded.
+  - Each maps to its embedding vector.
+  - Embeddings are averaged into a single vector.
+  - This vector is used to predict the target word.
+
+- **Training Samples:**
+
+  - Generates **one training sample per word**.
+
+- **Efficiency:**
+
+  - Faster to train than Skip-gram.
+  - Works well for **frequent words**.
+  - Captures **syntactic relationships** (e.g., drink, drinking, drinker).
+
+***
+
+## Skip-Gram
+
+The Skip-gram model does the inverse of CBOW: it uses a single **target word** to predict surrounding **context words**.
+
+- **Goal:** Predict $\{w_{t-n}, \dots, w_{t-1}, w_{t+1}, \dots, w_{t+n}\}$ given $w_t$.
+
+- **Training Samples:**
+
+  - Generates **multiple samples per word**.
+  - Number of samples $\propto$ window size.
+
+- **Effectiveness:**
+
+  - Better for **rare words**.
+  - Works well with **small datasets**.
+  - Produces more expressive embeddings.
+
+- **Computation:**
+
+  - More expensive than CBOW.
+
+***
+
+## Mathematical Objective: Softmax and Cross-Entropy
+
+The model aims to maximize the probability of the context word $w_O$ given the center word $w_I$.
+
+- **Softmax Function:**
+
+    $$P(w_O|w_I) = \frac{\exp(v_{w_O}'^\top v_{w_I})}{\sum_{w=1}^{V} \exp(v_w'^\top v_{w_I})}$$
+
+- **Problem with Softmax:**
+
+  - Requires computing probabilities over the entire vocabulary.
+  - Time complexity: $O(V)$ per update.
+  - Becomes infeasible for large vocabularies (millions of words).
+
+***
+
+## Training Optimizations
+
+To handle large vocabularies, Word2Vec uses approximation techniques:
+
+### Hierarchical Softmax
+
+- Uses a binary (Huffman) tree.
+- Reduces complexity from $O(V)$ $\to$ $O(\log V)$.
+
+---
+
+### Negative Sampling (NEG)
+
+- Replaces softmax with **sigmoid functions**.
+- Converts problem into multiple binary classification tasks.
+- Each output node acts as a **logistic regression classifier**.
+
+- **Mechanism:**
+
+  - Update:
+    - 1 positive sample
+    - ~5–20 negative samples
+  - Only a small subset of weights updated per step.
+
+- **Complexity:**
+
+  - Reduced from $O(V)$ $\to$ $O(1)$ per update.
+
+---
+
+### Subsampling
+
+- Frequent words (e.g., "the", "and", "of") are randomly discarded.
+
+- **Motivation:**
+
+  - These words generate too many redundant training samples.
+
+- **Mechanism:**
+
+  - Controlled by probability $P(w_i)$.
+  - Typical threshold: 0.001.
+
+- **Effect:**
+
+  - Reduces training size
+  - Speeds up training
+  - Improves embedding quality
+
+---
+
+### Context Position Weighting
+
+- Words closer to the target word are more important.
+
+- **Implementation:**
+
+  - Randomly shrink the context window size.
+  - Words near the center are more likely to remain.
+  - Words further away are more likely to be dropped.
+
+- **Result:**
+
+  - Implicit weighting without explicit weights.
+
+***
+
+## Skip-Gram vs. CBOW
+
+- **CBOW:**
+
+  - Faster and more efficient.
+  - Produces fewer training samples.
+  - Better for **frequent words**.
+  - Better at **syntactic relationships**.
+
+- **Skip-Gram:**
+
+  - Slower but more expressive.
+  - Generates more training samples.
+  - Better for **rare words**.
+  - Performs better on **small datasets**.
+  - Larger window $\to$ more training data.
+
+***
