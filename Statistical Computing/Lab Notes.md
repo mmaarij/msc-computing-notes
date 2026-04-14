@@ -627,3 +627,355 @@ Under the hood, `mle()` utilizes the general-purpose `optim()` function, which r
 - **Gradient Ascent Update Rule:**
 
 $$\theta^{(t+1)} = \theta^{(t)} + \gamma \cdot \frac{\partial \ell}{\partial \theta}\bigg|_{\theta^{(t)}}$$
+
+## Generalised Linear Models
+
+Generalised Linear Models (GLMs) extend standard linear regression to allow for response variables that have error distribution models other than a normal distribution (e.g., binomial for logistic regression, Poisson for count data).
+
+### Linear Models
+
+* **Standard Linear Regression:** Fit a linear model using `lm(y ~ x)`.
+* **Zero-Intercept Model:** Suppress the intercept by using `- 1` or `0 +` in the formula. This is used when theory dictates the line must pass through the origin (e.g., Hubble's Law $v = H_0D$).
+* **High Leverage:** An observation is considered to have high leverage if it has extreme values for predictor variables compared to the rest of the dataset.
+
+- **Check Leverage in R:**
+```r
+hatvalues(model)
+```
+
+- **Nested Models & Likelihood Ratio Test (LRT):**
+Two models are nested if one restricts the parameters of the other (e.g., $M_0$ fixes the slope to a specific value, while $M_1$ estimates it freely). Compare them to see if the extra parameters significantly improve the fit.
+
+```r
+# M0: y = B0 + 0.02*x (slope restricted to 0.02)
+m0 <- lm(BAL ~ 1 + offset(0.02 * Beers))
+
+# M1: y = B0 + B1*x (slope freely estimated)
+m1 <- lm(BAL ~ Beers)
+
+# Compare models using LRT
+anova(m0, m1, test = "LRT")
+# If significant, reject the restricted hypothesis
+```
+
+### Logistic Regression
+
+Models the probability of a binary outcome.
+
+* **Model Fitting:** Use `glm()` with the `family = binomial` argument.
+* **Reference Categories:** Pay attention to how categorical variables are encoded; R automatically treats the first level alphabetically as the reference category (coded 0).
+* **Odds-Ratios:** Exponentiating the model coefficients translates them into odds ratios.
+
+- **Fitting and Odds-Ratios in R:**
+
+```r
+# Fit a logistic regression model
+model <- glm(outcome ~ predictor1, family = binomial, data = df)
+
+# Calculate Odds Ratios
+exp(coef(model))
+```
+
+> **Odds-Ratio Interpretation:** A common misinterpretation is stating that an Odds-Ratio of 4 means an event is 4 times more likely to happen in terms of probability. It means the *odds* ($p / (1-p)$) change by a factor of 4, and the impact on the absolute probability depends heavily on the baseline risk.
+
+- **Best Model Selection:**
+Evaluate if dropping predictors with high p-values results in a better model. Compare models using multiple criteria to ensure they agree:
+
+1. **LRT:** `anova(model_full, model_reduced, test = "LRT")` 
+2. **Akaike Information Criterion:** `AIC(model)` 
+3. **Bayesian Information Criterion:** `BIC(model)` 
+
+### Poisson Regression
+
+Models count data, such as the number of claims or events.
+
+* **Model Fitting:** Use `glm()` with the `family = poisson` argument.
+* **Offsets:** When modeling totals across groups of different sizes (e.g., predicting claim counts without accounting for the number of policyholders), the model must be adjusted to predict the *rate*. Include an `offset()` term of the log of the exposure variable.
+
+- **Fitting with an Offset in R:**
+
+```r
+# Predict number of claims, offsetting by the number of policyholders
+# This effectively models the rate of claims per holder
+poisson_model <- glm(Claims ~ District + Group + Age + offset(log(Holders)),
+                     family = poisson, data = Insurance)
+```
+
+* **Categorical Contrasts:** R may use orthogonal polynomials for numeric factors, showing linear/quadratic relationships as categories increase. To interpret coefficients relative to a baseline category instead, force standard dummy variables:
+
+```r
+# Force dummy variable treatment for a factor
+Insurance$Age <- factor(Insurance$Age)
+contrasts(Insurance$Age) <- contr.treatment(levels(Insurance$Age))
+```
+
+## Count Data and Advanced Regression
+
+When modeling counts or strictly positive continuous variables, standard linear regression is often inappropriate due to variance and bounds issues.
+
+### Poisson and Negative Binomial Regression
+
+Models count data (e.g., number of insurance claims or bike rentals). The standard Poisson model assumes the variance is equal to the mean.
+
+* **Poisson Model Fitting:** Fit using `glm()` with `family = poisson(link = "log")`.
+* **Offsets:** If predicting counts over varying exposures (like different numbers of policyholders), use an `offset()` to model the *rate* rather than the raw count.
+* **Overdispersion:** If the variance of the data significantly exceeds the mean, the Poisson model assumptions are violated.
+* **Negative Binomial Model:** An extension of the Poisson model that introduces an extra parameter to account for overdispersion.
+
+- **Fitting Count Models in R:**
+
+```r
+library(MASS)
+
+# Poisson model with an offset for exposure
+poisson_model <- glm(Claims ~ District + Group + Age + offset(log(Holders)), 
+                     family = poisson(link = "log"), data = Insurance)
+
+# Negative Binomial model for overdispersed data
+nb_model <- glm.nb(Claims ~ District + Group + Age + offset(log(Holders)), 
+                   data = Insurance)
+
+# Compare improvements in log-likelihood and deviance
+summary(nb_model)
+```
+
+### Gamma Regression
+
+Gamma regression is useful for modeling continuous, strictly positive data that is typically right-skewed.
+
+* **Model Fitting:** Use `glm()` with `family = Gamma()` (often with a log link depending on the relationship).
+
+## Density Estimation
+
+Kernel density estimation (KDE) is a non-parametric way to estimate the probability density function of a random variable, effectively creating a smoothed version of a histogram.
+
+* **Kernels:** The shape of the "bump" placed at each data point. Common choices include Rectangular and Epanechnikov (the standard default in R is often Gaussian).
+* **Bandwidth:** Controls the smoothness of the estimate. A larger bandwidth creates a smoother curve (potentially underfitting), while a smaller bandwidth creates a more jagged curve (potentially overfitting).
+* **Bandwidth Selection Methods:** 
+
+  * **Rule-of-Thumb:** A standard heuristic computed using `bw.nrd0`.
+  * **Cross-Validation:** A data-driven approach computed using `bw = "ucv"` (unbiased cross-validation), which frequently selects a smaller bandwidth than the rule-of-thumb.
+
+* **Sum of Normals Concept:** The standard density estimate provided by `density()` is mathematically equivalent to placing an individual Normal distribution curve centered on every single data point—where the standard deviation of each normal curve equals the chosen bandwidth—and summing them all together.
+
+- **Creating Density Estimates in R:**
+
+```r
+# Standard density estimate
+turtle_density <- density(Turtles)
+plot(turtle_density)
+
+# Specifying an exact bandwidth and a rectangular kernel
+plot(density(Turtles, bw = 1, kernel = "rectangular"))
+
+# Specifying an Epanechnikov kernel with a bandwidth of 5
+plot(density(Turtles, bw = 5, kernel = "epanechnikov"))
+
+# Using unbiased cross-validation to automatically determine bandwidth
+plot(density(Turtles, bw = "ucv", kernel = "epanechnikov"))
+
+# Extracting the calculated rule-of-thumb bandwidth from a density object
+h <- turtle_density$bw
+```
+
+## Nonparametric Classification and Density
+
+Kernel Density Estimation (KDE) can be used to build a non-parametric classifier. By estimating the conditional densities of a predictor for each class, you can apply Bayes' Theorem to find the posterior probability of a class belonging to a certain category given a predictor value.
+
+- **Posterior Probability Formula:**
+
+    $$P(C=1 \mid X=x) = \frac{P(X=x \mid C=1) \cdot P(C=1)}{P(X=x)}$$
+
+Alternatively, using the expanded denominator (Law of Total Probability):
+
+    $$P(C=1 \mid X=x) = \frac{P(X=x \mid C=1) \cdot P(C=1)}{P(X=x \mid C=1) \cdot P(C=1) + P(X=x \mid C=0) \cdot P(C=0)}$$
+
+- **Implementation in R:**
+
+```r
+# Define overall density and class-conditional densities
+f <- density(df$predictor)
+f0 <- density(df$predictor[df$class == 0]) # Density for Class 0
+f1 <- density(df$predictor[df$class == 1]) # Density for Class 1
+
+# Calculate the prior probability of Class 1
+p <- mean(df$class == 1)
+
+# Calculate Posterior Probability: P(Class=1 | predictor)
+# f1$y is the density of class 1, f$y is the overall density
+prob_1 <- (f1$y * p) / f$y
+
+# Plot the probability of being in Class 1 across predictor values
+plot(f$x, prob_1, type = "l", xlab = "Predictor", ylab = "P(Class 1 | Predictor)")
+abline(h = 0.5, lty = 3) # Add a 50% decision boundary line
+```
+
+### 2D Density Estimation
+
+KDE can be extended to two dimensions to visualize clusters or relationships between two continuous variables.
+
+```r
+library(MASS)
+
+# Compute 2D kernel density estimate
+dens <- kde2d(x, y)
+
+# Visualise the 2D density
+contour(dens) # Contour plot representation
+image(dens)   # Heatmap/color representation
+```
+
+## Gaussian Mixture Models (GMM)
+
+When data exhibits multiple modes (peaks), a single standard distribution is insufficient. A mixture model represents the data as a combination of multiple distributions (usually Normal distributions).
+
+* **Parameters:** A $k$-component Normal mixture model has $3k - 1$ free parameters:
+    * $k$ means ($\mu$) 
+    * $k$ standard deviations ($\sigma$) 
+    * $k - 1$ mixing weights ($\lambda$), because the weights must sum exactly to 1.
+* **Expectation-Maximization (EM):** The `mixtools` library uses the EM algorithm to iteratively estimate the parameters of the mixture components.
+
+- **Fitting a Mixture Model in R:**
+
+```r
+library(mixtools)
+
+# Fit models with varying numbers of components (k)
+mix2 <- normalmixEM(data, k = 2)
+mix3 <- normalmixEM(data, k = 3)
+
+# Plot the fitted density curves over the data
+plot(mix2, whichplots = 2)
+```
+
+### Model Selection (AIC & BIC)
+
+To determine the optimal number of components ($k$), compare the models using the Akaike Information Criterion (AIC) and Bayesian Information Criterion (BIC), which penalize models for adding unnecessary complexity (extra parameters). The model with the lowest AIC/BIC is generally preferred.
+
+```r
+n <- length(data)
+
+# Calculate parameters (3k - 1)
+p2 <- 3 * 2 - 1  # 5 parameters for k=2
+p3 <- 3 * 3 - 1  # 8 parameters for k=3
+
+# Manual AIC calculation: 2 * (-logLikelihood) + 2 * parameters
+# Note: mixtools returns positive loglik, so use +2*mix$loglik or standard formula logic depending on sign
+AIC2 <- -2 * mix2$loglik + 2 * p2 
+
+# Manual BIC calculation: 2 * (-logLikelihood) + log(n) * parameters
+BIC2 <- -2 * mix2$loglik + log(n) * p2
+```
+
+### Maximum Likelihood Estimation for Mixtures
+
+You can also manually fit a mixture model by writing a negative log-likelihood function and optimizing it. Because variance and probabilities have strict bounds, you must use a bounded optimization algorithm like `"L-BFGS-B"`.
+
+```r
+library(stats4)
+
+# Negative log-likelihood for a 2-component Normal mixture
+negloglik <- function(lambda, mu1, s1, mu2, s2) {
+  -sum(log(lambda * dnorm(data, mu1, s1) + (1 - lambda) * dnorm(data, mu2, s2)))
+}
+
+# Minimize negative log-likelihood using mle()
+fit <- mle(negloglik, 
+           start = list(lambda = 0.5, mu1 = 5, s1 = 5, mu2 = 25, s2 = 8),
+           method = "L-BFGS-B",
+           lower = c(0.01, -Inf, 0.01, -Inf, 0.01), # Bounds to prevent negative variance
+           upper = c(0.99, Inf, Inf, Inf, Inf))
+
+summary(fit)
+```
+
+## Mixture Models and Advanced Regression
+
+### Mixture of Regressions
+
+Sometimes a dataset contains multiple subgroups with entirely different linear relationships, but the group memberships of the data points are unknown. A regression mixture model estimates these separate regression lines simultaneously.
+
+* **Interaction Models:** If the groups *are* known, an interaction term in a standard linear model can fit the separate lines (e.g., `lm(y ~ group * x)`).
+* **Regression Mixtures:** If the groups are *unknown*, the model estimates the lines and assigns a posterior probability to each observation indicating which line it likely belongs to.
+
+- **Fitting a Regression Mixture in R:**
+
+```r
+library(mixtools)
+
+# Known groups: Interaction model
+fit_interaction <- lm(Gas ~ Insul * Temp, data = whiteside)
+
+# Unknown groups: Regression mixture
+# arbvar = FALSE constrains both components to share the same variance
+fit_mix <- regmixEM(whiteside$Gas, whiteside$Temp, arbvar = FALSE, k = 2)
+
+# Extracting regression coefficients for the mixture components
+beta <- fit_mix$beta
+
+# Extracting posterior probabilities of group membership
+posterior_probs <- fit_mix$posterior
+assigned_group <- ifelse(posterior_probs[, 1] > 0.5, "Component 1", "Component 2")
+```
+
+### Multivariate Mixture Models
+
+Gaussian Mixture Models (GMMs) can be extended to multiple dimensions to cluster complex multivariate data, such as flow cytometry measurements where distinct cell populations overlap.
+
+* **Bivariate Normal Mixtures:** Use `mvnormalmixEM()` to fit mixtures on 2D data.
+* **Model Parameters:** For a $k$-component mixture of bivariate Normal distributions, the total number of parameters is $p = 6k - 1$. Each component contributes:
+  * 2 means ($\mu_x, \mu_y$)
+  * 3 unique covariance parameters ($\sigma^2_x, \sigma^2_y, \text{cov}_{xy}$)
+  * And there are $k - 1$ free mixing weights ($\lambda$) because they must sum to 1.
+
+- **Fitting a Bivariate Mixture in R:**
+
+```r
+# Fit 2-component and 3-component models
+m2 <- mvnormalmixEM(data_matrix, k = 2)
+m3 <- mvnormalmixEM(data_matrix, k = 3)
+
+# Visualise the density ellipses over a scatterplot
+plot(m3, whichplots = 2)
+```
+
+- **Model Selection for Bivariate Mixtures:**
+
+```r
+n <- nrow(data_matrix)
+
+# Number of parameters for k=2 and k=3
+p2 <- 6 * 2 - 1
+p3 <- 6 * 3 - 1
+
+# Calculate AIC and BIC manually for comparison
+AIC2 <- -2 * m2$loglik + 2 * p2
+BIC2 <- -2 * m2$loglik + log(n) * p2
+```
+
+### Interpreting Gamma Regression
+
+Gamma regression is used for strictly positive, right-skewed continuous data (e.g., rainfall, hospital wait times). With a `log` link function, the model equations look like this:
+
+$$\log(\mu) = \beta_0 + \beta_1 x_1 + \dots$$
+
+Or equivalently:
+
+$$\mu = e^{\beta_0 + \beta_1 x_1 + \dots}$$
+
+* **Multiplicative Effects:** Because of the log link, the coefficients must be exponentiated to be interpreted on the original scale. Instead of adding a fixed amount to the mean, an exponentiated coefficient *multiplies* the expected response.
+
+- **Fitting and Interpreting in R:**
+
+```r
+# Fit Gamma regression with a log link
+fit_gamma <- glm(stay ~ age + severity + complication, 
+                 family = Gamma(link = "log"), data = hospital)
+
+# Exponentiate the coefficients to get the multiplicative effects
+exp(coef(fit_gamma))
+
+# Example Interpretation: 
+# If exp(coef) for a "complication" factor is 1.5, developing a complication 
+# increases the expected length of stay by a factor of 1.5 (a 50% increase).
+```
