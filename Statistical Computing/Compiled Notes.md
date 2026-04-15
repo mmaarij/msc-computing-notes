@@ -1292,6 +1292,224 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 * When creating dummy variables for categorical data, including all categories creates "perfect multicollinearity" because one category can be perfectly predicted by the absence of the others.
 * The solution is to always exclude one level to serve as the baseline/reference category.
 
+# Week 8: Mixtures
+
+## Motivation
+
+* Distributions can often be a mixture of underlying sub-populations (e.g., commute times by different travel modes).
+* Unlike Kernel Density Estimation (KDE), which places an identical kernel at every data point, a mixture model uses a smaller number of components.
+* Components need not have the same weight, need not be centred at a data point, and need not have the same standard deviation.
+
+## Mixture Distributions
+
+* Suppose there are $d$ underlying distributions with probability density functions $f_1(x), \dots, f_d(x)$.
+* An observation is drawn from $f_j$ with probability $p_j$ (the mixing weight), where $p_j > 0$ and the sum of all mixing weights equals 1.
+* **Mixture Density:**
+
+    $$f(x) = \sum_{j=1}^{d} p_j f_j(x)$$
+
+### Two-Component Normal Mixture
+
+* For a two-component Normal mixture, the density is defined by the components and a mixing parameter $\lambda \in (0, 1)$.
+* **Two-Component Density:**
+
+    $$f(x) = \lambda f_1(x) + (1 - \lambda) f_2(x)$$
+
+* This model requires estimating exactly five parameters: $\mu_1$, $\sigma_1$, $\mu_2$, $\sigma_2$, and the mixing parameter $\lambda$.
+
+## Estimating the Parameters
+
+* For a single Normal distribution, Maximum Likelihood Estimation (MLE) provides simple closed-form estimates.
+* For mixtures, the log-likelihood function does not simplify easily, and direct numerical maximization is unreliable and sensitive to starting values.
+* **The Incomplete Data Problem:** The difficulty arises because we do not know the component label $z_i$ (which specific distribution generated the observation $x_i$).
+
+## The Expectation-Maximization (EM) Algorithm
+
+* If the component labels $z_i$ were known, estimation would be trivial.
+* The EM algorithm solves the incomplete data problem by iterating between two steps:
+  * **Expectation Step:** Calculates the expected value (probability) of the missing component labels $z_i$ given the current parameter estimates.
+  * **Maximization Step:** Updates the parameter estimates ($\mu$, $\sigma$, and mixing weights) using these expected labels.
+* The algorithm repeats these two steps continuously until the parameters converge to a stable solution.
+
+### EM Algorithm: Key Formulas
+
+* Define the **responsibility** (expected value of $z_i$):
+
+    $$\gamma_i = \frac{\lambda f_1(x_i)}{\lambda f_1(x_i) + (1 - \lambda) f_2(x_i)}$$
+
+* These $\gamma_i$ represent the probability that observation $x_i$ belongs to component 1.
+
+* **Weighted parameter updates (M-step):**
+
+    $$\mu_1 = \frac{\sum \gamma_i x_i}{\sum \gamma_i}, \quad \sigma_1^2 = \frac{\sum \gamma_i (x_i - \mu_1)^2}{\sum \gamma_i}$$
+
+    $$\mu_2 = \frac{\sum (1 - \gamma_i) x_i}{\sum (1 - \gamma_i)}, \quad \sigma_2^2 = \frac{\sum (1 - \gamma_i)(x_i - \mu_2)^2}{\sum (1 - \gamma_i)}$$
+
+    $$\lambda = \frac{\sum \gamma_i}{n}$$
+
+* Each observation contributes fractionally to each component via $\gamma_i$.
+
+### Properties of EM Algorithm
+
+* The likelihood **increases at every iteration**.
+* Converges to a **local maximum** (not necessarily global).
+* Sensitive to **initial parameter values** $\to$ multiple initialisations are often used.
+* More stable than direct numerical maximization.
+
+### Extension to $k$ Components
+
+* For $k$ components, we define $\gamma_{ij}$ = probability that observation $i$ belongs to component $j$.
+* For each observation:
+
+    $$\sum_{j=1}^k \gamma_{ij} = 1$$
+
+* EM generalises by updating all component parameters using weighted sums.
+
+## Number of Components
+
+* Akaike Information Criterion (AIC) and Bayesian Information Criterion (BIC) apply to mixture models to help select the optimal number of components $k$.
+
+### AIC and BIC
+
+* **AIC:**
+
+    $$AIC = -2 \log \mathcal{L} + 2p$$
+
+* **BIC:**
+
+    $$BIC = -2 \log \mathcal{L} + \log(n) \, p$$
+
+* BIC penalises model complexity more heavily than AIC.
+
+* **Parameter Count Example:** For a $k$-component mixture of bivariate Normals, each component has 2 means and 3 unique covariance parameters (5 parameters per component), plus $k-1$ free mixing weights.
+* **Total Parameters ($p$):**
+
+    $$p = 5k + (k - 1) = 6k - 1$$
+
+## Mixture of Regressions
+
+* Instead of mixing distributions, we mix regression models.
+* Each observation is generated from one of several regression lines:
+
+    $$y \sim \begin{cases} \mathcal{N}(\alpha_1 + \beta_1 x, \sigma^2) & \text{with probability } \lambda \\ \mathcal{N}(\alpha_2 + \beta_2 x, \sigma^2) & \text{with probability } 1 - \lambda \end{cases}$$
+
+* EM algorithm applies:
+  * E-step: compute probabilities of belonging to each regression
+  * M-step: fit **weighted regressions**
+
+## Multivariate Mixtures
+
+* Observations can be vectors instead of scalars.
+* Each component is a **multivariate Normal distribution** with:
+  * Mean vector
+  * Covariance matrix
+* EM generalises by:
+  * Computing $\gamma_{ij}$ for each component
+  * Updating mean vectors and covariance matrices using weighted sums
+
+---
+
+# Week 9: Markov Chains
+
+## Motivation: Beyond Independence
+
+* Standard statistical modeling often assumes that observations are independent events or measurements.
+* When measurements are sequential and dependent (e.g., forecasting whether today will be Sunny, Cloudy, or Rainy based on previous days), independence models are too naive.
+* A sequence of dependent observations can be effectively modeled as a Markov Chain.
+
+## The Markov Property
+
+* A system satisfies the Markov Property if the future state depends strictly on the current state, and not on the sequence of historical events that preceded it.
+* **The Markov Property:**
+
+    $$P(X_t \mid X_{t-1}, X_{t-2}, \dots, X_0) = P(X_t \mid X_{t-1})$$
+
+## Transition Matrices
+
+* A **Homogeneous Markov Chain** (where transition probabilities do not change over time) is fully defined by its state space and a transition matrix $P$.
+* The entries of the transition matrix represent the conditional probabilities of moving from one specific state to another in a single step.
+* To find the probabilities of transitioning from one state to another over $n$ steps, we compute the matrix power.
+* **$n$-Step Transition Probabilities:**
+
+    $$P^n$$
+
+### Evolution of State Distribution
+
+* If the initial distribution is $p_0$, then after $n$ steps:
+
+    $$p_n = p_0 P^n$$
+
+### Multi-Step Transitions
+
+* Two-step transitions:
+
+    $$P(X_t = S_j \mid X_{t-2} = S_i) = \sum_k p_{ik} p_{kj}$$
+
+* This generalises to $P^n$.
+
+## Structure of Markov Chains
+
+### Accessibility
+
+* State $j$ is **accessible** from state $i$ if there exists $n \ge 1$ such that:
+
+    $$(P^n)_{ij} > 0$$
+
+### Irreducibility
+
+* A chain is **irreducible** if every state is accessible from every other state.
+
+### Absorbing States
+
+* A state $i$ is **absorbing** if:
+
+    $$p_{ii} = 1$$
+
+* Once entered, it cannot be left.
+
+### Communicating Classes
+
+* States that can reach each other form a **communicating class**.
+* Some classes may be closed (cannot leave once entered).
+
+### Periodicity
+
+* A state has period $d$ if it can only return to itself in multiples of $d$ steps.
+* If $d = 1$, the state is **aperiodic**.
+
+### Ergodicity
+
+* A chain is **ergodic** if it is:
+  * Irreducible
+  * Aperiodic
+
+* Ergodic chains converge to a **unique stationary distribution**.
+
+## First Passage Time and Expected Passage Time
+
+* **First Passage Time ($T$):** The number of steps required to reach a specific target state for the very first time.
+
+### First Passage Recursion
+
+* Let $h_{ij}(n) = P(T_{ij} = n)$:
+
+    $$h_{ij}(1) = p_{ij}$$
+
+    $$h_{ij}(n) = \sum_{k \ne j} p_{ik} \, h_{kj}(n-1)$$
+
+* **Expected Passage Time:**
+
+    $$E[T] = \sum_{n} n \cdot h_{ij}(n)$$
+
+## Applications of Markov Chains
+
+* Web search (e.g., PageRank)
+* Finance (credit ratings, regimes)
+* Genomics
+* Natural language processing
+
+---
+
 ## Complete Exam Quick Reference Table
 
 | Concept / Test | Formula or R Function | Use Case | Key Exam Notes |
@@ -1367,4 +1585,12 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 | **Bayes Classifier** | $P(C \mid X) = \frac{f(X \mid C)P(C)}{f(X)}$ | Non-parametric classification | Estimate $f(X \mid C)$ via KDE |
 | **2D KDE** | `kde2d()` from `MASS` | Bivariate density | Separate bandwidths per dimension |
 | **Collinearity** | Correlated predictors | Unstable coefficients | Drop one dummy level as baseline |
+| **Mixture Density** | $f(x) = \sum p_j f_j(x)$ | Model sub-populations | Weights sum to 1 |
+| **EM Responsibility** | $\gamma_i = \frac{\lambda f_1(x_i)}{\lambda f_1(x_i) + (1-\lambda)f_2(x_i)}$ | E-step (prob of comp 1) | Fractional component membership |
+| **Mixture Complexity** | $p = 6k - 1$ | Parameter count | For bivariate Normals |
+| **Markov Property** | $P(X_t \mid X_{t-1}, \dots) = P(X_t \mid X_{t-1})$ | Future depends on present | Memoryless assumption |
+| **n-Step Transition** | $P^n$ | Multi-step probability | Multiply transition matrix |
+| **State Evolution** | $p_n = p_0 P^n$ | Find future distribution | Row vector $\times$ matrix |
+| **First Passage Time** | $h_{ij}(n) = \sum_{k \ne j} p_{ik} h_{kj}(n-1)$ | Time to hit state first time | Recursive formula |
+| **Expected Passage** | $E[T] = \sum n \cdot h_{ij}(n)$ | Avg time to reach state | Weighted sum of times |
 ---
