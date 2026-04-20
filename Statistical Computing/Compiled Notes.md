@@ -1420,32 +1420,57 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 ## The Markov Property
 
 * A system satisfies the Markov Property if the future state depends strictly on the current state, and not on the sequence of historical events that preceded it.
+
 * **The Markov Property:**
 
     $$P(X_t \mid X_{t-1}, X_{t-2}, \dots, X_0) = P(X_t \mid X_{t-1})$$
 
+* We focus on **Discrete-Time Finite-State Markov Chains**, where:
+  * Time is discrete
+  * The state space is finite
+
 ## Transition Matrices
 
 * A **Homogeneous Markov Chain** (where transition probabilities do not change over time) is fully defined by its state space and a transition matrix $P$.
-* The entries of the transition matrix represent the conditional probabilities of moving from one specific state to another in a single step.
-* To find the probabilities of transitioning from one state to another over $n$ steps, we compute the matrix power.
-* **$n$-Step Transition Probabilities:**
 
-    $$P^n$$
+* Transition probabilities:
+
+    $$p_{ij} = P(X_t = S_j \mid X_{t-1} = S_i)$$
+
+* Properties:
+  * $0 \le p_{ij} \le 1$
+  * $\sum_j p_{ij} = 1$ for each $i$
+  * Such a matrix is called a **stochastic matrix**
+
+* Each row represents the probability distribution of the next state given the current state.
+
+### Graph Interpretation
+
+* A Markov chain can be represented as a directed graph:
+  * Nodes = states
+  * Edges = transitions
+  * Edge weights = transition probabilities
+
+### Homogeneous vs Non-Homogeneous
+
+* **Homogeneous:** transition probabilities are constant over time
+* **Non-homogeneous:** transition probabilities vary with time $p_{ij}(t)$
+
+## Multi-Step Transitions
+
+* Two-step transitions:
+
+    $$P(X_t = S_j \mid X_{t-2} = S_i) = \sum_k p_{ik} p_{kj}$$
+
+* General case:
+
+    $$P(X_t = S_j \mid X_{t-n} = S_i) = (P^n)_{ij}$$
 
 ### Evolution of State Distribution
 
 * If the initial distribution is $p_0$, then after $n$ steps:
 
     $$p_n = p_0 P^n$$
-
-### Multi-Step Transitions
-
-* Two-step transitions:
-
-    $$P(X_t = S_j \mid X_{t-2} = S_i) = \sum_k p_{ik} p_{kj}$$
-
-* This generalises to $P^n$.
 
 ## Structure of Markov Chains
 
@@ -1459,6 +1484,11 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 
 * A chain is **irreducible** if every state is accessible from every other state.
 
+### Communicating Classes
+
+* States that can reach each other form a **communicating class**.
+* A class is **closed** if it cannot be left once entered.
+
 ### Absorbing States
 
 * A state $i$ is **absorbing** if:
@@ -1467,15 +1497,11 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 
 * Once entered, it cannot be left.
 
-### Communicating Classes
-
-* States that can reach each other form a **communicating class**.
-* Some classes may be closed (cannot leave once entered).
-
 ### Periodicity
 
 * A state has period $d$ if it can only return to itself in multiples of $d$ steps.
 * If $d = 1$, the state is **aperiodic**.
+* A chain is aperiodic if all states are aperiodic.
 
 ### Ergodicity
 
@@ -1483,13 +1509,57 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
   * Irreducible
   * Aperiodic
 
-* Ergodic chains converge to a **unique stationary distribution**.
+## Stationary Distribution
+
+* A probability vector $\pi$ is a **stationary distribution** if:
+
+    $$\pi = \pi P$$
+
+* Properties:
+  * $\sum_i \pi_i = 1$
+  * $\pi_i \ge 0$
+
+* Interpretation:
+  * If the chain starts in $\pi$, it remains in $\pi$ forever
+  * Represents long-run proportions of time spent in each state
+
+## Ergodic Theorem
+
+For an ergodic chain:
+
+1. A **unique stationary distribution** $\pi$ exists
+2. Convergence:
+
+    $$p_n \to \pi \quad \text{as } n \to \infty$$
+
+3. Long-run averages converge:
+
+    $$\frac{1}{n} \sum_{t=1}^n f(X_t) \to \sum_i \pi_i f(S_i)$$
+
+* Convergence happens regardless of the initial distribution.
+
+## Computing the Stationary Distribution
+
+### Power Method
+
+* Start with any probability vector $x$
+* Iteratively compute:
+
+    $$x \leftarrow xP$$
+
+* Repeat until convergence
+
+### Eigenvalue Method
+
+* Solve:
+
+    $$\pi P = \pi$$
+
+* Equivalent to finding the eigenvector corresponding to eigenvalue 1
 
 ## First Passage Time and Expected Passage Time
 
-* **First Passage Time ($T$):** The number of steps required to reach a specific target state for the very first time.
-
-### First Passage Recursion
+* **First Passage Time ($T_{ij}$):** Number of steps required to reach state $j$ for the first time starting from state $i$
 
 * Let $h_{ij}(n) = P(T_{ij} = n)$:
 
@@ -1499,14 +1569,237 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 
 * **Expected Passage Time:**
 
-    $$E[T] = \sum_{n} n \cdot h_{ij}(n)$$
+    $$E[T_{ij}] = \sum_n n \cdot h_{ij}(n)$$
+
+## Mean Return Time
+
+* Mean return time to state $i$:
+
+    $$\mu_i = E[T_{ii}]$$
+
+* Key relationship:
+
+    $$\pi_i = \frac{1}{\mu_i}$$
+
+* States with higher stationary probability are visited more frequently and have shorter return times.
+
+## Maximum Likelihood Estimation (MLE) of Markov Chains
+
+* We can estimate transition probabilities from observed data.
+
+* Let $n_{ij}$ = number of observed transitions from state $i$ to state $j$
+
+* **MLE:**
+
+    $$\hat{p}_{ij} = \frac{n_{ij}}{\sum_j n_{ij}}$$
+
+* Interpretation:
+  * Count transitions
+  * Normalize each row
+
+### Laplace Smoothing
+
+* To handle unseen transitions:
+
+    $$\hat{p}_{ij} = \frac{n_{ij} + \alpha}{\sum_j (n_{ij} + \alpha)}$$
+
+* Prevents zero probabilities
+
+## R Implementation (markovchain package)
+
+* **Defining a Markov Chain:**
+```r
+library(markovchain)
+
+P <- matrix(c(0.5, 0.3, 0.2,
+              0.2, 0.6, 0.2,
+              0.15, 0.05, 0.8),
+            byrow=TRUE, nrow=3)
+
+mc <- new("markovchain",
+          transitionMatrix = P,
+          states = c("Cloudy", "Rainy", "Sunny"))
+```
+
+* **Multi-step transitions:**
+
+```r
+p0 <- c(0, 0, 1)
+p0 * mc        # one step
+p0 * mc^5      # five steps
+```
+
+* **Stationary distribution and return times:**
+
+```r
+steadyStates(mc)
+meanRecurrenceTime(mc)
+```
+
+* **Simulation:**
+
+```r
+markovchainSequence(30, mc, t0="Sunny")
+```
+
+* **Fitting from data:**
+
+```r
+markovchainFit(data)$estimate
+```
 
 ## Applications of Markov Chains
 
-* Web search (e.g., PageRank)
-* Finance (credit ratings, regimes)
-* Genomics
-* Natural language processing
+* Web search (e.g., PageRank algorithm)
+* Finance (credit rating transitions, regime-switching models)
+* Genomics (DNA sequence modeling)
+* Natural language processing (text generation, predicting the next word)
+
+---
+
+# Week 10: Bayesian Inference
+
+## Motivation: Frequentist vs Bayesian
+
+* **Frequentist Approach (e.g., Maximum Likelihood):** Treats the parameter $\theta$ as a fixed, unknown quantity. The goal is to find the estimate $\hat{\theta}$ that makes the observed data most probable.
+* **Bayesian Approach:** Treats $\theta$ as a random variable with its own probability distribution. The goal is to answer: *Given the data I have observed, what should I now believe about $\theta$?*
+
+* Bayesian inference is closely related to earlier uses of Bayes' theorem (e.g. medical testing):
+  * Prior = initial belief (e.g. disease prevalence)
+  * Likelihood = evidence (e.g. test result accuracy)
+  * Posterior = updated belief after observing data
+
+## Bayes Theorem for Inference
+
+* Bayesian inference is entirely built upon Bayes' Theorem, which updates our prior beliefs based on new evidence.
+
+* **Bayes Theorem:**
+
+    $$p(\theta \mid y) = \frac{p(y \mid \theta) p(\theta)}{p(y)}$$
+
+* The components of the theorem:
+  * **Prior ($p(\theta)$):** What you believe about $\theta$ before seeing the data.
+  * **Likelihood ($p(y \mid \theta)$):** How probable the observed data is for a specific value of $\theta$.
+  * **Posterior ($p(\theta \mid y)$):** What you should believe about $\theta$ after seeing the data.
+  * **Marginal Likelihood / Evidence ($p(y)$):** A normalizing constant to ensure the posterior is a valid probability distribution that integrates to 1.
+
+* The marginal likelihood is defined as:
+
+    $$p(y) = \int p(y \mid \theta) p(\theta)\, d\theta$$
+
+* Because the denominator $p(y)$ is just a constant for a given dataset, the relationship is often simplified to:
+
+* **Proportionality Rule:**
+
+    $$p(\theta \mid y) \propto p(y \mid \theta) p(\theta)$$
+
+## Conjugacy and Conjugate Priors
+
+* Calculating the normalizing constant $p(y)$ often requires extremely complex integration.
+* A **Conjugate Prior** is a prior distribution chosen specifically so that the resulting Posterior distribution belongs to the exactly same probability family.
+* This provides a simple, closed-form algebraic solution, bypassing the need for numerical integration entirely.
+
+## The Beta-Binomial Model
+
+* Used for modeling proportions or probabilities of success (e.g., defect rates, coin flips).
+
+* **Likelihood:** The observed data $y$ follows a Binomial distribution for $n$ trials.
+
+    $$p(y \mid \theta) = \binom{n}{y} \theta^y (1 - \theta)^{n-y}$$
+
+* **MLE (for comparison):**
+
+    $$\hat{\theta}_{MLE} = \frac{y}{n}$$
+
+* **Prior:** The parameter $\theta$ follows a Beta distribution.
+  * The Beta distribution is naturally bounded between 0 and 1, making it the perfect choice for modeling probabilities.
+  * It is defined by two hyperparameters: $\alpha$ (prior successes) and $\beta$ (prior failures).
+
+* **Uniform Prior (special case):**
+  * $p(\theta) = 1$ for $0 \leq \theta \leq 1$
+  * Equivalent to $\text{Beta}(1,1)$
+  * Interpretation:
+    * No preference for any value of $\theta$
+    * Often called a **non-informative prior**
+    * Posterior is driven entirely by the data
+
+* **Interpretation of Beta($\alpha, \beta$):**
+  * $\alpha - 1$ = prior “successes”
+  * $\beta - 1$ = prior “failures”
+  * Total prior strength = $\alpha + \beta - 2$ (pseudo-observations)
+
+* **Posterior:** Because the Beta distribution is conjugate to the Binomial distribution, the posterior is guaranteed to be another Beta distribution.
+
+* **Posterior Distribution Formula:**
+
+    $$\theta \mid y \sim \text{Beta}(\alpha + y, \beta + n - y)$$
+
+## Prior–Likelihood–Posterior Relationship
+
+* **Prior:** belief before seeing data  
+* **Likelihood:** evidence from observed data  
+* **Posterior:** updated belief after combining both  
+
+* The posterior is a **compromise between prior and data**:
+  * Small dataset → prior has strong influence  
+  * Large dataset → likelihood dominates  
+  * As $n$ increases → posterior concentrates around $\frac{y}{n}$
+
+* Larger $\alpha + \beta$ ⇒ **stronger prior** (less influenced by data)
+
+## Example: Factory Defect Rate
+
+* **Prior Belief:** We have strong historical evidence that the defect rate is exactly 1%. We model this as $\theta \sim \text{Beta}(1, 99)$.
+* **New Data:** We test 10 new items and find 2 defective ($n=10$, $y=2$). The raw sample defect rate is 20%.
+* **Posterior Update:** Using the conjugate update rule, the new distribution becomes $\text{Beta}(1+2, 99+10-2) = \text{Beta}(3, 107)$.
+* **Interpretation:** The posterior shifts upward slightly but does not jump to the 20% seen in the data. Because the prior was very strong (based on essentially 100 prior observations) relative to the small new dataset ($n=10$), the prior heavily dominates the final posterior result.
+
+## Bayesian Point Estimates and Intervals
+
+* Instead of standard errors and frequentist p-values, Bayesian inference uses the posterior distribution directly to answer questions.
+
+* **Maximum A Posteriori (MAP):** The mode (highest peak) of the posterior distribution. It represents the single most probable value of $\theta$.
+
+* **MAP vs MLE:**
+  * MLE maximises likelihood
+  * MAP maximises posterior
+  * MAP can be seen as MLE with **regularisation from the prior**
+  * With a uniform prior, MAP ≈ MLE
+
+* **MAP Formula for Beta Distribution:**
+
+    $$\text{MAP} = \frac{\alpha - 1}{\alpha + \beta - 2}$$
+
+  * Valid only when $\alpha, \beta > 1$
+
+* **Credible Interval:** The Bayesian alternative to the Confidence Interval.
+  * A 90% Credible Interval means:
+    *"There is a 90% probability that $\theta$ lies within this range."*
+  * Typically computed using posterior quantiles (e.g. 5th and 95th percentiles)
+
+## R Implementation
+
+* In R, Bayesian updating with conjugate priors is simply a matter of updating the shape parameters of the distribution.
+
+```r
+n <- 10 # Total trials
+y <- 2  # Observed successes
+a <- 1  # Prior alpha
+b <- 99 # Prior beta
+
+# Calculate Posterior parameters
+post_a <- a + y
+post_b <- b + n - y
+
+# MLE
+mle <- y / n
+
+# Calculate Maximum A Posteriori (MAP)
+map_estimate <- (post_a - 1) / (post_a + post_b - 2)
+
+# Calculate 90% Credible Interval
+cred_int <- qbeta(c(0.05, 0.95), post_a, post_b)
+```
 
 ---
 
@@ -1593,4 +1886,12 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 | **State Evolution** | $p_n = p_0 P^n$ | Find future distribution | Row vector $\times$ matrix |
 | **First Passage Time** | $h_{ij}(n) = \sum_{k \ne j} p_{ik} h_{kj}(n-1)$ | Time to hit state first time | Recursive formula |
 | **Expected Passage** | $E[T] = \sum n \cdot h_{ij}(n)$ | Avg time to reach state | Weighted sum of times |
+| **Bayesian Prior** | $p(\theta)$ | Initial belief about parameter | Chosen before seeing data |
+| **Bayesian Likelihood** | $p(y \mid \theta)$ | Evidence from observed data | Probability of data given parameter |
+| **Bayesian Posterior** | $p(\theta \mid y) = \frac{p(y \mid \theta) p(\theta)}{p(y)}$ | Updated belief after data | Combines prior and likelihood |
+| **Conjugate Prior** | Prior where posterior is same family | Simplifies computation | Allows closed-form solutions |
+| **Beta-Binomial Model** | $\text{Beta}(\alpha, \beta)$ prior, Binomial likelihood | Model proportions/probabilities | Conjugate pair |
+| **Posterior Parameters (Beta-Binomial)** | $\text{Beta}(\alpha + y, \beta + n - y)$ | Updated shape parameters | $y$ = successes, $n$ = trials |
+| **Maximum A Posteriori (MAP)** | $\frac{\alpha - 1}{\alpha + \beta - 2}$ for Beta | Mode of posterior distribution | Regularized MLE with prior |
+| **Credible Interval** | Posterior quantiles (e.g., 5th, 95th percentiles) | Bayesian confidence interval | Direct probability interpretation |
 ---
