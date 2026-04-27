@@ -1120,3 +1120,132 @@ Due to the massive number of parameters, CNNs are prone to overfitting. Standard
     * Empirical evidence showed that simply stacking more layers does *not* necessarily mean better accuracy. 
     * A famous experiment compared a 20-layer network to a 56-layer network. The 56-layer network had significantly higher training and test errors.
     * ResNet solved this "vanishing gradient" / degradation problem by introducing **Residual Learning** (skip connections), allowing networks to successfully train at extreme depths (up to 152 layers).
+
+
+# Week 10: Neural Networks with Multiple Outputs & Transfer Learning
+
+## Neural Networks with Multiple Outputs
+
+### Terminology: Logits
+
+* In the context of Logistic Regression, the logit function converts a probability ($p$) into the log of the odds.
+* In the context of Deep Learning, a logit refers to the raw, unnormalized prediction values that come directly out of the output layer of a neural network before any activation function is applied.
+* These raw logits potentially range from $-\infty$ to $+\infty$.
+
+### The Softmax Function
+
+* When dealing with multi-class problems (e.g., classifying an image as an apple, banana, or car), a binary activation function like Sigmoid is insufficient.
+* The Softmax function is used in the final layer of a neural network classifier to generalize the Sigmoid function to multiple classes.
+* It converts a vector of raw logits into a vector of probabilities that sum exactly to $1.0$.
+
+- **Softmax Function:**
+
+$$S(y_i) = \frac{e^{y_i}}{\sum_{j} e^{y_j}}$$
+
+* The output of the Softmax function allows the model to express a normalized probability distribution across all possible, mutually exclusive categories.
+
+### Multi-Label Classification
+
+* Multi-class classification assumes each sample belongs to exactly one category. Multi-label classification occurs when a single sample can belong to multiple categories simultaneously (e.g., an image containing an apple, a dog, and candy).
+* Because the categories are not mutually exclusive, the probabilities across all classes do not need to sum to $1.0$.
+* Therefore, Softmax cannot be used. Instead, multiple Sigmoid activation functions are used at the output layer (one for each independent binary classification task).
+
+### Error Metrics and Cross Entropy Loss
+
+* Mean Squared Error (MSE) is primarily used for regression tasks and performs poorly for classification.
+* Log Loss is used for binary classification.
+* For multi-class neural networks, Log Loss is extended into Cross Entropy Loss.
+* Cross Entropy Loss calculates the error based on the predicted probability of the *correct* class.
+
+- **Simplified Cross Entropy Loss:**
+
+$$L = -\log(P_{\text{correct}})$$
+
+* Where $P_{\text{correct}}$ is the network's predicted probability for the actual true label. If the model predicts a high probability for the correct class, the loss approaches zero. If the model predicts a low probability for the correct class, the loss penalizes it heavily.
+
+## Transfer Learning
+
+### Introduction to Transfer Learning
+
+* Transfer learning is a machine learning technique where a model originally trained on one task is reused as the starting point for a model on a different, but related, task.
+* Instead of training a deep neural network from scratch (random weight initialization), it leverages the feature representations already learned by an established model on a massive dataset.
+
+### Benefits of Transfer Learning
+
+* **Data Efficiency:** Enables effective learning and high accuracy even with significantly smaller target datasets.
+* **Faster Training:** Starting with pre-trained weights drastically reduces the computational time required to achieve convergence.
+* **Improved Performance:** Generally yields better overall predictive performance and robustness, especially in domains where labeled data is scarce.
+
+### The Transfer Learning Process
+
+The standard implementation process generally follows these steps:
+
+1.  **Obtain a Pre-Trained Model:** Select an established architecture (e.g., VGG16, ResNet) that has been trained on a large-scale dataset (e.g., ImageNet).
+2.  **Create a Base Model:** Load the network without its original final classification layers (the "top" or "head" of the network).
+3.  **Freeze Base Layers:** Lock the weights of the pre-trained base model so they do not update during the initial training phase.
+4.  **Add Custom Layers:** Append new, randomly initialized layers suited to the specific target task (e.g., a Global Average Pooling layer followed by a Dense layer with a Softmax activation).
+5.  **Train the New Layers:** Train the model on the new dataset. Only the weights in the newly added custom layers will be updated.
+
+### Fine-Tuning
+
+* After the initial training of the custom layers, the model can be further optimized through fine-tuning.
+* **Unfreezing:** The base model (or the top few layers of the base model) is unfrozen, allowing its weights to be updated.
+* **Low Learning Rate:** The model must be recompiled and trained using a severely reduced learning rate (e.g., `1e-5`). Using a standard learning rate would cause massive gradient updates that destroy the delicate, pre-trained representations.
+* **Inference Mode:** When building the model, it is crucial to pass `training=False` to the base model. This ensures that layers like Batch Normalization run in inference mode and do not improperly update their internal mean and variance statistics during the fine-tuning stage.
+
+# Week 11: Backpropagation and Neural Network Training Parameters
+
+## Backpropagation
+
+### Historical Context and Usage
+
+* **Origins:** Backpropagation for training multiple layers was discovered by Seppo Linnainmaa in 1970 and later popularized by researchers including Rumelhart and Hinton in the 1980s, which kickstarted modern deep learning research.
+* **Biological Plausibility:** Unlike the structural inspiration of artificial neural networks, backpropagation is not biologically plausible. The physical hardware of the human brain is not suited to performing this specific mathematical algorithm.
+* **Modern Applications:** It is the foundational training mechanism used to optimize networks across diverse domains, including Natural Language Processing (Deep LLMs like ChatGPT), speech processing, object detection (e.g., YOLO), and fine-tuning pre-trained models for transfer learning.
+
+### The Algorithm
+
+* **Forward Pass:** The network computes a prediction by passing input data through sequential layers of weights and activation functions.
+    * Linear combination function: $f = W \cdot X$
+    * Two-layer network (with ReLU): $f = W_2 \cdot \max(0, W_1 \cdot X)$
+    * Three-layer network: $f = W_3 \cdot \max(W_2 \cdot \max(0, W_1 \cdot X))$
+* **Loss Computation:** The final predicted output is compared against the true target label using a loss function to determine the total error.
+* **Backward Pass:** The algorithm calculates the gradient of the loss function with respect to every single intermediate variable, weight, and bias by working backwards from the output layer to the input layer.
+* **The Chain Rule:** This is the core calculus principle that enables backpropagation. It allows for the calculation of derivatives for nested activation functions by iteratively multiplying local gradients.
+
+- **Chain Rule:**
+
+$$\frac{\partial L}{\partial w} = \frac{\partial L}{\partial y} \cdot \frac{\partial y}{\partial z} \cdot \frac{\partial z}{\partial w}$$
+
+## Neural Network Training Parameters
+
+### Network Architecture Parameters
+
+* **Depth of Network:** The total number of hidden layers. Larger, deeper networks are better able to model highly complex, non-linear functions but require stricter regularisation to prevent severe overfitting.
+* **Number of Units:** The width of each specific layer, dictating the dimensionality of the learned intermediate representations.
+* **Activation Function:** The non-linear transformation applied to the outputs of each layer (e.g., ReLU, Sigmoid, Tanh).
+* **Weight Initialisation:** The statistical strategy used to set the starting values of the network's weights before optimization begins.
+
+### Optimization and Learning Constraints
+
+* **Learning Algorithm (Optimizer):** The mathematical solver used to update the weights based on the computed gradients.
+    * **SGD (Stochastic Gradient Descent):** The classic optimization approach.
+    * **Adam:** An optimized, adaptive learning rate version of SGD. It is the default solver in most modern frameworks (like scikit-learn's `MLPClassifier`).
+    * **L-BFGS:** A quasi-Newton optimization method that often yields better performance on smaller datasets compared to SGD.
+* **Loss Function:** The mathematical objective being minimized (e.g., Log-Loss/Cross-Entropy for classification tasks).
+* **Learning Rate:** A scalar hyperparameter that controls the step size of the weight updates during gradient descent.
+* **Batch Size:** The number of individual training samples processed simultaneously before the model performs a weight update.
+* **Number of Epochs:** The total number of complete passes the training loop makes over the entire dataset.
+* **Regularisation Parameter:** The penalty applied to large weights to enforce simplicity, reduce model variance, and mitigate overfitting.
+* **Early Stopping:** A defensive training mechanism that automatically halts the optimization process when validation set performance stops improving.
+
+### Framework and Vectorization
+
+* **Fully-Connected Layers:** Neurons are arranged in dense, fully-connected structures to allow for highly efficient code execution.
+* **Vectorized Code:** By abstracting neurons into distinct layers, operations are executed simultaneously as large-scale matrix multiplications rather than individual calculations.
+
+### Model Selection Considerations
+
+* **Data Dependency:** Deep learning networks represent the state-of-the-art but require massive amounts of labelled data. If a network requires $10000$ points to properly train but only $1000$ are available, the model is practically useless.
+* **Alternative Approaches:** Data augmentation and synthesis can be used to artificially inflate dataset size in low-data scenarios.
+* **Traditional Machine Learning:** If data is strictly limited, classic algorithms (Naive Bayes, kNN, SVM, Random Forests) often outperform deep neural networks and remain a vital part of the machine learning toolkit.
