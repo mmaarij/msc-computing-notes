@@ -419,15 +419,37 @@ Used to compare two separate groups.
 1.  **Check Normality:**  
     Shapiro-Wilk test on both groups.
     
-2.  **Check Variances:**
+    * If p > 0.05 in both groups: data appears normal, proceed to step 2
+    * If p < 0.05 in either group: data is not normal, **use Wilcoxon test instead**
     
-    - Levene's Test (robust)
-    - Bartlett's Test (requires normality)
+2.  **Check Variances (Parametric Only):**
     
-    If p-value > 0.05, assume equal variances.
+    - **Levene's Test** (more robust, doesn't assume normality)
+      ```r
+      leveneTest(y ~ group, data = df)
+      ```
+    - **Bartlett's Test** (assumes normality, avoid if data not perfectly normal)
+      ```r
+      bartlett.test(list(group1, group2))
+      ```
+    
+    * If p-value > 0.05: variances appear equal, use **Pooled t-test** (`var.equal = TRUE`)
+    * If p-value < 0.05: variances are unequal, use **Welch t-test** (`var.equal = FALSE`)
     
 3.  **Run t-Test:**  
     Choose the appropriate variant based on the variance test result.
+    
+### When t-Test Assumptions Fail
+
+| Problem | Diagnostic | Solution |
+|---------|-----------|----------|
+| **Data not normal** | Shapiro-Wilk p < 0.05 | Use **Wilcoxon test** |
+| **Variances very unequal** | Levene p < 0.05 and ratio > 3:1 | Use **Welch t-test** (default in R) |
+| **Outliers present** | Visualize with boxplot | Use **Wilcoxon test** or remove outliers |
+| **Small sample + uncertainty** | n < 30 and Shapiro-Wilk p borderline | Use **Wilcoxon test** for safety |
+| **Ordinal/ranked data** | Data is ranks or categories | Use **Wilcoxon test** |
+
+> **Default Recommendation:** R's default `t.test()` uses **Welch's test** (no equal variance assumption), which is safe in most cases. If data fails normality, switch to `wilcox.test()`.
 
 ### Which t-Test to Use
 
@@ -476,6 +498,81 @@ t.test(before, after, paired = TRUE, alternative = "greater")
 ### Warning
 
 Using an independent t-test on paired data is incorrect and can increase the chance of a Type II error.
+
+* * *
+
+## Non-Parametric Alternatives: Wilcoxon Tests
+
+### When to Use Wilcoxon Tests
+
+Wilcoxon tests are **non-parametric alternatives** to t-tests and should be used when:
+
+* **Data is not normally distributed** (Shapiro-Wilk p < 0.05)
+* **Data is ordinal** (ranks or ordered categories, not measurements)
+* **Sample size is small** (n < 30 and normality questionable)
+* **Outliers are present** that cannot be removed
+* **Data has extreme skewness**
+
+> **Key Difference:** t-tests compare **means**; Wilcoxon tests compare **medians** (or distributions more generally).
+
+### Wilcoxon Rank Sum Test (Independent Samples)
+
+**Purpose:** Tests whether two independent groups have the same median.
+
+**Hypotheses:**
+
+* $H_0$: The two groups have the same distribution (or median)
+* $H_1$: The two groups have different distributions (or medians)
+
+**How it works:**
+
+1. Combine both samples and rank all values from smallest to largest
+2. Calculate the sum of ranks for each group
+3. Compare the rank sums to determine if they differ significantly
+
+**R Code:**
+
+```r
+# Independent samples
+wilcox.test(group1, group2, alternative = "two.sided")
+
+# One-sided alternatives
+wilcox.test(group1, group2, alternative = "less")     # group1 median < group2 median
+wilcox.test(group1, group2, alternative = "greater")  # group1 median > group2 median
+```
+
+### Wilcoxon Signed-Rank Test (Paired Samples)
+
+**Purpose:** Tests whether paired observations have a median difference of zero (equivalent to paired t-test but non-parametric).
+
+**How it works:**
+
+1. Calculate differences between paired observations
+2. Rank the absolute values of these differences
+3. Assign + or − sign to ranks based on whether the difference is positive or negative
+4. Compare signed rank sums
+
+**R Code:**
+
+```r
+# Paired samples
+wilcox.test(before, after, paired = TRUE, alternative = "two.sided")
+
+# One-sided: test if after > before
+wilcox.test(before, after, paired = TRUE, alternative = "greater")
+```
+
+### t-Test vs Wilcoxon: Summary
+
+| Aspect | t-Test | Wilcoxon |
+|--------|--------|----------|
+| **Data Type** | Continuous, normal | Any distribution (especially non-normal) |
+| **Compares** | Means | Medians/distributions |
+| **Assumptions** | Normality required | No normality assumption |
+| **Small samples** | Risky if non-normal | Preferred |
+| **Power** | Higher (if normal) | Lower but reliable |
+| **Outliers** | Affected | Robust |
+| **Use When** | Confident data is normal | Any doubt about normality |
 
 * * *
 
@@ -577,38 +674,67 @@ $$df = (r - 1)(c - 1)$$
 
 ---
 
-### Assumptions
+### Assumptions & Requirements
 
-1. Categorical variables  
-2. Independent observations  
-3. Rule of 5:
-   - At least 80% of expected counts $\ge$ 5  
-   - No expected count $<$ 1  
+1. **Categorical variables** (not continuous)
+2. **Independent observations** (each row in contingency table is from a different subject)
+3. **Rule of 5 (Critical Requirement):**
+   - At least **80% of expected counts** $\ge$ 5  
+   - **No expected count** $<$ 1  
 
-If violated, combine categories or use Fisher's test.
+### Why Rule of 5 Matters
+
+* When expected counts are too small, the chi-squared distribution is not a good approximation
+* This leads to inaccurate p-values (can be either too large or too small)
+* Violating this assumption can cause incorrect conclusions
+
+### What to Do if Rule of 5 Violated
+
+1. **Combine categories:** Merge categories with small expected counts
+   - Example: If "Other" has expected count < 5, merge it with the most similar category
+   - This reduces dimensionality but preserves information
+
+2. **Use Fisher's Exact Test:** For 2×2 tables, Fisher's test computes exact p-values without relying on the chi-squared approximation
+   ```r
+   fisher.test(contingency_table)
+   ```
+
+3. **Collect more data:** Larger sample sizes increase expected counts
+
+### Checking Rule of 5 in R
+
+```r
+# After running chi-squared test
+result <- chisq.test(data)
+result$expected  # View expected counts
+
+# Check if any expected < 5
+sum(result$expected < 5)  # If > 0, violation detected
+
+# Proportion of expected counts < 5
+mean(result$expected < 5)  # If > 0.2 (20%), violation
+```
 
 ---
 
 ### Fisher's Exact Test
 
-Used for small samples.
+Used when chi-squared test assumptions are violated (Rule of 5 fails).
+
+* Computes exact binomial probabilities instead of relying on chi-squared approximation
+* Ideal for 2×2 contingency tables with small expected counts
+* Can be slow for large tables
+
+**R Code:**
 
 ```r
-# Independent
-wilcox.test(group_A, group_B, alternative = "two.sided")
-
-#Paired
-wilcox.test(group_A, group_B, alternative = "two.sided", paired = TRUE)
+fisher.test(contingency_table)
 ```
 
----
-
-### Mann-Whitney U Test / Wilcoxon Test
-Used for median
-
-```r
-wilcox.test
-```
+**When to use:**
+* Rule of 5 is violated (> 20% of expected counts < 5)
+* Small sample sizes
+* Conservative p-values preferred
 
 #### Effect Size: Statistical vs Practical Significance
 
@@ -1226,17 +1352,54 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 
 * The bandwidth $h$ controls the smoothness of the estimate; too small creates an "undersmoothed" jagged line, while too large creates an "oversmoothed" flat line.
 
+#### Visual Effects of Bandwidth
+
+| Bandwidth | Appearance | Problem | Use Case |
+|-----------|-----------|---------|----------|
+| **Very Small** (h << optimal) | Jagged, spiky, many peaks | Overfitting to noise; hard to see true structure | Rarely intentional |
+| **Small** (h < optimal) | Somewhat detailed, shows structure but bumpy | Minor noise visible | Exploratory analysis |
+| **Optimal** | Smooth curve, shows true peaks/valleys clearly | None | **Preferred for inference** |
+| **Large** (h > optimal) | Very smooth, rounded | Hides true features; merges separate modes | Quick visualization only |
+| **Very Large** (h >> optimal) | Nearly flat, almost no variation | Loses all information | Not useful |
+
+#### Visual Interpretation Tips
+
+* **If plot is spiky with many small peaks:** bandwidth is too small → increase it
+* **If you see clear bimodality (two peaks):** bandwidth is reasonable (or slightly large)
+* **If plot is almost flat:** bandwidth is too large → decrease it  
+* **If you can't tell if there are 1 or 2 modes:** try 3-4 bandwidths and compare
+
+#### Selecting Bandwidth
+
 * **Silverman's Rule of Thumb:**
 
     $$h \approx 1.06 \sigma n^{-1/5}$$
 
 * The rule of thumb assumes the true underlying distribution is Normal, and R uses a pragmatic variant of this ($h = 0.9 \min(s, R/1.34) n^{-1/5}$) as its default `bw="nrd0"`.
-* **Cross-Validation:** An alternative method that minimizes the integrated square error by leaving out one observation at a time.
-* In R, unbiased cross-validation is called using `bw.ucv`, and biased cross-validation is called using `bw.bcv`.
+
+* **Cross-Validation:** An alternative **data-driven** method that minimizes the integrated square error by leaving out one observation at a time.
+  * **Unbiased cross-validation:** `bw.ucv()`  — often selects **smaller** bandwidth than rule of thumb
+  * **Biased cross-validation:** `bw.bcv()` — balance between fit quality and smoothness
+  * Cross-validation is preferred when you want bandwidth selected **automatically from data**
 
 * **Cross-Validation Formula:** Bandwidth can be chosen by minimising:
 
     $$M(h) = \int \hat{f}(x)^2\,dx - \frac{2}{n} \sum_{i=1}^{n} \hat{f}_{-i}(x_i)$$
+
+#### Comparing Bandwidths Visually (Exam Strategy)
+
+When presented with multiple KDE plots at different bandwidths:
+
+1. **Look for clear structure:** Which plot shows distinct modes/peaks most clearly?
+2. **Check for noise artifacts:** Are there unexplained spikes or bumps?
+3. **Consider data properties:** If you suspect 1-2 modes, choose the bandwidth that reveals this
+4. **Balance:** Too much smoothing loses information; too little adds noise
+5. **Answer the scientific question:** If you're looking for subpopulations, a slightly smaller bandwidth may be better
+
+**Exam Tip:** For Q4(b)(ii) style questions, justify by saying:
+- "This bandwidth shows the underlying structure clearly (bimodal/unimodal)"
+- "Smaller bandwidths are too noisy; larger ones over-smooth the important features"
+- "This bandwidth achieves the best balance between revealing structure and suppressing noise"
 
 ### Edge Effects
 
@@ -2025,9 +2188,11 @@ cred_int <- qbeta(c(0.05, 0.95), post_a, post_b)
 | **Proportion Test** | `prop.test(x, n)` | Test proportion | Large samples ($n \ge 30$), normal approx |
 | **Exact Binomial Test** | `binom.test(x, n, p=...)` | Test proportion exactly | Small samples; exact binomial p-value |
 | **Chi Square Statistic** | $\chi^2 = \sum \frac{(O - E)^2}{E}$ | Categorical tests | Large = big difference |
-| **Goodness of Fit** | `chisq.test(x, p=probs)` | Match distribution | $df = k-1$ |
-| **Independence Test** | `chisq.test(matrix)` | Relationship test | $df = (r-1)(c-1)$ |
-| **Fisher Exact Test** | `fisher.test(matrix)` | Small samples | Use if counts < 5 |
+| **Goodness of Fit** | `chisq.test(x, p=probs)` | Match distribution | $df = k-1$; requires 80% expected counts $\ge$ 5 |
+| **Independence Test** | `chisq.test(matrix)` | Relationship test | $df = (r-1)(c-1)$; requires Rule of 5 |
+| **Wilcoxon Rank Sum Test** | `wilcox.test(x, y)` | Compare medians (independent) | Non-parametric alternative to t-test |
+| **Wilcoxon Signed-Rank Test** | `wilcox.test(x, y, paired=TRUE)` | Compare medians (paired) | Non-parametric alternative to paired t-test |
+| **Fisher Exact Test** | `fisher.test(matrix)` | Small samples | Use when Rule of 5 violated |
 | **Effect Size (Phi)** | $\phi = \sqrt{\frac{\chi^2}{n}}$ | Strength of association | 0.1 small, 0.3 med, 0.5 large |
 | **Cohen's d** | $d = \frac{\bar{x}_1 - \bar{x}_2}{s}$ | Effect size for mean differences | 0.2 small, 0.5 medium, 0.8 large. |
 | **Likelihood** | $L(\theta)=\prod f(x_i|\theta)$ | Parameter estimation | Maximise |
