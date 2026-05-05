@@ -9,12 +9,12 @@
 
 - **Population Parameters** (constants, usually unknown):
     
-    - $\mu$ → population mean
-    - $\sigma$ → population standard deviation
+    - $\mu$ $\to$ population mean
+    - $\sigma$ $\to$ population standard deviation
 - **Sample Statistics** (random variables):
     
-    - $\bar{x}$ → sample mean
-    - $s$ → sample standard deviation
+    - $\bar{x}$ $\to$ sample mean
+    - $s$ $\to$ sample standard deviation
 
 * * *
 
@@ -268,6 +268,24 @@ Regardless of the population distribution, if sample size $n$ is large, the dist
 
 ## Hypothesis Testing Basics
 
+### Quick Reference: Which Test Should I Use?
+
+**Decision Tree for Selecting the Appropriate Test:**
+
+| **Scenario** | **Test to Use** | **R Command** | **Key Assumption** |
+|---|---|---|---|
+| **One sample, testing mean, normal data** | One-sample t-test | `t.test(x, mu = mu0)` | Data approximately normal (Shapiro-Wilk p > 0.05) |
+| **One sample, testing mean, NOT normal** | Wilcoxon Signed-Rank | `wilcox.test(x, mu = mu0)` | Data symmetric (doesn't require normality) |
+| **Two paired samples, normal differences** | Paired t-test | `t.test(x, y, paired = TRUE)` | Differences approximately normal |
+| **Two paired samples, NOT normal differences** | Wilcoxon Signed-Rank (paired) | `wilcox.test(x, y, paired = TRUE)` | Symmetric differences |
+| **Two independent samples, both normal, equal variances** | Two-sample t-test (Student's) | `t.test(x, y, var.equal = TRUE)` | Both groups normal; check with Levene's test |
+| **Two independent samples, normal, unequal variances** | Two-sample t-test (Welch's) | `t.test(x, y, var.equal = FALSE)` | Both groups normal; Welch's doesn't assume equal variance |
+| **Two independent samples, NOT normal** | Wilcoxon Rank Sum | `wilcox.test(x, y)` | Doesn't require normality |
+| **Categorical data, goodness-of-fit** | Chi-squared Goodness-of-Fit | `chisq.test(x, p = probs)` | Expected counts $\ge$ 5 in 80% of cells (Rule of 5) |
+| **Categorical data, independence of two factors** | Chi-squared Test of Independence | `chisq.test(table)` | Expected counts $\ge$ 5 in 80% of cells |
+| **Categorical data, small expected counts** | Fisher's Exact Test | `fisher.test(table)` | No cell assumptions; exact p-value |
+| **Comparing proportions between groups** | Chi-squared or Fisher's Exact | See above | Depends on sample sizes |
+
 ### Core Concepts
 
 - **Null Hypothesis ($H_0$):**  
@@ -351,7 +369,7 @@ prop.test(64, 100, p = 0.5)
 - p-value = 0.0069  
     Reject $H_0$.
 
-**R Code (Exact — preferred for small samples):**
+**R Code (Exact - preferred for small samples):**
 
 ```r
 binom.test(64, 100, p = 0.5)
@@ -366,10 +384,10 @@ binom.test(64, 100, p = 0.5)
 binom.test(x, n, p = 0.5, alternative = "two.sided")
 ```
 
-- `x` — number of successes observed
-- `n` — number of trials
-- `p` — hypothesised probability of success under $H_0$
-- `alternative` — `"two.sided"`, `"less"`, or `"greater"`
+- `x` - number of successes observed
+- `n` - number of trials
+- `p` - hypothesised probability of success under $H_0$
+- `alternative` - `"two.sided"`, `"less"`, or `"greater"`
 
 ### When to Use Each
 
@@ -455,18 +473,18 @@ Used to compare two separate groups.
 
 | Situation | Test | R Code |
 |-----------|------|--------|
-| **Unequal variances** (or unsure) | Welch Two Sample t-test — **does NOT assume equal variances** | `t.test(x, y, alternative = ...)` |
-| **Equal variances confirmed** | Pooled (Student's) t-test — assumes equal variances | `t.test(x, y, var.equal = TRUE, alternative = ...)` |
+| **Unequal variances** (or unsure) | Welch Two Sample t-test - **does NOT assume equal variances** | `t.test(x, y, alternative = ...)` |
+| **Equal variances confirmed** | Pooled (Student's) t-test - assumes equal variances | `t.test(x, y, var.equal = TRUE, alternative = ...)` |
 
-> **Default in R:** `t.test()` uses Welch's test (`var.equal = FALSE`) — safe to use in all cases.
+> **Default in R:** `t.test()` uses Welch's test (`var.equal = FALSE`) - safe to use in all cases.
 
-**R Code (Welch — unequal/unknown variances):**
+**R Code (Welch - unequal/unknown variances):**
 
 ```r
 t.test(x, y, alternative = "less")
 ```
 
-**R Code (Pooled — equal variances confirmed):**
+**R Code (Pooled - equal variances confirmed):**
 
 ```r
 t.test(x, y, var.equal = TRUE, alternative = "less")
@@ -549,7 +567,7 @@ wilcox.test(group1, group2, alternative = "greater")  # group1 median > group2 m
 
 1. Calculate differences between paired observations
 2. Rank the absolute values of these differences
-3. Assign + or − sign to ranks based on whether the difference is positive or negative
+3. Assign + or - sign to ranks based on whether the difference is positive or negative
 4. Compare signed rank sums
 
 **R Code:**
@@ -694,7 +712,7 @@ $$df = (r - 1)(c - 1)$$
    - Example: If "Other" has expected count < 5, merge it with the most similar category
    - This reduces dimensionality but preserves information
 
-2. **Use Fisher's Exact Test:** For 2×2 tables, Fisher's test computes exact p-values without relying on the chi-squared approximation
+2. **Use Fisher's Exact Test:** For 2 x 2 tables, Fisher's test computes exact p-values without relying on the chi-squared approximation
    ```r
    fisher.test(contingency_table)
    ```
@@ -722,7 +740,7 @@ mean(result$expected < 5)  # If > 0.2 (20%), violation
 Used when chi-squared test assumptions are violated (Rule of 5 fails).
 
 * Computes exact binomial probabilities instead of relying on chi-squared approximation
-* Ideal for 2×2 contingency tables with small expected counts
+* Ideal for 2 x 2 contingency tables with small expected counts
 * Can be slow for large tables
 
 **R Code:**
@@ -873,7 +891,7 @@ $$\hat{\sigma}^2_{MLE} = \frac{1}{n} \sum (x_i - \bar{x})^2$$
 
 #### Bias Issue
 
-- MLE divides by $n$ → biased (underestimates variance)  
+- MLE divides by $n$ $\to$ biased (underestimates variance)  
 - Sample variance:
 
 $$s^2 = \frac{1}{n - 1} \sum (x_i - \bar{x})^2$$
@@ -1364,9 +1382,9 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 
 #### Visual Interpretation Tips
 
-* **If plot is spiky with many small peaks:** bandwidth is too small → increase it
+* **If plot is spiky with many small peaks:** bandwidth is too small $\to$ increase it
 * **If you see clear bimodality (two peaks):** bandwidth is reasonable (or slightly large)
-* **If plot is almost flat:** bandwidth is too large → decrease it  
+* **If plot is almost flat:** bandwidth is too large $\to$ decrease it  
 * **If you can't tell if there are 1 or 2 modes:** try 3-4 bandwidths and compare
 
 #### Selecting Bandwidth
@@ -1378,8 +1396,8 @@ $$\Lambda = -2 \left[ \ell(\hat{\theta}_0) - \ell(\hat{\theta}) \right]$$
 * The rule of thumb assumes the true underlying distribution is Normal, and R uses a pragmatic variant of this ($h = 0.9 \min(s, R/1.34) n^{-1/5}$) as its default `bw="nrd0"`.
 
 * **Cross-Validation:** An alternative **data-driven** method that minimizes the integrated square error by leaving out one observation at a time.
-  * **Unbiased cross-validation:** `bw.ucv()`  — often selects **smaller** bandwidth than rule of thumb
-  * **Biased cross-validation:** `bw.bcv()` — balance between fit quality and smoothness
+  * **Unbiased cross-validation:** `bw.ucv()` - often selects **smaller** bandwidth than rule of thumb
+  * **Biased cross-validation:** `bw.bcv()` - balance between fit quality and smoothness
   * Cross-validation is preferred when you want bandwidth selected **automatically from data**
 
 * **Cross-Validation Formula:** Bandwidth can be chosen by minimising:
@@ -1628,6 +1646,34 @@ When presented with multiple KDE plots at different bandwidths:
 * General case:
 
     $$P(X_t = S_j \mid X_{t-n} = S_i) = (P^n)_{ij}$$
+
+#### Worked Example: Two-Step Transition Calculation
+
+**Given transition matrix:**
+
+$$P = \begin{pmatrix} 0.5 & 0.4 & 0.1 \\ 0.2 & 0.6 & 0.2 \\ 0.1 & 0.3 & 0.6 \end{pmatrix}$$
+
+**Question:** Calculate $P(X_2 = C \mid X_0 = A)$ (probability of going from state A to C in 2 steps)
+
+**Solution:**
+
+Using the formula: $P(X_2 = C \mid X_0 = A) = \sum_k p_{AK} p_{KC}$
+
+Where K can be A, B, or C:
+
+$$P(X_2 = C \mid X_0 = A) = p_{AA} \cdot p_{AC} + p_{AB} \cdot p_{BC} + p_{AC} \cdot p_{CC}$$
+
+$$= (0.5)(0.1) + (0.4)(0.2) + (0.1)(0.6)$$
+
+$$= 0.05 + 0.08 + 0.06 = 0.19$$
+
+**Interpretation:** The probability of transitioning from state A to state C in exactly 2 steps is 0.19 or 19%.
+
+**Alternative (Matrix Method):**
+
+Compute $P^2 = P \times P$:
+
+$$(P^2)_{AC} = \text{(Row A of P)} \cdot \text{(Column C of P)} = 0.19$$
 
 ### Evolution of State Distribution
 
@@ -1897,18 +1943,18 @@ markovchainFit(data)$estimate
 
     $$\theta \mid y \sim \text{Beta}(\alpha + y, \beta + n - y)$$
 
-## Prior–Likelihood–Posterior Relationship
+## Prior - Likelihood - Posterior Relationship
 
 * **Prior:** belief before seeing data  
 * **Likelihood:** evidence from observed data  
 * **Posterior:** updated belief after combining both  
 
 * The posterior is a **compromise between prior and data**:
-  * Small dataset → prior has strong influence  
-  * Large dataset → likelihood dominates  
-  * As $n$ increases → posterior concentrates around $\frac{y}{n}$
+  * Small dataset $\to$ prior has strong influence  
+  * Large dataset $\to$ likelihood dominates  
+  * As $n$ increases $\to$ posterior concentrates around $\frac{y}{n}$
 
-* Larger $\alpha + \beta$ ⇒ **stronger prior** (less influenced by data)
+* Larger $\alpha + \beta$ $\Rightarrow$ **stronger prior** (less influenced by data)
 
 ## Example: Factory Defect Rate
 
@@ -1927,7 +1973,7 @@ markovchainFit(data)$estimate
   * MLE maximises likelihood
   * MAP maximises posterior
   * MAP can be seen as MLE with **regularisation from the prior**
-  * With a uniform prior, MAP ≈ MLE
+  * With a uniform prior, MAP $\approx$ MLE
 
 * **MAP Formula for Beta Distribution:**
 
@@ -2041,6 +2087,26 @@ cred_int <- qbeta(c(0.05, 0.95), post_a, post_b)
 * Running multiple chains from overdispersed starting values provides robust evidence of convergence if all chains mix into the identical distribution.
 * The Gelman-Rubin statistic ($\hat{R}$) formally compares within-chain variance to between-chain variance.
 * $\hat{R} \approx 1$ indicates strong agreement between chains (convergence), whereas $\hat{R} > 1.1$ indicates failure to converge.
+
+#### Worked Example: Interpreting MCMC Diagnostics
+
+**Scenario:** You run MCMC to estimate a parameter and get the following diagnostics:
+
+| Diagnostic | Value | Interpretation |
+|---|---|---|
+| Trace plot appearance | Looks like "hairy caterpillar" (mean-reverting fluctuations) | Good mixing |
+| Trace plot appearance | Trends upward or downward; doesn't revert to mean | Poor mixing; needs more iterations |
+| ACF decay | Drops below 0.1 at lag ~5-10 | Good mixing |
+| ACF decay | High correlation at lag 50+ | Slow mixing; high autocorrelation |
+| $\hat{R}$ value | 1.01 | Converged (< 1.05 benchmark) |
+| $\hat{R}$ value | 1.15 | Not converged (> 1.05); run longer |
+| ESS | 4000 out of 5000 iterations | Good efficiency |
+| ESS | 100 out of 5000 iterations | Slow mixing; run much longer |
+
+**Decision Rules:**
+* If trace plots look like white noise, ACF drops quickly, and $\hat{R} < 1.05$ $\to$ **Use all chains** for inference
+* If trace plots trend or ACF is slow $\to$ **Run longer** or **tune proposal distribution**
+* If $\hat{R} > 1.1$ $\to$ **Restart completely** with better starting values or model specification
 
 ## Applied Bayesian Workflow
 
