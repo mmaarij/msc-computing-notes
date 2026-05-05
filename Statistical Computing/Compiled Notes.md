@@ -1803,6 +1803,200 @@ cred_int <- qbeta(c(0.05, 0.95), post_a, post_b)
 
 ---
 
+# Week 11: Bayesian Inference and MCMC
+
+## The Intractability Problem
+
+* Analytical computation of the posterior requires calculating the marginal likelihood to act as a normalizing constant.
+* For most realistic, non-conjugate models, the integral required to compute this constant has no closed-form analytical solution.
+* Without the marginal likelihood, we cannot normalize the posterior, making it difficult to compute credible intervals or expectations directly.
+
+- **Marginal Likelihood:**
+
+    $$p(y) = \int p(y \mid \theta) p(\theta) d\theta$$
+
+## Grid Approximation
+
+* Grid approximation replaces the continuous parameter space with a discrete grid of finite evaluation points.
+* The unnormalized posterior is computed at each grid point by multiplying the discrete prior by the likelihood, and then normalizing the resulting discrete probability mass function.
+* This method is exact on the specified grid but suffers severely from the curse of dimensionality.
+* A model with many parameters becomes computationally infeasible (e.g., a 5-parameter model with 100 points each requires $100^5$ evaluations).
+
+## Sampling from the Posterior
+
+* An alternative to full evaluation is to draw a sequence of random samples from the posterior.
+* From these samples, we can estimate posterior means, quantiles, and credible intervals.
+* Inverse transform sampling can draw samples using a uniform distribution if the Cumulative Distribution Function (CDF) and its inverse (the quantile function) are known.
+* Because the CDF of an arbitrary posterior is rarely known, advanced stochastic processes are required.
+
+- **Posterior Expectation:**
+
+    $$E[f(\theta) \mid y] \approx \frac{1}{B} \sum_{b} f(\theta^{(b)})$$
+
+## Markov Chain Monte Carlo (MCMC)
+
+* MCMC constructs an ergodic Markov Chain designed so that its unique stationary distribution is exactly the target posterior distribution.
+* By running the chain for a sufficiently long duration, the ergodic theorem guarantees that the generated sequence will converge to draws from the posterior.
+* MCMC only requires evaluating the unnormalized posterior $f(\theta) \propto p(y \mid \theta)p(\theta)$, neatly bypassing the intractable integration problem.
+
+## The Metropolis-Hastings Algorithm
+
+* The algorithm generates an MCMC sequence using a stochastic proposal mechanism $g(\theta^* \mid \theta^{(t)})$, often a Normal distribution centered on the current value.
+* At each step $t$, a new candidate value $\theta^*$ is proposed.
+* The candidate is accepted with probability $\min(1, \alpha)$; if rejected, the chain remains at the current value for that iteration.
+* This accept-reject mechanism ensures the chain satisfies detailed balance, maintaining the target posterior as the stationary distribution.
+
+- **Acceptance Ratio:**
+
+    $$\alpha = \frac{f(\theta^*)}{f(\theta^{(t)})} \cdot \frac{g(\theta^{(t)} \mid \theta^*)}{g(\theta^* \mid \theta^{(t)})}$$
+
+## Proposal Tuning and Step Size
+
+* The standard deviation (step size) of the proposal distribution critically affects the algorithm's efficiency.
+* If the step size is too small, the chain explores slowly, exhibits high autocorrelation, and has an acceptance rate that is too high (e.g., $>70\%$).
+* If the step size is too large, the chain gets stuck because most proposals are rejected, leading to a very low acceptance rate (e.g., $<10\%$).
+* A well-tuned proposal standard deviation results in good mixing and an optimal acceptance rate between $20\%$ and $50\%$.
+
+## Assessing Convergence and Diagnostics
+
+* MCMC samples are generated sequentially and are inherently dependent (autocorrelated).
+
+### Trace Plots and Burn-in
+
+* A trace plot visualizes the sequence of parameter values across iterations to assess mixing.
+* The "burn-in" period consists of the initial transient iterations where the chain is still influenced by its starting value.
+* Burn-in samples are biased and must be discarded. The chain should look like stationary, mean-reverting white noise after burn-in.
+
+### Autocorrelation and Effective Sample Size (ESS)
+
+* The Autocorrelation Function (ACF) measures the correlation between samples separated by a specific lag.
+* A fast decay in the ACF plot indicates good mixing, while slow decay indicates high memory and slow exploration.
+* The Effective Sample Size (ESS) estimates the equivalent number of independent samples within the autocorrelated chain. Low ESS requires running the chain longer.
+
+### Multiple Chains and Gelman-Rubin Diagnostic
+
+* Running multiple chains from overdispersed starting values provides robust evidence of convergence if all chains mix into the identical distribution.
+* The Gelman-Rubin statistic ($\hat{R}$) formally compares within-chain variance to between-chain variance.
+* $\hat{R} \approx 1$ indicates strong agreement between chains (convergence), whereas $\hat{R} > 1.1$ indicates failure to converge.
+
+## Applied Bayesian Workflow
+
+* The transition from dataset to posterior requires an explicit, step-by-step workflow.
+
+### Step 0: Choose a Model
+
+* Match the likelihood model to the data type (e.g., Poisson for unbounded counts, Bernoulli for binary outcomes).
+* Always check model assumptions. For example, a Poisson model assumes the variance is approximately equal to the mean. If variance heavily exceeds the mean (overdispersion), a Negative Binomial model is required.
+
+### Step 1: Specify the Prior
+
+* Select a prior distribution that reflects existing knowledge before seeing the data (e.g., a Gamma prior for a Poisson rate parameter).
+* Perform a **Prior Predictive Check** by simulating data from the prior to ensure it covers the observed data range reasonably without generating physically impossible values.
+
+### Step 2: Write the Log-Posterior
+
+* Always compute the posterior on the log scale to prevent numerical underflow in software.
+* The log-posterior is the sum of the log-likelihood and the log-prior. Evaluate it at sensible bounds to ensure plausible values return higher log-probabilities than implausible ones.
+
+- **Gamma-Poisson Log-Posterior Form:**
+
+    $$\log p(\lambda \mid y) \propto (\alpha + \sum y_i - 1)\log\lambda - (\beta + n)\lambda$$
+
+### Step 3: Visualise Before Sampling
+
+* Plot the unnormalized posterior surface across a grid of plausible values.
+* This reveals whether the posterior is multimodal or heavily skewed and confirms where the sampler should ideally be spending its time.
+
+### Step 4: Run the Sampler
+
+* Initialize the chain deliberately off-center from the expected posterior mean.
+* If the chain successfully finds the right region despite a poor start, it provides confidence that there are no major mixing problems.
+
+### Step 5 & 6: Burn-In and Post-Diagnostics
+
+* Discard the initial iterations (e.g., 10% to 20% of the total chain) as burn-in.
+* Generate trace plots and ACF plots exclusively on the post-burn-in samples to verify rapid mixing and stationary behavior.
+
+### Step 7 & 8: Posterior Summaries and Interpretation
+
+* Extract point estimates (Posterior Mean, Posterior Median) and measures of uncertainty (95% Credible Interval) from the samples.
+* A Bayesian Credible Interval differs fundamentally from a frequentist Confidence Interval; it allows for a direct probability statement (e.g., "There is a 95% probability that the true parameter lies within this specific range").
+* Always translate the numerical summaries back into the scientific context of the original question.
+
+## Prior Influence
+
+* A weakly informative prior lets the likelihood (the data) dominate the posterior shape.
+* A heavily misspecified, strong prior can pull the posterior away from the true data generating parameter.
+* However, as the sample size $n$ increases, the likelihood will continually grow in influence and eventually overwhelm even a stubborn prior.
+
+# Week 12: Hidden Markov Models
+
+## Motivation and Concept
+
+* Standard Markov models are designed to model transitions between observable states.
+* When the underlying states governing a system are unobservable (hidden), but we have access to measurements that depend on these states, we use a Hidden Markov Model (HMM).
+* For example, the actual weather (Sunny, Cloudy, Rainy) might be hidden from an observer in a windowless room, but they can observe whether a colleague brings an umbrella to work.
+
+## Model Definition and Structure
+
+
+
+* An HMM is defined by two linked sequences:
+  * **Hidden States ($S$):** A sequence $S_1, S_2, \dots, S_N$ that strictly follows the Markov property, forming a Markov Chain.
+  * **Observations ($X$):** A sequence of measurements $X_1, X_2, \dots, X_N$ where each observation depends only on the current hidden state.
+* The system is fully characterized by two key probability distributions:
+  * **Transition Probabilities:** The probability of the system moving from one hidden state to another in the next time step.
+
+    $$P(S_t \mid S_{t-1})$$
+
+  * **Emission Probabilities:** The probability of recording a specific observation given the current hidden state.
+
+    $$P(X_t \mid S_t)$$
+
+* HMMs are heavily utilized across various domains, including thermodynamics, finance, signal processing, pattern recognition (e.g., speech and handwriting), and bioinformatics.
+
+## Mixture Models and Time Dependence
+
+
+
+* When modeling sequential count data (such as the number of major earthquakes per year), a baseline approach is to use a simple Poisson distribution.
+* **Independent Mixture Model:**
+  * Assumes the data is generated by multiple independent intensity periods (e.g., a "high" intensity state and a "low" intensity state) that do not depend on the previous year's state.
+  * For a two-component Poisson mixture, the density is parameterized by a mixture proportion $\gamma$ and state-specific rates $\lambda$.
+
+    $$f(x) = \gamma p(x; \lambda_1) + (1 - \gamma) p(x; \lambda_2)$$
+
+* **Dependent Mixture Model (HMM):**
+  * A more realistic assumption is that the high and low intensity regimes follow a Markov Chain, making the states time-dependent.
+  * Extending an independent mixture to an HMM increases the number of parameters to estimate.
+  * For a two-state HMM, exactly five parameters must be estimated: one for the initial state probability $P(S_1)$, two for the transition matrix probabilities, and two for the mean emission rates $\lambda_1$ and $\lambda_2$.
+
+## Likelihood and The Expectation-Maximization (EM) Algorithm
+
+* To estimate the parameters of an HMM, we use Maximum Likelihood Estimation.
+* The likelihood $L$ of an entire observed sequence is computed as a matrix product:
+
+    $$L = \delta P(x_1) \Gamma P(x_2) \dots \Gamma P(X_N) 1'$$
+
+* In this likelihood equation, $\delta$ is the initial state distribution, $\Gamma$ is the transition matrix, and $P(x_t)$ represents a diagonal matrix of the emission probabilities.
+* Because the underlying states are hidden, we cannot maximize this likelihood directly; we must use the Expectation-Maximization (EM) algorithm.
+* We define indicator variables for the hidden states: $u_j(t) = 1$ if $X_t = j$ (and 0 otherwise), and $v_{jk}(t) = u_j(t-1)u_k(t)$.
+* **The EM Algorithm Steps for HMMs:**
+  * **E-Step (Expectation):** Compute the expected values of the indicator variables given the full sequence of observed data.
+
+    $$E[u_j(t)] = P(X_t = j \mid Y_1=y_1, \dots, Y_t=y_t)$$
+
+    $$E[v_{jk}(t)] = P(X_{t-1} = j, X_t = k \mid Y_1=y_1, \dots, Y_t=y_t)$$
+
+  * **M-Step (Maximization):** Maximize the expected log-likelihood using these computed probabilities to update the transition and emission parameters.
+
+## Model Selection and Posterior State Decoding
+
+* Competing models (e.g., a single-component Poisson, an independent mixture, and an HMM) can be formally compared using a Likelihood Ratio Test, AIC (Akaike Information Criterion), or BIC (Bayesian Information Criterion).
+* Once the optimal HMM is fitted to the data, we use the **forward-backward algorithm** to infer the hidden states.
+* This algorithm calculates the posterior probability that the system was in a specific state (e.g., the "high-intensity" regime) at any given time point $t$, conditioned on the entire observed sequence and the fitted model parameters.
+* Posterior decoding is crucial for identifying historical regime shifts, detecting changes in underlying states, and understanding the hidden dynamics that generated the observed sequence.
+
 ## Complete Exam Quick Reference Table
 
 | Concept / Test | Formula or R Function | Use Case | Key Exam Notes |
@@ -1894,4 +2088,24 @@ cred_int <- qbeta(c(0.05, 0.95), post_a, post_b)
 | **Posterior Parameters (Beta-Binomial)** | $\text{Beta}(\alpha + y, \beta + n - y)$ | Updated shape parameters | $y$ = successes, $n$ = trials |
 | **Maximum A Posteriori (MAP)** | $\frac{\alpha - 1}{\alpha + \beta - 2}$ for Beta | Mode of posterior distribution | Regularized MLE with prior |
 | **Credible Interval** | Posterior quantiles (e.g., 5th, 95th percentiles) | Bayesian confidence interval | Direct probability interpretation |
+| **Marginal Likelihood** | $p(y) = \int p(y \mid \theta) p(\theta)\, d\theta$ | Normalizing constant in Bayes Theorem | Intractable for non-conjugate models |
+| **MCMC (Markov Chain Monte Carlo)** | Construct ergodic chain with target posterior as stationary distribution | Sample from intractable posteriors | Convergence guaranteed by ergodic theorem |
+| **Metropolis-Hastings Algorithm** | Accept-reject mechanism with ratio $\alpha = \frac{f(\theta^*)}{f(\theta^{(t)})} \cdot \frac{g(\theta^{(t)} \mid \theta^*)}{g(\theta^* \mid \theta^{(t)})}$ | Generate MCMC sequence | Satisfies detailed balance |
+| **Proposal Tuning** | Optimal step size yields acceptance rate 20%-50% | Tune proposal standard deviation | Too small = slow exploration; too large = high rejection |
+| **Trace Plot** | Visualize parameter values across iterations | Assess MCMC mixing | Should look like stationary white noise |
+| **Burn-in** | Discard initial transient iterations | Remove bias from starting value | Typically 10%-20% of total chain |
+| **Autocorrelation Function (ACF)** | Correlation between samples at different lags | Check mixing quality | Fast decay = good mixing |
+| **Effective Sample Size (ESS)** | Equivalent number of independent samples | Assess MCMC efficiency | Low ESS requires longer chain |
+| **Gelman-Rubin Statistic** | $\hat{R} \approx 1$ indicates convergence | Compare multiple chains | $\hat{R} > 1.1$ indicates non-convergence |
+| **Prior Predictive Check** | Simulate data from prior before fitting | Validate prior specification | Ensure prior covers observed data range |
+| **Log-Posterior** | Sum of log-likelihood and log-prior | Numerically stable computation | Avoid underflow in software |
+| **Hidden Markov Model (HMM)** | Hidden states + observations; states follow Markov property | Model unobservable states | Observations depend only on current state |
+| **HMM Transition Probabilities** | $P(S_t \mid S_{t-1})$ | Probability of state transitions | Part of HMM specification |
+| **HMM Emission Probabilities** | $P(X_t \mid S_t)$ | Probability of observation given state | Links observations to hidden states |
+| **Independent Mixture Model** | $f(x) = \gamma p(x; \lambda_1) + (1 - \gamma) p(x; \lambda_2)$ | Multiple regimes without time dependence | Baseline model without Markov structure |
+| **Dependent Mixture (HMM)** | Mixture components follow Markov Chain | Time-dependent regime switching | More realistic than independent mixture |
+| **HMM Likelihood** | $L = \delta P(x_1) \Gamma P(x_2) \dots \Gamma P(X_N) 1'$ | Probability of entire observation sequence | Product of transition and emission matrices |
+| **EM Algorithm for HMMs** | E-Step: compute expected state indicators; M-Step: update parameters | Optimize HMM parameters | Handles hidden state uncertainty |
+| **Forward-Backward Algorithm** | Calculate posterior probability of state at time $t$ given full sequence | Infer hidden states | Posterior decoding |
+| **Posterior Decoding** | Extract most probable hidden state sequence | Identify regime shifts | Understand hidden dynamics |
 ---
