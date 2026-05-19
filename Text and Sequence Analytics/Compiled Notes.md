@@ -1208,7 +1208,7 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 
     $$\text{vector} = (\text{embedding}[d_1] + \text{embedding}[d_2] + \dots + \text{embedding}[d_n]) / n$$
 
-  - Reduces space from $O(nd)$ to $O(d)$, where $n = \text{#words in document}$ and $d = \text{embeddings size}$.
+  - Reduces space from $O(nd)$ to $O(d)$, where $n = \text{number of words in document}$ and $d = \text{embeddings size}$.
 
 - Preserves the general semantic meaning of the text.
 
@@ -1342,7 +1342,7 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 - A key component of transformer architectures.
 
   - Slices the Q, K, V matrices and processes each slice with a separate head. 8 heads used in original.
-  - Converts matrix of [#tokens][#dim] into $n$ matrices of size [#tokens][#dim / $n$], where $n = \text{#heads}$.
+  - Converts matrix of [number of tokens][dimension] into $n$ matrices of size [number of tokens][dimension / $n$], where $n = \text{number of heads}$.
 
 - Enables parallel learning of different relationships that a single attention matrix cannot capture alone.
 
