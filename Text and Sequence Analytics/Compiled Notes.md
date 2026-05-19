@@ -1150,12 +1150,17 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Doc2Vec
 
 - Extends Word2Vec to represent documents paragraphs or sentences as fixed-length vectors.
+
   - Adds a unique vector with document / paragraph id.
+
 - Doc2Vec considers document membership as part of the context.
 - Two main approaches:
+
   - PV-DM (Paragraph Vector - Distributed Memory): Similar to CBOW but with an additional document ID vector.
   - PV-DBOW (Paragraph Vector - Distributed BOW): Similar to Skip-gram.
+
 - Captures the semantics and context of all words in all documents (all vs all).
+
   - Term distributed refers to the density of the vector.
 
 ***
@@ -1163,6 +1168,7 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Word2Vec Limitations
 
 - While Word2Vec has been groundbreaking, it does have some limitations:
+
   - No context for polysemy: where a single word or phrase has multiple meanings. E.g. He has been drinking again or he is really wicked.
   - Scalability: Each word in a vocabulary requires a full vector. Very large dataset can be prohibitive.
   - Incomplete vocabulary: missing words in training data may cause inaccuracies in models.
@@ -1173,15 +1179,22 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Machine Learning with Embeddings
 
 - Embeddings have many advantages over BOW and TF-IDF vectors as input vectors for ML models.
+
   - Capture semantic meaning. Similar words cluster together in vector space. Traditional methods are statistical and treat words as independent dimensions.
   - Create fixed-size dense vectors regardless of vocabulary size. More computationally efficient.
   - Enable analogical reasoning for mathematical operations, e.g. king - man + woman = queen.
   - Pre-trained models allow transfer learning, i.e. they can be applied to new tasks with limited data. BOW and TF-IDF must be recalculated for each new corpus.
+
 - Embeddings capture semantics and context. They are also fixed length and can be used as ML inputs.
+
   - Semantics and context are encoded in dimensions. Commonly have 50 $\to$ 500+ dimensions / word.
+
 - Vector space is $O(nd)$, where $n = \text{vocabulary size}$ and $d = \text{vector dimension size}$. Vector length very large.
+
   - 1000 words of 300 dimensions $\Rightarrow$ 300,000 inputs... Too large for efficient ML models. Need to squash vector.
+
 - Lots of options for dimensionality reduction.
+
   - Can use simple aggregation methods, including domain-specific optimizations, to compress ML vector.
   - Can also use embeddings with BOW and TF-IDF.
 
@@ -1190,12 +1203,15 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Average Pooling
 
 - Calculates a mean vector across all word embeddings in the document. Simple and effective.
+
 - **Average Pooling Equation:**
 
     $$\text{vector} = (\text{embedding}[d_1] + \text{embedding}[d_2] + \dots + \text{embedding}[d_n]) / n$$
 
   - Reduces space from $O(nd)$ to $O(d)$, where $n = \text{#words in document}$ and $d = \text{embeddings size}$.
+
 - Preserves the general semantic meaning of the text.
+
   - Robust to document length variations and works well for many classification tasks. Loses word order information.
   - Gives equal importance to all words. Can dilute the signal from important but rare words.
 
@@ -1204,13 +1220,17 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Max Pooling
 
 - Uses the maximum value found across all word embeddings for each dimension [i] in vector space.
+
   - Represents the most activated features and captures the most salient features across the document.
+
 - **Max Pooling Equation:**
 
     $$\text{vector}[i] = \max(\text{embedding}[i][d_1], \text{embedding}[i][d_2], \dots, \text{embedding}[i][d_n])$$
 
   - Also reduces space complexity from $O(nd)$ to $O(d)$.
+
 - Captures the strongest signals regardless of position.
+
   - Can identify important features even if they appear only once. Less affected by common words or padding.
   - Loses word order and feature frequency information. May overemphasize outlier words.
 
@@ -1219,12 +1239,17 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Transformer Architecture
 
 - A neural network model that uses self-attention mechanisms to process sequential data efficiently.
+
   - An evolution of Seq2Seq encoder-decoder architecture.
   - Uses a self-attention mechanism to process input token relationships regardless of their position.
+
 - The output of a transformer model is:
+
   - A prediction of the next token in a sequence based on all previous tokens. Generate a sequence of tokens.
   - The transformation an input sequence into a meaningful output sequence. Language translation.
+
 - Replaces RNN Seq2Seq models like LSTM and GRU.
+
   - Lose context in long sequences. Vanishing gradient.
 
 ***
@@ -1247,8 +1272,10 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 
 - Input text is tokenized, converted to a vocabulary id and associated embeddings loaded.
 - Need to represent positional information for each token to enable comprehension and parallelism.
+
   - Without it, a transformer cannot distinguish between "man bites dog" and "dog bites man", i.e. we've a BOW.
   - Transformer would fail at understanding sequential tasks like translation and summarization.
+
 - Positional encoding values are computed from varying frequencies of the sine and cosine functions.
 
 ***
@@ -1256,7 +1283,9 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Positional Encoding
 
 - Positional encoding are computed just once for each index of the token embeddings.
+
   - Encoder Input = [token embeddings] + [positional embeddings]
+
 - $\sin(0) = 0$ and $\cos(0) = 1$. For large dimensions sine values (even) approach 0 and cos values (odd) approach 1.
 - Positional encoding uses $\sin()$ / $\cos()$ for even/odd indices. Sinusoidal patterns create unique encodings for each position.
 
@@ -1265,9 +1294,12 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Transformer Model - Encoder
 
 - An encoder transforms the processed input embeddings into contextualized representations.
+
   - Outputs a set of vectors representing the input sequence with a rich contextual understanding.
   - Consists of a multi-headed attention mechanism and a feed-forward network. Whole encoder is a NN.
+
 - Encoders are stacked. Original used a stack of 6.
+
   - Creates a deep network to model complex functions.
   - Each layer refines representations from previous layer.
   - Amplifies the portion of the input that influences a particular output position (Effective Receptive Field).
@@ -1278,7 +1310,9 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Self-Attention
 
 - Allows the model to relate tokens to each other.
+
   - E.g. strongly relate flies, silver and lie to salmon.
+
 - Need a way to convert the embeddings of dimension d for each token into this matrix. Done using Q, K and V matrices.
 
 ***
@@ -1286,10 +1320,13 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Scaled Dot Product Attention
 
 - Scaled dot-product attention is at the heart of a transformer. Uses Q, K and V vectors (2D matrices).
+
   - Attention score is the dot product of Q and K vectors, scaled by $\sqrt{\text{dimension}}$ of the key vectors.
   - Determines how much each token should attend to every other token.
+
 - The values in the $QK^T$ matrix are called attention scores. Queries (Q) and Keys (K) that are similar will have a larger dot product. Scaling is needed to ensure a stable gradient during training. Matrix multiplication may generate large scores.
 - Encoder inputs multiplied by weight matrices to produce QKV. Weights learned during training.
+
   - Q (Query): What each token is looking for: $Q = X \cdot W_q$
     - $W_q$ learns to transform token embeddings into query vectors that ask questions of other tokens.
   - K (Key): What each token offers: $K = X \cdot W_k$
@@ -1303,18 +1340,27 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Multi-head Attention
 
 - A key component of transformer architectures.
+
   - Slices the Q, K, V matrices and processes each slice with a separate head. 8 heads used in original.
   - Converts matrix of [#tokens][#dim] into $n$ matrices of size [#tokens][#dim / $n$], where $n = \text{#heads}$.
+
 - Enables parallel learning of different relationships that a single attention matrix cannot capture alone.
+
   - Matrix transposition and multiplication means different attention scores will be learned with multiple heads.
   - Can focus simultaneously on different parts of the input.
   - Learns complex relationships by projecting input into multiple subspaces before computing attention.
+
 - Concat does not add vectors. It joins them together to form a longer vector.
 - Number of attention heads depends on the model architecture and size, but powers of 2 often used.
+
   - BERT base has 12 heads and BERT large has 16. GPT-3 had up to 96. Typically, 16 - 128 heads are used.
+
 - More heads enable simultaneous attention to more input patterns. Increases computational complexity.
+
   - Can overlap heads to for redundancy / robustness.
+
 - Slicing into $2^n$ sizes helps GPU parallelization.
+
   - GPUs more efficient with matrices / vector of $2^n$. This includes GPU matrix multiplication libraries.
   - CUDA (Compute Unified Device Architecture) warps computation into groups of 32 threads in NVIDIA GPUs.
 
@@ -1323,11 +1369,16 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Add & Normalize Layer
 
 - A residual connection in a transformer is a direct path that bypasses a sublayer, e.g. attention or FFNN.
+
   - Prevents original input being lost in stacked sublayers.
   - Mitigates vanishing gradient / reduces training time.
+
 - Encoder adds original input, $X$, to $\text{attention}(X)$ and then normalizes the values for the FFNN:
+
   - $\text{Output} = \text{LayerNorm}(X + \text{MultiHeadAttention}(X))$
+
 - Normalization calculates the mean and variance of the features at each position and rescales the values.
+
 - **Layer Normalization:**
 
     $$\text{LayerNorm}(x) = \gamma \cdot \frac{x - \mu}{\sigma + \epsilon} + \beta$$
@@ -1339,8 +1390,11 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Feed-Forward Network
 
 - Normalized attention vectors are the result of matrix multiplications and are linear transformations.
+
   - Non-linearity applied by transforming vectors using a dense FF neural network. FFNN is just another matrix.
+
 - For the input vector x at each row the FFN computes:
+
 - **FFN Equation:**
 
     $$\text{FFN}(x) = W_2(\text{ReLU}(W_1 x + b_1)) + b_2$$
@@ -1348,6 +1402,7 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
   - $W_1$: weights for the hidden layer. Usually 2048 nodes, i.e. a matrix of dimensions $\times$ 2048 values.
   - $W_2$: weight matrix for the second linear transformation (2048 $\times$ dimensions)
   - $b_1$ and $b_2$: bias vectors learned during training.
+
 - Transformer power based on attention and FFNN.
 - Information flows through the encoder once. It only generates one output.
 
@@ -1356,11 +1411,16 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Encoder Output
 
 - The encoder output is a set of vectors representing the input with a rich contextual understanding.
+
   - A 2D matrix with dimensions $\text{len(tokens)} \times \text{embeddings}$.
+
 - Encoder output enough for classification tasks:
+
   - Sentiment analysis, topic modelling, spam detection.
   - Can use for labelling (PoS tagging) and similarity (IR).
+
 - Encoder output can be fed as input to a ML model:
+
   - ML model called a classification head. Fine tune a pre-trained encoder (BERT) with new ML and labelled data.
   - Just use encoder as a fixed feature extractor without updating its weights. Train the new ML model only.
   - Can also postprocess encoder output using pooling etc.
@@ -1370,9 +1430,12 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Transformer Model - Decoder
 
 - Takes an encoded input representation and outputs tokens one at a time using autoregressive generation.
+
   - Information flows through a decoder every time a new token needs to be generated. Decoders are stacked.
   - The output of the decoder is fed back into the decoder as the next input. Starts with [SOS] $\to$ [BOS] $\to$ [EOS].
+
 - Most of a decoder components are identical to those in an encoder. The different components are:
+
   - Masked Multi-Head Self-Attention: prevents decoder looking at future tokens when generating a sequence.
   - Cross-Attention: allows the decoder to stay focused on the relevant parts of the encoder input.
 
@@ -1381,11 +1444,15 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Masked Multi-Head Attention
 
 - Enables autoregressive behavior by preventing model "seeing into the future" during training / inference.
+
   - Each token can only attend to itself and previous tokens in the sequence. Called causal masked attention.
   - Causal respects the natural ordering of a sequence.
+
 - The iteratively generated decoder sequence is preprocessed and an attention mask applied.
+
   - Masking done by setting future positions in attention matrix to $-\infty$ to before softmax. $\text{softmax}(-\infty) = 0$.
   - Ensures autoregressive generation. When predicting tokens at position i, decoder only sees tokens at positions < i. All cells above the diagonal are zeroed out.
+
 - Applying an attention mask means the decoder cannot look ahead. Values are zeroed out.
 
 ***
@@ -1393,11 +1460,13 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Cross Attention
 
 - The encoder output serves as the memory that the decoder attends to. Helps prevent hallucinations.
+
   - Multiheaded attention applied to output of masked self-attention layer and encoder output.
   - Works exactly like the encoder attention layer but:
     - Query (Q): current causal decoder sequence.
     - Key / Value (KV): encoder output matrix.
 - Prevents drift from the original prompt intention.
+
   - A bridge that connects the iterative generation of decoder output to the encoder representation of input.
   - Without cross attention, a LLM would be conditioned only on its own previously generated tokens.
 
@@ -1406,10 +1475,15 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Linear Layer & Softmax
 
 - The decoder output (hidden states) is converted by a linear projection into logits over a whole vocabulary.
+
   - Softmax then applied to logits to generate next token.
+
 - Final layer called language modelling or LM head.
+
   - Transforms high-dimensional representations into useful language predictions.
+
 - Linear project is a matrix multiplication of:
+
 - **Linear Project Equation:**
 
     $$\text{logits} = \text{decoderout} \times W + b$$
@@ -1417,7 +1491,9 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
   - decoderout: decoder output (tokens $\times$ dimensions).
   - W: a weight matrix of shape (dimensions $\times$ vocab size).
   - b: A optional bias vector of length vocab size.
+
 - BERT / DistilBERT have a vocabulary size of 30,522 WordPiece tokens. GPT-4: 100,000 BPE tokens.
+
   - Claude: ~50,000 BPEs tokens. Gemini: ~256,000 SentencePiece BPEs. LLaMA2: 32,000 BPEs.
 
 ***
@@ -1427,10 +1503,13 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Information Retrieval (IR)
 
 - Techniques for efficiently locating and ranking relevant documents within large-scale text collections.
+
   - Challenge: given a corpus of $n$ docs and a query $q$, identify and rank all docs by relevance in $< O(n)$ time.
   - IR is foundational to managing the information explosion.
   - Enables effective access to data far beyond human browsing capacity. Vannevar Bush (1945).
+
 - Combines data structures, algorithms, linear algebra, graph theory and distributed systems.
+
   - Use optimized inverted indexes, PageRank and link analysis, web spam detection and web crawling.
   - Technologies used by Google, Apache Lucene etc.
 
@@ -1439,15 +1518,21 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Inverted Index Data Structure
 
 - The fundamental data structure in IR and the backbone of how search engines work efficiently.
+
   - Used by virtually all search engines, including Google, Elasticsearch, Apache Lucene and Apache Solr.
+
 - Inverts the relationship between documents and words / tokens. Like an index at the back of a book.
 - In practice, the tokens will be represented by integers. Fixed length 32 bits vs strings.
 - Transforms a search of all documents into a dictionary look-up and processing of a postings list.
+
   - Implemented as a mapping of $f: T \to P$, where $T$ is a term and $P$ is a postings list. A sorted list of DocIDs.
+
 - Requires very fast CRUD operations on $n$ indexed documents. Must support concurrency.
+
   - Dictionary / vocabulary lookup can be done in $O(\log n)$ or $O(1)$. Hash Map, Skip List, B-Tree, Radix (Prefix) Tree.
   - Posting list of document IDs and positions processed in $O(n + k)$, where $k$ is the size of the positions index.
   - Use Array / Compressed Array, Skip List, Bitmap / Bit Vector, Roaring Bitmap. Usually compressed data.
+
 - The key is a term, a normalized word or token. The value is the postings list for that term, an ordered list of documentIDs where the term appears. The positions list is sorted. This is critical for rapid search and query / set operations.
 
 ***
@@ -1455,19 +1540,30 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Inverted Index Query Operations
 
 - Boolean logic maps directly to efficient set operations on sorted postings lists in an inverted index.
+
   - Enables efficient AND, OR, NOT and phrase queries.
   - Time complexity depends on data structure used.
+
 - Single-Term Query (Set Retrieval)
+
   - Retrieve all documents containing a specific term., e.g. Query algorithm $\to$ {doc1, doc5, doc7, doc12}.
   - $O(1)$ lookup + $O(k)$ where $k = \text{posting list length}$.
+
 - AND Query (Intersection)
+
   - Returns documents containing all query terms, e.g. graph AND algorithm. Process shortest list first.
   - $O(m + n)$ where $m$, $n$ are posting list lengths.
+
 - OR Query (Union)
+
   - Returns documents containing any query term, e.g. graph OR algorithm. $O(m + n)$ complexity.
+
 - NOT Query (Complement/Difference)
+
   - Returns documents not containing a term. Set difference or complement query, e.g. NOT algorithm. $O(d)$ complexity where $d$ is the total number of documents.
+
 - Phrase Query (Positional Intersection)
+
   - Returns documents containing an exact phrase (term sequence) , e.g. data structures and algorithms.
   - Requires a sorted positional index. $O(m + n + p \cdot q)$ where $p$, $q \to$ average positions of each term in $m, n$.
 
@@ -1476,10 +1572,14 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Inverted Index Optimisation
 
 - Optimisations also include query processing (Skip Lists, Pointers, Galloping Search) and caching lists.
+
 - **Variable-Byte Encoding (VByte)**
+
   - A compression technique that encodes integers with a variable number of bytes based on their magnitude.
   - Smaller numbers use fewer bytes. Instead of using 4 bytes (32 bits) per integer, chain together 7-bit chunks.
+
 - **Delta Encoding**
+
   - Compresses by storing differences (deltas) between consecutive values instead of the values themselves.
   - Fundamental for scaling search engines. Otherwise indexes would consume prohibitive amounts of storage.
   - Scalability issues using 32-bit ints in postings lists.
@@ -1489,7 +1589,9 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
     - deltas: [101, 4, 2, 5, 38, 1, 1]
   - Most gaps are small numbers that can be encoded using far fewer bits (variable-length encoding).
   - Typically reduces storage for postings list by 50-80%.
+
 - **Bit Packing**
+
   - Compresses data by packing an integer into the smallest number of bits possible.
   - Leading zeros are a waste of space! Can compact multiple smaller values into 32-bit ints or 64-bit longs.
   - Can use variable-length encoding to maximise compression! Bit size given as metadata in header.
@@ -1506,8 +1608,11 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Spam and Search Engines
 
 - Computing and ranking search results from terms in an inverted index can easily fall prey to spam.
+
   - Term results from an inverted index are scored and ranked by an algorithm. Links examined too.
+
 - Search engine rankings affected by term and link spam. Search engine "optimisation"...
+
   - Term spam: convincing a search engine that a page represents something it is not. Done by adding terms.
   - Add lots of terms, copy #1 search result into page.
   - Link Spam: generate lots of spurious back links.
@@ -1518,11 +1623,16 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Link-Based Search
 
 - Analyses the hyperlink structure of a document graph to determine page importance and authority.
+
   - Not just content and term frequency / weights.
   - Link structure is content-independent.
+
 - Not all pages are equal. Links work like citations.
+
   - A link from an authoritative page (IEEE / Gov) carries more weight than a link from a random blog.
+
 - Highly effective against term spam:
+
   - External and Costly: Difficult and costly to manipulate backlinks from authoritative sites.
   - Trust: Spam sites tend to form isolated clusters with links only among themselves. Detect with link analysis.
 
@@ -1531,11 +1641,14 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Early Search Engines
 
 - **Lycos Search Engine - 1994**
+
   - Based on the Pursuit retrieval engine developed by Michael Mauldin at Carnegie Mellon in 1994.
   - Inverted index with a vector space model. First search engine to scale massively (60M pages by 1996).
   - Fast query processing. Partial matches with prefixes.
   - No link analysis (web structure) or notion of document authority. Susceptible to keyword stuffing / spamming.
+
 - **AltaVista Search Engine - 1996**
+
   - Developed by DEC, AltaVista was the preeminent internet search engine before Google.
   - Ranked document content using vector space scoring and cosine similarity. Used HITs to analyse links.
   - Vector space can measure content similarity using cosine distance. HITS algorithm measures relevance based on link indegree and outdegree.
@@ -1545,12 +1658,17 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Hyperlink-Induced Topic Search (HITS)
 
 - HITS is a link-based ranking algorithm that models web pages in two complementary roles:
+
   - Authorities: pages that are linked to by many hubs, e.g. a course page, a W3C specification.
   - Hubs: pages that link to many authoritative pages, e.g. a wiki list of computing degrees, a list of ML APIs.
+
 - HITS assigns two scores to each page, creating a mutually-reinforcing relationship.
+
   - A good hub points to good authorities. A good authority is pointed to by good hubs.
   - Creates a positive feedback loop that amplifies relevant pages. Score using Principle of Repeated Improvement.
+
 - The time complexity is $O(k \cdot (|V| + |E|))$, as each iteration processes all vertices and edges once.
+
   - A value of $k = [20..30]$ is typically needed for convergence. Efficient for sparse graphs common on the web.
 
 ***
@@ -1558,12 +1676,17 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## Limitations of HITs
 
 - HITs is query-dependent and semantically aware, with auth scores computed for each query.
+
   - Identifies pages that are genuinely authoritative within that semantic domain rather than globally popular.
+
 - But cost per query is too expensive at scale:
+
   - Identifying a topic-specific subgraph.
   - Expand subgraph to include neighbourhood pages.
   - Execute 10-30 iterative computations for each query.
+
 - HITs is vulnerable to topic drift and link spam.
+
   - A spammer only needs to create hubs that link to their own authority pages to artificially inflate HITs scores.
 
 ***
@@ -1571,13 +1694,19 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## PageRank
 
 - Original Google search algorithm. Developed at Stanford in 1996 by Larry Page and Sergey Brin.
+
   - Their BackRub search engine analysed back links pointing to a website. Similar to an academic citation.
+
 - PageRank is modelled as a random surfer on the web, randomly clicking hyperlinks.
+
   - At each page, they follow an outgoing link with probability $d$, a damping factor, typically $0.85$.
   - With probability $1-d$, they teleport to a random page, representing getting bored and typing a new URL.
   - The PageRank of a page is the probability the surfer is on that page at any given time after $n$ steps.
+
 - The importance of a page is proportional to the number and quality of pages that link to it.
+
   - The damping factor of $0.85$ is based on empirical data. 85% of the time, a web user will follow a link on the existing page.
+
 - The time complexity is $O(k \cdot (|V| + |E|))$, as each iteration processes all vertices and edges once.
 
 ***
@@ -1585,10 +1714,139 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
 ## TrustRank
 
 - TrustRank uses a small set of trustworthy seed sites.
+
   - Propagates trust backward from seeds through the link graph. Seeds are authoritative, e.g. educational.
+
 - PageRank assumes that link structure reflects quality.
+
   - High-authority pages link to other high-authority pages.
   - Treats all links equally and iteratively distributes authority globally. Breaks down with link spam / spam farms.
+
 - PageRank vs TrustRank:
+
   - PageRank treats all links equally. Can manipulate backlinks to boost ranking. (e.g. link farms, purchased links).
   - TrustRank: Trust cumulatively boosts the ranking from specific authoritative seeds.
+
+***
+
+# Week 12: Sentiment Analysis
+
+## Sentiment Analysis Fundamentals
+
+- The process of determining the emotional tone or attitude expressed in a piece of text or speech.
+
+  - Overall emotion is classified in terms of polarity as being positive, neutral or negative. Range is [1, 0, -1].
+  - The term valency is the emotional direction and intensity of a word or phrase. Range is [-5...+5].
+  - Used to extract subjective information from a source.
+
+- Has wide applicability to situations where opinions can be mapped to real world events.
+
+  - Feedback analysis for service / product improvement.
+  - Monitoring social media for perception / opinion.
+  - Financial market predictions using news sentiment.
+
+***
+
+## Evaluation Methods
+
+- Main approaches involve lexicons and ML models.
+
+  - Hybrid and transformer approaches also used.
+
+- Lexicons: a static dictionary of words or phrases and their associated sentiment scores. Very fast.
+
+  - Often manually curated. Different scoring systems.
+
+- ML involves feature engineering training, test and production text using techniques like:
+
+  - Traditional: BoW, TF-IDF, $n$-grams.
+  - Word Embeddings: Create a document vector by averaging / pooling the embeddings for each word.
+  - Contextual Embeddings: use the hidden states output from a transformer encoder. Join or pool vectors.
+
+***
+
+## Key Lexicons
+
+- **Bing Liu's Lexicon:**
+
+  - Widely used simple lexicon of 6,800 opinion words. Contains ~2,000 positive and ~4,800 negative words.
+  - No scores associated with words, but fine for basic sentiment analysis. English only.
+
+- **AFINN Lexicon:**
+
+  - A word based lexicon by Finn Årup Nielsen. Words rated from -5 (extremely negative) to +5 (extremely positive). AFINN provides intensity levels. Different languages.
+
+- **TextBlob (Pattern) Lexicon:**
+
+  - A Python library for processing textual data that includes its own lexicon. Polarity: [-1..1].
+  - Modified Pattern Lexicon. Includes phrases and provides subjectivity scores (0 $\to$ objective, -1/1 $\to$ subjective).
+
+- **VADER Lexicon:**
+
+  - Valence Aware Dictionary and sEntiment Reasoner.
+  - Circa 7,500 words rated from -4 (extremely negative) to +4 (extremely positive). Human validated scores.
+  - Special handling for social media type sentiments: Emoticons (e.g. :)), Acronyms (e.g., LOL), Slang (e.g. meh, nah).
+  - Very effective for short texts, e.g. tweets, social media posts and short reviews where context may be limited.
+
+- **MPQA Subjectivity Lexicon:**
+
+  - Multi-Perspective Question Answering categorizes words and phrases based on subjectivity and polarity.
+  - Manually curated lexicon of 8,000 words and phrases tagged with subjectivity information.
+  - Words have a Subjectivity type (strongsubj / weaksubj), a Polarity (positive, negative or neutral) and a PoS.
+
+- **SentiWordNet Lexicon:**
+
+  - A lexicon based on WordNet with 117,000+ words. Sentiment annotation for English nouns, verbs, adjectives and adverbs.
+  - Sense distinction and has three sentiment scores: Positivity: [0..1], Negativity: [0..1] and Objectivity.
+  - **Objectivity Equation:**
+
+    $$\text{Objectivity} = 1 - (\text{Positivity} + \text{Negativity})$$
+
+  - Performs well for formal, edited text but can lags behind Vader for social media content.
+
+- **NRC Word-Emotion Lexicon:**
+
+  - Words and their associations with eight basic emotions and two sentiments. Multiple languages.
+  - Emotions: anger, fear, anticipation, trust, surprise, sadness, joy, and disgust. Sentiments: neg or pos.
+
+***
+
+## Scoring Mechanisms
+
+- **Basic Sentiment Scoring:**
+
+  - Assigns numerical or categorical values to text based on the emotional tone it conveys. Treats all elements equally without applying weights.
+  - Fast, transparent, easy to implement / adopt to different languages. Good for preliminary processing.
+  - Cannot handle context, negations, sarcasm or irony.
+
+- **Weighted Sentiment Scoring:**
+
+  - Computes a sentiment score by prioritizing / weighting customizable factors of words or phrases.
+  - Weights can be based on word position, PoS importance (adjectives weighted higher) and TF-IDF scores.
+  - Customizable and produces more nuanced results than simple averaging but domain dependent.
+  - Weights can handle negations (not) / intensifiers (very).
+
+***
+
+## VADER Specific Properties
+
+- Vader combines a lexicon of words with grammatical and syntactical rules to determine sentiment scores.
+- The document score then normalized [-1..1] using a sigmoid function. Individual word scores are [-5..5].
+
+  - $\text{score} \ge 0.05 \Rightarrow \text{Positive}$
+  - $\text{score} \le -0.05 \Rightarrow \text{Negative}$
+  - $-0.05 < \text{score} < 0.05 \Rightarrow \text{Neutral}$
+
+- Vader also reports the overall positive, negative and neutral sentiment scores for a document.
+
+  - Human-validated lexicon and can handle negations, intensifiers, punctuation emphasis (!), capitalization (ALL CAPS) and contrastive conjunctions ("but", "however").
+
+***
+
+## Distance-Weighted Negation
+
+- Accounts for the impact of negation words based on their distance from sentiment-bearing terms (e.g. Vader).
+- Captures how negation diminishes with distance:
+
+  - Negation words closer to sentiment terms have a stronger effect than those farther away.
+  - Denominator ensures that as distance increases, the negation effect decreases proportionally.
