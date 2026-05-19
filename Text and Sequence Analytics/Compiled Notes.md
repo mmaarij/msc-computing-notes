@@ -1419,3 +1419,176 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
   - b: A optional bias vector of length vocab size.
 - BERT / DistilBERT have a vocabulary size of 30,522 WordPiece tokens. GPT-4: 100,000 BPE tokens.
   - Claude: ~50,000 BPEs tokens. Gemini: ~256,000 SentencePiece BPEs. LLaMA2: 32,000 BPEs.
+
+***
+
+# Week 11: Information Retrieval & Text Search
+
+## Information Retrieval (IR)
+
+- Techniques for efficiently locating and ranking relevant documents within large-scale text collections.
+  - Challenge: given a corpus of $n$ docs and a query $q$, identify and rank all docs by relevance in $< O(n)$ time.
+  - IR is foundational to managing the information explosion.
+  - Enables effective access to data far beyond human browsing capacity. Vannevar Bush (1945).
+- Combines data structures, algorithms, linear algebra, graph theory and distributed systems.
+  - Use optimized inverted indexes, PageRank and link analysis, web spam detection and web crawling.
+  - Technologies used by Google, Apache Lucene etc.
+
+***
+
+## Inverted Index Data Structure
+
+- The fundamental data structure in IR and the backbone of how search engines work efficiently.
+  - Used by virtually all search engines, including Google, Elasticsearch, Apache Lucene and Apache Solr.
+- Inverts the relationship between documents and words / tokens. Like an index at the back of a book.
+- In practice, the tokens will be represented by integers. Fixed length 32 bits vs strings.
+- Transforms a search of all documents into a dictionary look-up and processing of a postings list.
+  - Implemented as a mapping of $f: T \to P$, where $T$ is a term and $P$ is a postings list. A sorted list of DocIDs.
+- Requires very fast CRUD operations on $n$ indexed documents. Must support concurrency.
+  - Dictionary / vocabulary lookup can be done in $O(\log n)$ or $O(1)$. Hash Map, Skip List, B-Tree, Radix (Prefix) Tree.
+  - Posting list of document IDs and positions processed in $O(n + k)$, where $k$ is the size of the positions index.
+  - Use Array / Compressed Array, Skip List, Bitmap / Bit Vector, Roaring Bitmap. Usually compressed data.
+- The key is a term, a normalized word or token. The value is the postings list for that term, an ordered list of documentIDs where the term appears. The positions list is sorted. This is critical for rapid search and query / set operations.
+
+***
+
+## Inverted Index Query Operations
+
+- Boolean logic maps directly to efficient set operations on sorted postings lists in an inverted index.
+  - Enables efficient AND, OR, NOT and phrase queries.
+  - Time complexity depends on data structure used.
+- Single-Term Query (Set Retrieval)
+  - Retrieve all documents containing a specific term., e.g. Query algorithm $\to$ {doc1, doc5, doc7, doc12}.
+  - $O(1)$ lookup + $O(k)$ where $k = \text{posting list length}$.
+- AND Query (Intersection)
+  - Returns documents containing all query terms, e.g. graph AND algorithm. Process shortest list first.
+  - $O(m + n)$ where $m$, $n$ are posting list lengths.
+- OR Query (Union)
+  - Returns documents containing any query term, e.g. graph OR algorithm. $O(m + n)$ complexity.
+- NOT Query (Complement/Difference)
+  - Returns documents not containing a term. Set difference or complement query, e.g. NOT algorithm. $O(d)$ complexity where $d$ is the total number of documents.
+- Phrase Query (Positional Intersection)
+  - Returns documents containing an exact phrase (term sequence) , e.g. data structures and algorithms.
+  - Requires a sorted positional index. $O(m + n + p \cdot q)$ where $p$, $q \to$ average positions of each term in $m, n$.
+
+***
+
+## Inverted Index Optimisation
+
+- Optimisations also include query processing (Skip Lists, Pointers, Galloping Search) and caching lists.
+- **Variable-Byte Encoding (VByte)**
+  - A compression technique that encodes integers with a variable number of bytes based on their magnitude.
+  - Smaller numbers use fewer bytes. Instead of using 4 bytes (32 bits) per integer, chain together 7-bit chunks.
+- **Delta Encoding**
+  - Compresses by storing differences (deltas) between consecutive values instead of the values themselves.
+  - Fundamental for scaling search engines. Otherwise indexes would consume prohibitive amounts of storage.
+  - Scalability issues using 32-bit ints in postings lists.
+  - Instead of storing a sorted list of document IDs, store a list of the VByte-encoded deltas:
+    - term: "algorithm"
+    - postings: [101, 105, 107, 112, 150, 151, 152, ...]
+    - deltas: [101, 4, 2, 5, 38, 1, 1]
+  - Most gaps are small numbers that can be encoded using far fewer bits (variable-length encoding).
+  - Typically reduces storage for postings list by 50-80%.
+- **Bit Packing**
+  - Compresses data by packing an integer into the smallest number of bits possible.
+  - Leading zeros are a waste of space! Can compact multiple smaller values into 32-bit ints or 64-bit longs.
+  - Can use variable-length encoding to maximise compression! Bit size given as metadata in header.
+
+***
+
+## Compressed Inverted Index
+
+- Compression significantly reduces the index size.
+- Needs to be balanced against the overhead of decoding the compressed index.
+
+***
+
+## Spam and Search Engines
+
+- Computing and ranking search results from terms in an inverted index can easily fall prey to spam.
+  - Term results from an inverted index are scored and ranked by an algorithm. Links examined too.
+- Search engine rankings affected by term and link spam. Search engine "optimisation"...
+  - Term spam: convincing a search engine that a page represents something it is not. Done by adding terms.
+  - Add lots of terms, copy #1 search result into page.
+  - Link Spam: generate lots of spurious back links.
+  - Link farms, reciprocal linking schemes, Comment / forum spam, hidden links, expired domain hijacking.
+
+***
+
+## Link-Based Search
+
+- Analyses the hyperlink structure of a document graph to determine page importance and authority.
+  - Not just content and term frequency / weights.
+  - Link structure is content-independent.
+- Not all pages are equal. Links work like citations.
+  - A link from an authoritative page (IEEE / Gov) carries more weight than a link from a random blog.
+- Highly effective against term spam:
+  - External and Costly: Difficult and costly to manipulate backlinks from authoritative sites.
+  - Trust: Spam sites tend to form isolated clusters with links only among themselves. Detect with link analysis.
+
+***
+
+## Early Search Engines
+
+- **Lycos Search Engine - 1994**
+  - Based on the Pursuit retrieval engine developed by Michael Mauldin at Carnegie Mellon in 1994.
+  - Inverted index with a vector space model. First search engine to scale massively (60M pages by 1996).
+  - Fast query processing. Partial matches with prefixes.
+  - No link analysis (web structure) or notion of document authority. Susceptible to keyword stuffing / spamming.
+- **AltaVista Search Engine - 1996**
+  - Developed by DEC, AltaVista was the preeminent internet search engine before Google.
+  - Ranked document content using vector space scoring and cosine similarity. Used HITs to analyse links.
+  - Vector space can measure content similarity using cosine distance. HITS algorithm measures relevance based on link indegree and outdegree.
+
+***
+
+## Hyperlink-Induced Topic Search (HITS)
+
+- HITS is a link-based ranking algorithm that models web pages in two complementary roles:
+  - Authorities: pages that are linked to by many hubs, e.g. a course page, a W3C specification.
+  - Hubs: pages that link to many authoritative pages, e.g. a wiki list of computing degrees, a list of ML APIs.
+- HITS assigns two scores to each page, creating a mutually-reinforcing relationship.
+  - A good hub points to good authorities. A good authority is pointed to by good hubs.
+  - Creates a positive feedback loop that amplifies relevant pages. Score using Principle of Repeated Improvement.
+- The time complexity is $O(k \cdot (|V| + |E|))$, as each iteration processes all vertices and edges once.
+  - A value of $k = [20..30]$ is typically needed for convergence. Efficient for sparse graphs common on the web.
+
+***
+
+## Limitations of HITs
+
+- HITs is query-dependent and semantically aware, with auth scores computed for each query.
+  - Identifies pages that are genuinely authoritative within that semantic domain rather than globally popular.
+- But cost per query is too expensive at scale:
+  - Identifying a topic-specific subgraph.
+  - Expand subgraph to include neighbourhood pages.
+  - Execute 10-30 iterative computations for each query.
+- HITs is vulnerable to topic drift and link spam.
+  - A spammer only needs to create hubs that link to their own authority pages to artificially inflate HITs scores.
+
+***
+
+## PageRank
+
+- Original Google search algorithm. Developed at Stanford in 1996 by Larry Page and Sergey Brin.
+  - Their BackRub search engine analysed back links pointing to a website. Similar to an academic citation.
+- PageRank is modelled as a random surfer on the web, randomly clicking hyperlinks.
+  - At each page, they follow an outgoing link with probability $d$, a damping factor, typically $0.85$.
+  - With probability $1-d$, they teleport to a random page, representing getting bored and typing a new URL.
+  - The PageRank of a page is the probability the surfer is on that page at any given time after $n$ steps.
+- The importance of a page is proportional to the number and quality of pages that link to it.
+  - The damping factor of $0.85$ is based on empirical data. 85% of the time, a web user will follow a link on the existing page.
+- The time complexity is $O(k \cdot (|V| + |E|))$, as each iteration processes all vertices and edges once.
+
+***
+
+## TrustRank
+
+- TrustRank uses a small set of trustworthy seed sites.
+  - Propagates trust backward from seeds through the link graph. Seeds are authoritative, e.g. educational.
+- PageRank assumes that link structure reflects quality.
+  - High-authority pages link to other high-authority pages.
+  - Treats all links equally and iteratively distributes authority globally. Breaks down with link spam / spam farms.
+- PageRank vs TrustRank:
+  - PageRank treats all links equally. Can manipulate backlinks to boost ranking. (e.g. link farms, purchased links).
+  - TrustRank: Trust cumulatively boosts the ranking from specific authoritative seeds.
