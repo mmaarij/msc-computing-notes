@@ -1144,3 +1144,278 @@ To handle large vocabularies, Word2Vec uses approximation techniques:
   - Larger window $\to$ more training data.
 
 ***
+
+# Week 10: Continued Word Embeddings & Transformer Architecture
+
+## Doc2Vec
+
+- Extends Word2Vec to represent documents paragraphs or sentences as fixed-length vectors.
+  - Adds a unique vector with document / paragraph id.
+- Doc2Vec considers document membership as part of the context.
+- Two main approaches:
+  - PV-DM (Paragraph Vector - Distributed Memory): Similar to CBOW but with an additional document ID vector.
+  - PV-DBOW (Paragraph Vector - Distributed BOW): Similar to Skip-gram.
+- Captures the semantics and context of all words in all documents (all vs all).
+  - Term distributed refers to the density of the vector.
+
+***
+
+## Word2Vec Limitations
+
+- While Word2Vec has been groundbreaking, it does have some limitations:
+  - No context for polysemy: where a single word or phrase has multiple meanings. E.g. He has been drinking again or he is really wicked.
+  - Scalability: Each word in a vocabulary requires a full vector. Very large dataset can be prohibitive.
+  - Incomplete vocabulary: missing words in training data may cause inaccuracies in models.
+  - Morphological words variations are coded independently, e.g. executable, execute, executed, execution and executioner semantics are not encoded.
+
+***
+
+## Machine Learning with Embeddings
+
+- Embeddings have many advantages over BOW and TF-IDF vectors as input vectors for ML models.
+  - Capture semantic meaning. Similar words cluster together in vector space. Traditional methods are statistical and treat words as independent dimensions.
+  - Create fixed-size dense vectors regardless of vocabulary size. More computationally efficient.
+  - Enable analogical reasoning for mathematical operations, e.g. king - man + woman = queen.
+  - Pre-trained models allow transfer learning, i.e. they can be applied to new tasks with limited data. BOW and TF-IDF must be recalculated for each new corpus.
+- Embeddings capture semantics and context. They are also fixed length and can be used as ML inputs.
+  - Semantics and context are encoded in dimensions. Commonly have 50 $\to$ 500+ dimensions / word.
+- Vector space is $O(nd)$, where $n = \text{vocabulary size}$ and $d = \text{vector dimension size}$. Vector length very large.
+  - 1000 words of 300 dimensions $\Rightarrow$ 300,000 inputs... Too large for efficient ML models. Need to squash vector.
+- Lots of options for dimensionality reduction.
+  - Can use simple aggregation methods, including domain-specific optimizations, to compress ML vector.
+  - Can also use embeddings with BOW and TF-IDF.
+
+***
+
+## Average Pooling
+
+- Calculates a mean vector across all word embeddings in the document. Simple and effective.
+- **Average Pooling Equation:**
+
+    $$\text{vector} = (\text{embedding}[d_1] + \text{embedding}[d_2] + \dots + \text{embedding}[d_n]) / n$$
+
+  - Reduces space from $O(nd)$ to $O(d)$, where $n = \text{#words in document}$ and $d = \text{embeddings size}$.
+- Preserves the general semantic meaning of the text.
+  - Robust to document length variations and works well for many classification tasks. Loses word order information.
+  - Gives equal importance to all words. Can dilute the signal from important but rare words.
+
+***
+
+## Max Pooling
+
+- Uses the maximum value found across all word embeddings for each dimension [i] in vector space.
+  - Represents the most activated features and captures the most salient features across the document.
+- **Max Pooling Equation:**
+
+    $$\text{vector}[i] = \max(\text{embedding}[i][d_1], \text{embedding}[i][d_2], \dots, \text{embedding}[i][d_n])$$
+
+  - Also reduces space complexity from $O(nd)$ to $O(d)$.
+- Captures the strongest signals regardless of position.
+  - Can identify important features even if they appear only once. Less affected by common words or padding.
+  - Loses word order and feature frequency information. May overemphasize outlier words.
+
+***
+
+## Transformer Architecture
+
+- A neural network model that uses self-attention mechanisms to process sequential data efficiently.
+  - An evolution of Seq2Seq encoder-decoder architecture.
+  - Uses a self-attention mechanism to process input token relationships regardless of their position.
+- The output of a transformer model is:
+  - A prediction of the next token in a sequence based on all previous tokens. Generate a sequence of tokens.
+  - The transformation an input sequence into a meaningful output sequence. Language translation.
+- Replaces RNN Seq2Seq models like LSTM and GRU.
+  - Lose context in long sequences. Vanishing gradient.
+
+***
+
+## What is Attention?
+
+- RNNs process tokens sequentially causing distant elements to be diluted or forgotten. Creates an implicit chain of computation.
+- Transformers process tokens in parallel and create a matrix of relationships using attention scores.
+
+***
+
+## Attention Scores
+
+- Requires multi-step processing of tokens to create matrix. Multiple attention heads can focus on different relationships.
+- A lie is a place in a river where salmon rest before moving on.
+
+***
+
+## Transformer Model - Preprocess & Input Embeddings
+
+- Input text is tokenized, converted to a vocabulary id and associated embeddings loaded.
+- Need to represent positional information for each token to enable comprehension and parallelism.
+  - Without it, a transformer cannot distinguish between "man bites dog" and "dog bites man", i.e. we've a BOW.
+  - Transformer would fail at understanding sequential tasks like translation and summarization.
+- Positional encoding values are computed from varying frequencies of the sine and cosine functions.
+
+***
+
+## Positional Encoding
+
+- Positional encoding are computed just once for each index of the token embeddings.
+  - Encoder Input = [token embeddings] + [positional embeddings]
+- $\sin(0) = 0$ and $\cos(0) = 1$. For large dimensions sine values (even) approach 0 and cos values (odd) approach 1.
+- Positional encoding uses $\sin()$ / $\cos()$ for even/odd indices. Sinusoidal patterns create unique encodings for each position.
+
+***
+
+## Transformer Model - Encoder
+
+- An encoder transforms the processed input embeddings into contextualized representations.
+  - Outputs a set of vectors representing the input sequence with a rich contextual understanding.
+  - Consists of a multi-headed attention mechanism and a feed-forward network. Whole encoder is a NN.
+- Encoders are stacked. Original used a stack of 6.
+  - Creates a deep network to model complex functions.
+  - Each layer refines representations from previous layer.
+  - Amplifies the portion of the input that influences a particular output position (Effective Receptive Field).
+  - Helps capture long-range dependencies.
+
+***
+
+## Self-Attention
+
+- Allows the model to relate tokens to each other.
+  - E.g. strongly relate flies, silver and lie to salmon.
+- Need a way to convert the embeddings of dimension d for each token into this matrix. Done using Q, K and V matrices.
+
+***
+
+## Scaled Dot Product Attention
+
+- Scaled dot-product attention is at the heart of a transformer. Uses Q, K and V vectors (2D matrices).
+  - Attention score is the dot product of Q and K vectors, scaled by $\sqrt{\text{dimension}}$ of the key vectors.
+  - Determines how much each token should attend to every other token.
+- The values in the $QK^T$ matrix are called attention scores. Queries (Q) and Keys (K) that are similar will have a larger dot product. Scaling is needed to ensure a stable gradient during training. Matrix multiplication may generate large scores.
+- Encoder inputs multiplied by weight matrices to produce QKV. Weights learned during training.
+  - Q (Query): What each token is looking for: $Q = X \cdot W_q$
+    - $W_q$ learns to transform token embeddings into query vectors that ask questions of other tokens.
+  - K (Key): What each token offers: $K = X \cdot W_k$
+    - $W_k$ learns to transform token embeddings into key vectors that answer questions from queries.
+  - V (Value): Information contained by tokens: $V = X \cdot W_v$
+    - $W_v$ learns to transform token embeddings into value vectors that contain information to be aggregated.
+- The original dimensions of the 2D matrix are restored, i.e. 4 x 5. The attention weights represent the All vs All contextual importance of the tokens. Logically the same as the weighted sum of the inputs from a hidden layer to the next layer of neurons in a MLP.
+
+***
+
+## Multi-head Attention
+
+- A key component of transformer architectures.
+  - Slices the Q, K, V matrices and processes each slice with a separate head. 8 heads used in original.
+  - Converts matrix of [#tokens][#dim] into $n$ matrices of size [#tokens][#dim / $n$], where $n = \text{#heads}$.
+- Enables parallel learning of different relationships that a single attention matrix cannot capture alone.
+  - Matrix transposition and multiplication means different attention scores will be learned with multiple heads.
+  - Can focus simultaneously on different parts of the input.
+  - Learns complex relationships by projecting input into multiple subspaces before computing attention.
+- Concat does not add vectors. It joins them together to form a longer vector.
+- Number of attention heads depends on the model architecture and size, but powers of 2 often used.
+  - BERT base has 12 heads and BERT large has 16. GPT-3 had up to 96. Typically, 16 - 128 heads are used.
+- More heads enable simultaneous attention to more input patterns. Increases computational complexity.
+  - Can overlap heads to for redundancy / robustness.
+- Slicing into $2^n$ sizes helps GPU parallelization.
+  - GPUs more efficient with matrices / vector of $2^n$. This includes GPU matrix multiplication libraries.
+  - CUDA (Compute Unified Device Architecture) warps computation into groups of 32 threads in NVIDIA GPUs.
+
+***
+
+## Add & Normalize Layer
+
+- A residual connection in a transformer is a direct path that bypasses a sublayer, e.g. attention or FFNN.
+  - Prevents original input being lost in stacked sublayers.
+  - Mitigates vanishing gradient / reduces training time.
+- Encoder adds original input, $X$, to $\text{attention}(X)$ and then normalizes the values for the FFNN:
+  - $\text{Output} = \text{LayerNorm}(X + \text{MultiHeadAttention}(X))$
+- Normalization calculates the mean and variance of the features at each position and rescales the values.
+- **Layer Normalization:**
+
+    $$\text{LayerNorm}(x) = \gamma \cdot \frac{x - \mu}{\sigma + \epsilon} + \beta$$
+
+  - $\mu$ is the mean at a position, $\sigma$ is stddev, $\epsilon$ is a small constant 1e-5, $\gamma$ and $\beta$ are learnable parameters.
+
+***
+
+## Feed-Forward Network
+
+- Normalized attention vectors are the result of matrix multiplications and are linear transformations.
+  - Non-linearity applied by transforming vectors using a dense FF neural network. FFNN is just another matrix.
+- For the input vector x at each row the FFN computes:
+- **FFN Equation:**
+
+    $$\text{FFN}(x) = W_2(\text{ReLU}(W_1 x + b_1)) + b_2$$
+
+  - $W_1$: weights for the hidden layer. Usually 2048 nodes, i.e. a matrix of dimensions $\times$ 2048 values.
+  - $W_2$: weight matrix for the second linear transformation (2048 $\times$ dimensions)
+  - $b_1$ and $b_2$: bias vectors learned during training.
+- Transformer power based on attention and FFNN.
+- Information flows through the encoder once. It only generates one output.
+
+***
+
+## Encoder Output
+
+- The encoder output is a set of vectors representing the input with a rich contextual understanding.
+  - A 2D matrix with dimensions $\text{len(tokens)} \times \text{embeddings}$.
+- Encoder output enough for classification tasks:
+  - Sentiment analysis, topic modelling, spam detection.
+  - Can use for labelling (PoS tagging) and similarity (IR).
+- Encoder output can be fed as input to a ML model:
+  - ML model called a classification head. Fine tune a pre-trained encoder (BERT) with new ML and labelled data.
+  - Just use encoder as a fixed feature extractor without updating its weights. Train the new ML model only.
+  - Can also postprocess encoder output using pooling etc.
+
+***
+
+## Transformer Model - Decoder
+
+- Takes an encoded input representation and outputs tokens one at a time using autoregressive generation.
+  - Information flows through a decoder every time a new token needs to be generated. Decoders are stacked.
+  - The output of the decoder is fed back into the decoder as the next input. Starts with [SOS] $\to$ [BOS] $\to$ [EOS].
+- Most of a decoder components are identical to those in an encoder. The different components are:
+  - Masked Multi-Head Self-Attention: prevents decoder looking at future tokens when generating a sequence.
+  - Cross-Attention: allows the decoder to stay focused on the relevant parts of the encoder input.
+
+***
+
+## Masked Multi-Head Attention
+
+- Enables autoregressive behavior by preventing model "seeing into the future" during training / inference.
+  - Each token can only attend to itself and previous tokens in the sequence. Called causal masked attention.
+  - Causal respects the natural ordering of a sequence.
+- The iteratively generated decoder sequence is preprocessed and an attention mask applied.
+  - Masking done by setting future positions in attention matrix to $-\infty$ to before softmax. $\text{softmax}(-\infty) = 0$.
+  - Ensures autoregressive generation. When predicting tokens at position i, decoder only sees tokens at positions < i. All cells above the diagonal are zeroed out.
+- Applying an attention mask means the decoder cannot look ahead. Values are zeroed out.
+
+***
+
+## Cross Attention
+
+- The encoder output serves as the memory that the decoder attends to. Helps prevent hallucinations.
+  - Multiheaded attention applied to output of masked self-attention layer and encoder output.
+  - Works exactly like the encoder attention layer but:
+    - Query (Q): current causal decoder sequence.
+    - Key / Value (KV): encoder output matrix.
+- Prevents drift from the original prompt intention.
+  - A bridge that connects the iterative generation of decoder output to the encoder representation of input.
+  - Without cross attention, a LLM would be conditioned only on its own previously generated tokens.
+
+***
+
+## Linear Layer & Softmax
+
+- The decoder output (hidden states) is converted by a linear projection into logits over a whole vocabulary.
+  - Softmax then applied to logits to generate next token.
+- Final layer called language modelling or LM head.
+  - Transforms high-dimensional representations into useful language predictions.
+- Linear project is a matrix multiplication of:
+- **Linear Project Equation:**
+
+    $$\text{logits} = \text{decoderout} \times W + b$$
+
+  - decoderout: decoder output (tokens $\times$ dimensions).
+  - W: a weight matrix of shape (dimensions $\times$ vocab size).
+  - b: A optional bias vector of length vocab size.
+- BERT / DistilBERT have a vocabulary size of 30,522 WordPiece tokens. GPT-4: 100,000 BPE tokens.
+  - Claude: ~50,000 BPEs tokens. Gemini: ~256,000 SentencePiece BPEs. LLaMA2: 32,000 BPEs.
