@@ -1,1419 +1,1533 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MSc Computing Notes Reader</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#111">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<style>
-html,body{
-margin:0;
-height:100%;
-overflow:hidden;
-font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
-background:#f5f5f5;
-}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>MSc Computing Notes Reader</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#111">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f5f5;
+        }
 
-.material-symbols-rounded{
-font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
-vertical-align:middle;
-font-size:20px;
-}
+        .material-symbols-rounded {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+            font-size: 20px;
+        }
 
-/* ── shelf ── */
+        /* ── shelf ── */
 
-#shelf{
-height:100%;
-overflow-y:auto;
-padding:24px 16px 40px;
-box-sizing:border-box;
-}
-#shelf h1{
-text-align:center;
-font-size:28px;
-font-weight:800;
-margin:0 0 8px;
-letter-spacing:-0.5px;
-color:#1a1a1a;
-}
-#shelf .subtitle{
-text-align:center;
-font-size:14px;
-color:#888;
-margin:0 0 32px;
-font-weight:400;
-}
-.bookGrid{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-gap:16px;
-max-width:720px;
-margin:0 auto;
-}
-.bookCard{
-border-radius:14px;
-padding:22px;
-cursor:pointer;
-transition:transform 0.15s ease,box-shadow 0.15s ease;
-position:relative;
-overflow:hidden;
-}
-.bookCard:hover{
-transform:translateY(-3px);
-box-shadow:0 8px 24px rgba(0,0,0,0.12);
-}
-.bookCard:active{
-transform:scale(0.97);
-}
-.bookIcon{
-width:40px;
-height:40px;
-border-radius:10px;
-background:rgba(0,0,0,0.08);
-display:flex;
-align-items:center;
-justify-content:center;
-margin-bottom:12px;
-}
-.bookIcon .material-symbols-rounded{
-font-size:22px;
-color:#1a1a1a;
-}
-.bookTitle{
-font-size:16px;
-font-weight:700;
-margin-bottom:4px;
-color:#1a1a1a;
-}
-.bookDesc{
-font-size:12px;
-color:#555;
-margin-bottom:12px;
-}
-.bookBadge{
-font-size:10px;
-color:#fff;
-background:rgba(0,0,0,0.25);
-padding:3px 8px;
-border-radius:20px;
-position:absolute;
-top:12px;
-right:12px;
-}
+        #shelf {
+            height: 100%;
+            overflow-y: auto;
+            padding: 24px 16px 40px;
+            box-sizing: border-box;
+        }
 
-/* ── reader ── */
+        #shelf h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 0 8px;
+            letter-spacing: -0.5px;
+            color: #1a1a1a;
+        }
 
-#readerView{
-display:none;
-height:100%;
-flex-direction:column;
-}
+        #shelf .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+            margin: 0 0 32px;
+            font-weight: 400;
+        }
 
-#topBar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:6px 8px;
-z-index:20;
-flex-shrink:0;
-}
+        .bookGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+            max-width: 720px;
+            margin: 0 auto;
+        }
 
-.iconBtn{
-width:36px;
-height:36px;
-border:none;
-border-radius:10px;
-background:rgba(0,0,0,0.06);
-color:#333;
-font-size:14px;
-cursor:pointer;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:0;
-transition:background 0.12s;
-}
+        .bookCard {
+            border-radius: 14px;
+            padding: 22px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            position: relative;
+            overflow: hidden;
+        }
 
-.iconBtn:hover{
-background:rgba(0,0,0,0.12);
-}
+        .bookCard:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
 
-.iconBtn .material-symbols-rounded{
-font-size:20px;
-}
+        .bookCard:active {
+            transform: scale(0.97);
+        }
 
-.textBtn{
-border:none;
-border-radius:10px;
-background:rgba(0,0,0,0.06);
-color:#333;
-font-size:13px;
-font-weight:600;
-cursor:pointer;
-padding:7px 12px;
-transition:background 0.12s;
-display:flex;
-align-items:center;
-gap:5px;
-}
+        .bookIcon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
 
-.textBtn:hover{
-background:rgba(0,0,0,0.12);
-}
+        .bookIcon .material-symbols-rounded {
+            font-size: 22px;
+            color: #1a1a1a;
+        }
 
-.textBtn .material-symbols-rounded{
-font-size:18px;
-}
+        .bookTitle {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1a1a1a;
+        }
 
-#rightControls{
-display:flex;
-gap:4px;
-}
+        .bookDesc {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 12px;
+        }
 
-.btnGroup{
-display:flex;
-gap:2px;
-background:rgba(0,0,0,0.04);
-border-radius:10px;
-padding:2px;
-}
+        .bookBadge {
+            font-size: 10px;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 3px 8px;
+            border-radius: 20px;
+            position: absolute;
+            top: 12px;
+            right: 12px;
+        }
 
-.btnGroup .iconBtn{
-background:transparent;
-border-radius:8px;
-}
+        /* ── reader ── */
 
-.btnGroup .iconBtn:hover{
-background:rgba(0,0,0,0.1);
-}
+        #readerView {
+            display: none;
+            height: 100%;
+            flex-direction: column;
+        }
 
-.separator{
-width:8px;
-}
+        #topBar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            z-index: 20;
+            flex-shrink: 0;
+        }
 
-#viewer{
-flex:1;
-overflow:auto;
--webkit-overflow-scrolling:touch;
-display:flex;
-padding:10px;
-box-sizing:border-box;
-transition:transform 0.25s ease;
-}
+        .iconBtn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.06);
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: background 0.12s;
+        }
 
-#pageWrapper{
-position:relative;
-display:inline-block;
-flex-shrink:0;
-margin:auto;
-}
+        .iconBtn:hover {
+            background: rgba(0, 0, 0, 0.12);
+        }
 
-#pageWrapper{
-transition:transform 0.15s ease;
-transform-origin:top center;
-}
+        .iconBtn .material-symbols-rounded {
+            font-size: 20px;
+        }
 
-#pageWrapper canvas{
-display:block;
-box-shadow:0 6px 30px rgba(0,0,0,0.25);
-border-radius:6px;
-position:relative;
-z-index:1;
-}
+        .textBtn {
+            border: none;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.06);
+            color: #333;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 7px 12px;
+            transition: background 0.12s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
 
-#textLayer{
-z-index:2;
-opacity:1;
-}
+        .textBtn:hover {
+            background: rgba(0, 0, 0, 0.12);
+        }
 
-#textLayer ::selection {
-background: rgba(33, 150, 243, 0.35);
-color: transparent;
-}
+        .textBtn .material-symbols-rounded {
+            font-size: 18px;
+        }
 
-#searchLayer{
-position:absolute;
-top:0;
-left:0;
-right:0;
-bottom:0;
-z-index:2;
-pointer-events:none;
-}
+        #rightControls {
+            display: flex;
+            gap: 4px;
+        }
 
-.search-hit{
-position:absolute;
-background:rgba(255,235,59,0.38);
-border-radius:2px;
-}
+        .btnGroup {
+            display: flex;
+            gap: 2px;
+            background: rgba(0, 0, 0, 0.04);
+            border-radius: 10px;
+            padding: 2px;
+        }
 
-#annotationLayer{
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:100%;
-z-index:3;
-pointer-events:none;
-}
+        .btnGroup .iconBtn {
+            background: transparent;
+            border-radius: 8px;
+        }
 
-#annotationLayer a{
-position:absolute;
-display:block;
-pointer-events:auto;
-}
+        .btnGroup .iconBtn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
 
-#searchBar{
-display:none;
-align-items:center;
-gap:8px;
-padding:6px 10px;
-margin:0 10px 8px;
-border-radius:12px;
-background:rgba(0,0,0,0.06);
-}
+        .separator {
+            width: 8px;
+        }
 
-#searchInput{
-flex:1;
-border:none;
-outline:none;
-padding:8px 10px;
-border-radius:8px;
-background:#fff;
-font-size:13px;
-}
+        #viewer {
+            flex: 1;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            padding: 10px;
+            box-sizing: border-box;
+            transition: transform 0.25s ease;
+        }
 
-#searchCount{
-font-size:12px;
-color:#666;
-min-width:90px;
-text-align:center;
-}
+        #pageWrapper {
+            position: relative;
+            display: inline-block;
+            flex-shrink: 0;
+            margin: auto;
+        }
 
-.search-active{
-background:rgba(255,193,7,0.72);
-}
+        #pageWrapper {
+            transition: transform 0.15s ease;
+            transform-origin: top center;
+        }
 
-/* ── bottom bar ── */
+        #pageWrapper canvas {
+            display: block;
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.25);
+            border-radius: 6px;
+            position: relative;
+            z-index: 1;
+        }
 
-#bottomBar{
-display:flex;
-align-items:center;
-gap:10px;
-padding:8px 14px;
-flex-shrink:0;
-z-index:20;
-}
+        #textLayer {
+            z-index: 2;
+            opacity: 1;
+        }
 
-#pageSlider{
-flex:1;
-height:4px;
--webkit-appearance:none;
-appearance:none;
-background:#ccc;
-border-radius:4px;
-outline:none;
-cursor:pointer;
-}
+        #textLayer ::selection {
+            background: rgba(33, 150, 243, 0.35);
+            color: transparent;
+        }
 
-#pageSlider::-webkit-slider-thumb{
--webkit-appearance:none;
-width:16px;
-height:16px;
-border-radius:50%;
-background:#333;
-cursor:pointer;
-border:2px solid #fff;
-box-shadow:0 1px 4px rgba(0,0,0,0.2);
-}
+        #searchLayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+            pointer-events: none;
+        }
 
-#pageSlider::-moz-range-thumb{
-width:16px;
-height:16px;
-border-radius:50%;
-background:#333;
-border:2px solid #fff;
-box-shadow:0 1px 4px rgba(0,0,0,0.2);
-cursor:pointer;
-}
+        .search-hit {
+            position: absolute;
+            background: rgba(255, 235, 59, 0.38);
+            border-radius: 2px;
+        }
 
-#pageLabel{
-font-size:12px;
-color:#555;
-white-space:nowrap;
-min-width:60px;
-text-align:right;
-}
+        #annotationLayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
 
-/* ── sidebar ── */
+        #annotationLayer a {
+            position: absolute;
+            display: block;
+            pointer-events: auto;
+        }
 
-#sidebar{
-position:fixed;
-top:0;
-left:0;
-width:300px;
-max-width:85vw;
-height:100%;
-background:#fff;
-box-shadow:4px 0 24px rgba(0,0,0,0.12);
-z-index:100;
-transform:translateX(-100%);
-transition:transform 0.25s ease;
-display:flex;
-flex-direction:column;
-border-radius:0 16px 16px 0;
-}
+        #searchBar {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            margin: 0 10px 8px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.06);
+        }
 
-#sidebar.open{
-transform:translateX(0);
-}
+        #searchInput {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: #fff;
+            font-size: 13px;
+        }
 
-#sidebarHeader{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:16px 16px 14px;
-border-bottom:1px solid #eee;
-font-weight:700;
-font-size:16px;
-flex-shrink:0;
-}
+        #searchCount {
+            font-size: 12px;
+            color: #666;
+            min-width: 90px;
+            text-align: center;
+        }
 
-#sidebarHeader .iconBtn{
-background:none;
-}
+        .search-active {
+            background: rgba(255, 193, 7, 0.72);
+        }
 
-#sidebarList{
-flex:1;
-overflow-y:auto;
-padding:8px 0;
-}
+        /* ── bottom bar ── */
 
-.tocItem{
-display:block;
-padding:10px 16px;
-font-size:13px;
-color:#333;
-cursor:pointer;
-border:none;
-background:none;
-width:100%;
-text-align:left;
-transition:background 0.1s;
-border-radius:0;
-}
+        #bottomBar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            flex-shrink: 0;
+            z-index: 20;
+        }
 
-.tocItem:hover{
-background:#f5f5f5;
-}
+        #pageSlider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ccc;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
 
-.tocItem.depth-1{padding-left:16px;font-weight:700;}
-.tocItem.depth-2{padding-left:30px;}
-.tocItem.depth-3{padding-left:44px;font-size:12px;color:#666;}
-.tocItem.depth-4{padding-left:58px;font-size:12px;color:#888;}
+        #pageSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #333;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        }
 
-.tocItem.active.depth-1{background:rgba(0,0,0,0.08);color:#000;}
-.tocItem.active.depth-2{background:rgba(0,0,0,0.05);color:#000;}
-.tocItem.active.depth-3{background:rgba(0,0,0,0.04);color:#333;}
-.tocItem.active.depth-4{background:rgba(0,0,0,0.03);color:#555;}
+        #pageSlider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #333;
+            border: 2px solid #fff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
 
-#sidebarOverlay{
-position:fixed;
-top:0;left:0;right:0;bottom:0;
-background:rgba(0,0,0,0.3);
-z-index:99;
-display:none;
-}
+        #pageLabel {
+            font-size: 12px;
+            color: #555;
+            white-space: nowrap;
+            min-width: 60px;
+            text-align: right;
+        }
 
-/* ── dark mode ── */
+        /* ── sidebar ── */
 
-.dark{
-background:#111;
-}
-.dark #shelf h1{
-color:#eee;
-}
-.dark #shelf .subtitle{
-color:#666;
-}
-.dark .shelfFooter{
-color:#444;
-}
-.dark .bookCard{
-filter:brightness(0.85);
-}
-.dark .bookTitle{
-color:#1a1a1a;
-}
-.dark #pageWrapper canvas{
-filter:invert(1) hue-rotate(180deg);
-}
-.dark .iconBtn,.dark .textBtn{
-background:rgba(255,255,255,0.1);
-color:#ddd;
-}
-.dark .iconBtn:hover,.dark .textBtn:hover{
-background:rgba(255,255,255,0.18);
-}
-.dark .btnGroup{
-background:rgba(255,255,255,0.06);
-}
-.dark .btnGroup .iconBtn{
-background:transparent;
-}
-.dark .btnGroup .iconBtn:hover{
-background:rgba(255,255,255,0.12);
-}
-.dark #searchBar{
-background:rgba(255,255,255,0.1);
-}
-.dark #searchInput{
-background:#222;
-color:#eee;
-}
-.dark #searchCount{
-color:#bbb;
-}
-.dark #pageLabel{
-color:#aaa;
-}
-.dark #pageSlider{
-background:#444;
-}
-.dark #pageSlider::-webkit-slider-thumb{
-background:#ccc;
-border-color:#222;
-}
-.dark #pageSlider::-moz-range-thumb{
-background:#ccc;
-border-color:#222;
-}
-.dark #sidebar{
-background:#1a1a1a;
-box-shadow:4px 0 24px rgba(0,0,0,0.5);
-}
-.dark #sidebarHeader{
-color:#eee;
-border-color:#333;
-}
-.dark #sidebarHeader .iconBtn{
-color:#ccc;
-}
-.dark .tocItem{
-color:#ccc;
-}
-.dark .tocItem:hover{
-background:#2a2a2a;
-}
-.dark .tocItem.depth-3,.dark .tocItem.depth-4{
-color:#888;
-}
-.dark .tocItem.active.depth-1{background:rgba(255,255,255,0.1);color:#fff;}
-.dark .tocItem.active.depth-2{background:rgba(255,255,255,0.07);color:#eee;}
-.dark .tocItem.active.depth-3{background:rgba(255,255,255,0.05);color:#ccc;}
-.dark .tocItem.active.depth-4{background:rgba(255,255,255,0.04);color:#aaa;}
-</style>
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 300px;
+            max-width: 85vw;
+            height: 100%;
+            background: #fff;
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+            z-index: 100;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            border-radius: 0 16px 16px 0;
+        }
+
+        #sidebar.open {
+            transform: translateX(0);
+        }
+
+        #sidebarHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 16px 14px;
+            border-bottom: 1px solid #eee;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        #sidebarHeader .iconBtn {
+            background: none;
+        }
+
+        #sidebarList {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .tocItem {
+            display: block;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #333;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            transition: background 0.1s;
+            border-radius: 0;
+        }
+
+        .tocItem:hover {
+            background: #f5f5f5;
+        }
+
+        .tocItem.depth-1 {
+            padding-left: 16px;
+            font-weight: 700;
+        }
+
+        .tocItem.depth-2 {
+            padding-left: 30px;
+        }
+
+        .tocItem.depth-3 {
+            padding-left: 44px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .tocItem.depth-4 {
+            padding-left: 58px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .tocItem.active.depth-1 {
+            background: rgba(0, 0, 0, 0.08);
+            color: #000;
+        }
+
+        .tocItem.active.depth-2 {
+            background: rgba(0, 0, 0, 0.05);
+            color: #000;
+        }
+
+        .tocItem.active.depth-3 {
+            background: rgba(0, 0, 0, 0.04);
+            color: #333;
+        }
+
+        .tocItem.active.depth-4 {
+            background: rgba(0, 0, 0, 0.03);
+            color: #555;
+        }
+
+        #sidebarOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 99;
+            display: none;
+        }
+
+        /* ── dark mode ── */
+
+        .dark {
+            background: #111;
+        }
+
+        .dark #shelf h1 {
+            color: #eee;
+        }
+
+        .dark #shelf .subtitle {
+            color: #666;
+        }
+
+        .dark .shelfFooter {
+            color: #444;
+        }
+
+        .dark .bookCard {
+            filter: brightness(0.85);
+        }
+
+        .dark .bookTitle {
+            color: #1a1a1a;
+        }
+
+        .dark #pageWrapper canvas {
+            filter: invert(1) hue-rotate(180deg);
+        }
+
+        .dark .iconBtn,
+        .dark .textBtn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ddd;
+        }
+
+        .dark .iconBtn:hover,
+        .dark .textBtn:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .dark .btnGroup {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .dark .btnGroup .iconBtn {
+            background: transparent;
+        }
+
+        .dark .btnGroup .iconBtn:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .dark #searchBar {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .dark #searchInput {
+            background: #222;
+            color: #eee;
+        }
+
+        .dark #searchCount {
+            color: #bbb;
+        }
+
+        .dark #pageLabel {
+            color: #aaa;
+        }
+
+        .dark #pageSlider {
+            background: #444;
+        }
+
+        .dark #pageSlider::-webkit-slider-thumb {
+            background: #ccc;
+            border-color: #222;
+        }
+
+        .dark #pageSlider::-moz-range-thumb {
+            background: #ccc;
+            border-color: #222;
+        }
+
+        .dark #sidebar {
+            background: #1a1a1a;
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .dark #sidebarHeader {
+            color: #eee;
+            border-color: #333;
+        }
+
+        .dark #sidebarHeader .iconBtn {
+            color: #ccc;
+        }
+
+        .dark .tocItem {
+            color: #ccc;
+        }
+
+        .dark .tocItem:hover {
+            background: #2a2a2a;
+        }
+
+        .dark .tocItem.depth-3,
+        .dark .tocItem.depth-4 {
+            color: #888;
+        }
+
+        .dark .tocItem.active.depth-1 {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .dark .tocItem.active.depth-2 {
+            background: rgba(255, 255, 255, 0.07);
+            color: #eee;
+        }
+
+        .dark .tocItem.active.depth-3 {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ccc;
+        }
+
+        .dark .tocItem.active.depth-4 {
+            background: rgba(255, 255, 255, 0.04);
+            color: #aaa;
+        }
+    </style>
 </head>
 
 <body>
 
-<!-- ── SHELF VIEW ── -->
-<div id="shelf">
-<div style="display:flex;justify-content:flex-end;padding:8px 8px 0">
-<button class="iconBtn" onclick="toggleDark()" title="Dark mode"><span id="shelfDarkIcon" class="material-symbols-rounded">dark_mode</span></button>
-</div>
-<h1>MSc Computing Notes</h1>
-<p class="subtitle">Pick a notebook to start reading</p>
-<div class="bookGrid" id="bookGrid"></div>
-</div>
-
-<!-- ── SIDEBAR ── -->
-<div id="sidebarOverlay" onclick="closeSidebar()"></div>
-<div id="sidebar">
-<div id="sidebarHeader">
-<span>Contents</span>
-<button class="iconBtn" onclick="closeSidebar()"><span class="material-symbols-rounded">close</span></button>
-</div>
-<div id="sidebarList"></div>
-</div>
-
-<!-- ── READER VIEW ── -->
-<div id="readerView">
-
-<div id="topBar">
-<div style="display:flex;gap:4px">
-<button class="textBtn" onclick="goToShelf()"><span class="material-symbols-rounded">arrow_back</span></button>
-<button class="iconBtn" onclick="openSidebar()" title="Contents"><span class="material-symbols-rounded">menu</span></button>
-</div>
-<div id="rightControls">
-<div class="btnGroup">
-<button class="iconBtn" onclick="prevPage()" title="Previous page"><span class="material-symbols-rounded">chevron_left</span></button>
-<button class="iconBtn" onclick="nextPage()" title="Next page"><span class="material-symbols-rounded">chevron_right</span></button>
-</div>
-<div class="separator"></div>
-<div class="btnGroup">
-<button class="iconBtn" onclick="zoomOut()" title="Zoom out"><span class="material-symbols-rounded">remove</span></button>
-<button class="iconBtn" onclick="zoomFit()" title="Fit to screen"><span class="material-symbols-rounded">fit_screen</span></button>
-<button class="iconBtn" onclick="zoomIn()" title="Zoom in"><span class="material-symbols-rounded">add</span></button>
-</div>
-<div class="separator"></div>
-<button class="iconBtn" onclick="openSearchBar()" title="Search"><span class="material-symbols-rounded">search</span></button>
-<div class="separator"></div>
-<button class="iconBtn" onclick="toggleDark()" title="Dark mode"><span id="darkIcon" class="material-symbols-rounded">dark_mode</span></button>
-</div>
-</div>
-
-<div id="searchBar">
-<input id="searchInput" type="text" placeholder="Search this PDF">
-<span id="searchCount">0 matches</span>
-<div class="btnGroup">
-<button class="iconBtn" onclick="searchPrev()" title="Previous"><span class="material-symbols-rounded">keyboard_arrow_up</span></button>
-<button class="iconBtn" onclick="searchNext()" title="Next"><span class="material-symbols-rounded">keyboard_arrow_down</span></button>
-</div>
-<button class="iconBtn" onclick="closeSearchBar()" title="Close search"><span class="material-symbols-rounded">close</span></button>
-</div>
-
-<div id="viewer">
-<div id="pageWrapper">
-<canvas id="pdfCanvas"></canvas>
-<div id="textLayer" class="textLayer"></div>
-<div id="searchLayer"></div>
-<div id="annotationLayer"></div>
-</div>
-</div>
-
-<div id="bottomBar">
-<input type="range" id="pageSlider" min="1" max="1" value="1">
-<span id="pageLabel">1 / 1</span>
-</div>
-
-</div>
-
-<script>
-
-/* ── book catalogue ── */
-
-const BOOKS = [
-{
-id:"ml",
-title:"Machine Learning",
-icon:"smart_toy",
-desc:"Compiled Lecture Notes",
-color:"#C3E0DD",
-path:"Machine Learning/Compiled Notes.pdf"
-},
-{
-id:"tsa",
-title:"Text & Sequence Analytics",
-icon:"edit_note",
-desc:"Compiled Lecture Notes",
-color:"#D4E4BC",
-path:"Text and Sequence Analytics/Compiled Notes.pdf"
-},
-{
-id:"stats",
-title:"Statistical Computing",
-icon:"bar_chart",
-desc:"Compiled Lecture Notes",
-color:"#F7D9D9",
-path:"Statistical Computing/Compiled Notes.pdf"
-},
-{
-id:"statslab",
-title:"Stats Lab Notes",
-icon:"search",
-desc:"R Focused Lab Notes",
-color:"#FAE9DA",
-path:"Statistical Computing/Lab Notes.pdf"
-}
-]
-
-const DARK_KEY = "reader-dark"
-let badgeMap = {}
-
-let currentBook = null
-let pdfDoc = null
-let pageNum = 1
-let lastModified = null
-let updateTimer = null
-let zoomLevel = 1.0
-let tocEntries = []
-const ZOOM_STEP = 0.25
-const ZOOM_MIN = 0.5
-const ZOOM_MAX = 3.0
-
-const canvas = document.getElementById("pdfCanvas")
-const ctx = canvas.getContext("2d")
-const slider = document.getElementById("pageSlider")
-const textLayer = document.getElementById("textLayer")
-const searchLayer = document.getElementById("searchLayer")
-const searchBar = document.getElementById("searchBar")
-const searchInput = document.getElementById("searchInput")
-
-let textLayerMatches = []
-let activeMatchIndex = -1
-let searchQuery = ""
-const pageTextCache = new Map()
-let pendingSearchFocus = false
-let docMatchCount = 0
-let currentPageTextContent = null
-let currentPageViewport = null
-const measureCanvas = document.createElement("canvas")
-const measureCtx = measureCanvas.getContext("2d")
-
-/* ── shelf rendering ── */
-
-async function fetchBadges(){
-try{
-const res = await fetch("README.md?t=" + Date.now())
-const text = await res.text()
-const re = /badge\/.*?-([^-]+)-(\w+)\?[^\]]*\]\(([^)]+)\)/g
-let m
-while((m = re.exec(text)) !== null){
-const label = decodeURIComponent(m[1]).replace(/%20/g," ")
-const path = decodeURIComponent(m[3]).replace(/%20/g," ")
-badgeMap[path] = label
-}
-}catch(e){}
-}
-
-function renderShelf(){
-const grid = document.getElementById("bookGrid")
-grid.innerHTML = ""
-
-BOOKS.forEach(book=>{
-const badge = badgeMap[book.path]
-const card = document.createElement("div")
-card.className = "bookCard"
-card.style.background = book.color
-
-card.innerHTML =
-'<div class="bookIcon"><span class="material-symbols-rounded">' + book.icon + '</span></div>' +
-'<div class="bookTitle">' + book.title + '</div>' +
-'<div class="bookDesc">' + book.desc + '</div>' +
-(badge ? '<span class="bookBadge">' + badge + '</span>' : '')
-
-card.addEventListener("click",()=> openBook(book))
-grid.appendChild(card)
-})
-}
-
-/* ── open / close book ── */
-
-async function openBook(book){
-currentBook = book
-pageNum = 1
-lastModified = null
-zoomLevel = 1.0
-clearSearchState()
-applyZoom()
-
-document.getElementById("shelf").style.display = "none"
-document.getElementById("readerView").style.display = "flex"
-
-await loadPDF()
-await loadOutline()
-
-updateTimer = setInterval(()=> checkUpdate(),60000)
-}
-
-function goToShelf(){
-if(updateTimer){
-clearInterval(updateTimer)
-updateTimer = null
-}
-closeSidebar()
-pdfDoc = null
-currentBook = null
-closeSearchBar()
-clearSearchState()
-
-document.getElementById("readerView").style.display = "none"
-document.getElementById("shelf").style.display = "block"
-
-renderShelf()
-}
-
-/* ── pdf loading ── */
-
-async function loadPDF(){
-const url = currentBook.path + "?t=" + Date.now()
-pdfDoc = await pdfjsLib.getDocument(url).promise
-pageTextCache.clear()
-
-if(pageNum > pdfDoc.numPages) pageNum = pdfDoc.numPages
-if(pageNum < 1) pageNum = 1
-
-slider.max = pdfDoc.numPages
-slider.value = pageNum
-
-await renderPage(pageNum)
-if (typeof scrollToTopMiddle === "function") scrollToTopMiddle()
-}
-
-async function renderPage(num){
-const page = await pdfDoc.getPage(num)
-
-// Render at device resolution based on fit + user zoom for crisp text.
-const dpr = window.devicePixelRatio || 1
-const baseViewport = page.getViewport({scale:1})
-const viewer = document.getElementById("viewer")
-const vw = viewer.clientWidth - 20 // padding
-const vh = viewer.clientHeight - 20
-const fitScale = Math.min(vw / baseViewport.width, vh / baseViewport.height, 1)
-const displayScale = fitScale * zoomLevel
-
-const viewport = page.getViewport({scale:displayScale})
-const qualityBoost = 1.25
-const zoomBoost = Math.min(1.25, Math.max(1.0, zoomLevel * 0.25 + 1.0))
-const renderPixelScale = Math.min(3.25, dpr * qualityBoost * zoomBoost)
-
-canvas.width = Math.floor(viewport.width * renderPixelScale)
-canvas.height = Math.floor(viewport.height * renderPixelScale)
-canvas.style.width = viewport.width + "px"
-canvas.style.height = viewport.height + "px"
-
-ctx.setTransform(1,0,0,1,0,0)
-ctx.clearRect(0,0,canvas.width,canvas.height)
-ctx.imageSmoothingEnabled = true
-ctx.imageSmoothingQuality = "high"
-
-await page.render({
-canvasContext:ctx,
-viewport:viewport,
-transform: renderPixelScale !== 1
-? [renderPixelScale,0,0,renderPixelScale,0,0]
-: null
-}).promise
-
-currentPageTextContent = await renderTextLayer(page, displayScale)
-currentPageViewport = viewport
-
-// Update slider & label
-slider.value = num
-document.getElementById("pageLabel").innerText = num + " / " + pdfDoc.numPages
-
-// Render clickable links
-await renderAnnotations(page, viewport)
-
-updateSearchHighlights(pendingSearchFocus)
-pendingSearchFocus = false
-
-highlightToc()
-}
-
-async function renderTextLayer(page, displayScale){
-textLayer.innerHTML = ""
-
-const viewport = page.getViewport({scale:displayScale})
-textLayer.style.width = viewport.width + "px"
-textLayer.style.height = viewport.height + "px"
-textLayer.style.setProperty("--scale-factor", displayScale)
-
-const textContent = await page.getTextContent()
-const task = pdfjsLib.renderTextLayer({
-container: textLayer,
-textContentSource: textContent,
-viewport: viewport
-})
-
-if(task && task.promise){
-await task.promise
-}
-
-return textContent
-}
-
-/* ── clickable PDF links ── */
-
-async function renderAnnotations(page, viewport){
-const layer = document.getElementById("annotationLayer")
-layer.innerHTML = ""
-
-const annotations = await page.getAnnotations()
-
-annotations.forEach(ann=>{
-if(ann.subtype !== "Link") return
-
-const rect = ann.rect
-const vw = viewport.viewBox
-// Convert PDF coords to CSS pixel positions
-const x1 = (rect[0] - vw[0]) / (vw[2] - vw[0]) * 100
-const y1 = (1 - (rect[3] - vw[1]) / (vw[3] - vw[1])) * 100
-const x2 = (rect[2] - vw[0]) / (vw[2] - vw[0]) * 100
-const y2 = (1 - (rect[1] - vw[1]) / (vw[3] - vw[1])) * 100
-
-const a = document.createElement("a")
-a.style.left = x1 + "%"
-a.style.top = y1 + "%"
-a.style.width = (x2 - x1) + "%"
-a.style.height = (y2 - y1) + "%"
-
-if(ann.url){
-// External URL
-a.href = ann.url
-a.target = "_blank"
-a.rel = "noopener"
-} else if(ann.dest){
-// Internal link (named destination)
-a.href = "#"
-a.addEventListener("click",async(e)=>{
-e.preventDefault()
-try{
-const dest = typeof ann.dest === "string"
-? await pdfDoc.getDestination(ann.dest)
-: ann.dest
-if(dest){
-const idx = await pdfDoc.getPageIndex(dest[0])
-goToPage(idx + 1)
-}
-}catch(ex){}
-})
-} else if(ann.newWindow === undefined && ann.action){
-// GoTo action
-a.href = "#"
-a.addEventListener("click",async(e)=>{
-e.preventDefault()
-try{
-if(ann.action.dest){
-const dest = typeof ann.action.dest === "string"
-? await pdfDoc.getDestination(ann.action.dest)
-: ann.action.dest
-if(dest){
-const idx = await pdfDoc.getPageIndex(dest[0])
-goToPage(idx + 1)
-}
-}
-}catch(ex){}
-})
-} else {
-return
-}
-
-layer.appendChild(a)
-})
-}
-
-/* ── outline / chapters sidebar ── */
-
-async function loadOutline(){
-const list = document.getElementById("sidebarList")
-list.innerHTML = ""
-tocEntries = []
-
-if(!pdfDoc) return
-
-const outline = await pdfDoc.getOutline()
-if(!outline || outline.length === 0){
-list.innerHTML = '<div style="padding:16px;color:#999;font-size:13px">No chapters found</div>'
-return
-}
-
-async function buildItems(items, depth){
-for(const item of items){
-const btn = document.createElement("button")
-btn.className = "tocItem depth-" + Math.min(depth, 4)
-btn.textContent = item.title
-
-let tocPage = null
-try{
-const dest = typeof item.dest === "string"
-? await pdfDoc.getDestination(item.dest)
-: item.dest
-if(dest){
-tocPage = await pdfDoc.getPageIndex(dest[0]) + 1
-}
-}catch(ex){}
-
-tocEntries.push({btn:btn, page:tocPage, depth:depth})
-
-btn.addEventListener("click",async()=>{
-if(tocPage !== null){
-goToPage(tocPage)
-closeSidebar()
-}
-})
-
-list.appendChild(btn)
-
-if(item.items && item.items.length > 0){
-await buildItems(item.items, depth + 1)
-}
-}
-}
-
-await buildItems(outline, 1)
-highlightToc()
-}
-
-function highlightToc(){
-if(!tocEntries.length) return
-
-// Clear all
-tocEntries.forEach(e => e.btn.classList.remove("active"))
-
-// For each depth, find the last entry whose page <= current page
-const activeByDepth = {}
-tocEntries.forEach(e => {
-if(e.page !== null && e.page <= pageNum){
-activeByDepth[e.depth] = e
-}
-})
-
-// Highlight the active item at each depth level
-Object.values(activeByDepth).forEach(e => e.btn.classList.add("active"))
-}
-
-function openSidebar(){
-document.getElementById("sidebar").classList.add("open")
-document.getElementById("sidebarOverlay").style.display = "block"
-}
-
-function closeSidebar(){
-document.getElementById("sidebar").classList.remove("open")
-document.getElementById("sidebarOverlay").style.display = "none"
-}
-
-/* ── zoom ── */
-
-async function applyZoom(){
-if(pdfDoc){
-const viewer = document.getElementById("viewer")
-let sx = 0, sy = 0
-if(viewer.scrollWidth > 0 && viewer.scrollHeight > 0) {
-sx = (viewer.scrollLeft + viewer.clientWidth / 2) / viewer.scrollWidth
-sy = (viewer.scrollTop + viewer.clientHeight / 2) / viewer.scrollHeight
-}
-
-await renderPage(pageNum)
-
-if(sx > 0 || sy > 0) {
-viewer.scrollLeft = sx * viewer.scrollWidth - viewer.clientWidth / 2
-viewer.scrollTop = sy * viewer.scrollHeight - viewer.clientHeight / 2
-}
-}
-}
-
-function zoomIn(){
-zoomLevel = Math.min(ZOOM_MAX, zoomLevel + ZOOM_STEP)
-applyZoom()
-}
-
-function zoomOut(){
-zoomLevel = Math.max(ZOOM_MIN, zoomLevel - ZOOM_STEP)
-applyZoom()
-}
-
-async function zoomFit(){
-zoomLevel = 1.0
-await applyZoom()
-if (typeof scrollToTopMiddle === "function") scrollToTopMiddle()
-}
-
-/* ── search ── */
-
-function clearSearchState(){
-searchQuery = ""
-textLayerMatches = []
-activeMatchIndex = -1
-pendingSearchFocus = false
-docMatchCount = 0
-searchLayer.innerHTML = ""
-updateSearchCount(0)
-}
-
-function openSearchBar(){
-searchBar.style.display = "flex"
-searchInput.focus()
-searchInput.select()
-updateSearchHighlights(false)
-}
-
-function closeSearchBar(){
-searchBar.style.display = "none"
-searchInput.value = ""
-clearSearchState()
-updateSearchHighlights(false)
-}
-
-function updateSearchCount(count){
-const countEl = document.getElementById("searchCount")
-if(!searchQuery){
-countEl.textContent = "0 matches"
-return
-}
-countEl.textContent = textLayerMatches.length + " on page / " + count + " total"
-}
-
-function updateSearchHighlights(focusFirst){
-searchLayer.innerHTML = ""
-textLayerMatches = []
-activeMatchIndex = -1
-
-if(!searchQuery || !currentPageTextContent || !currentPageViewport){
-updateSearchCount(docMatchCount)
-return
-}
-
-const styles = currentPageTextContent.styles || {}
-currentPageTextContent.items.forEach(item=>{
-const raw = item.str || ""
-if(!raw) return
-
-const lower = raw.toLowerCase()
-let from = 0
-while(true){
-const idx = lower.indexOf(searchQuery, from)
-if(idx === -1) break
-
-const box = getItemMatchBox(item, idx, idx + searchQuery.length, styles, currentPageViewport)
-if(box){
-const hit = document.createElement("div")
-hit.className = "search-hit"
-hit.style.left = box.left + "px"
-hit.style.top = box.top + "px"
-hit.style.width = box.width + "px"
-hit.style.height = box.height + "px"
-searchLayer.appendChild(hit)
-textLayerMatches.push(hit)
-}
-
-from = idx + Math.max(1, searchQuery.length)
-}
-})
-
-updateSearchCount(docMatchCount)
-
-if(focusFirst && textLayerMatches.length){
-activeMatchIndex = 0
-focusActiveMatch()
-}
-}
-
-function focusActiveMatch(){
-if(activeMatchIndex < 0 || activeMatchIndex >= textLayerMatches.length) return
-textLayerMatches.forEach(s => s.classList.remove("search-active"))
-const el = textLayerMatches[activeMatchIndex]
-el.classList.add("search-active")
-el.scrollIntoView({block:"center",inline:"nearest",behavior:"smooth"})
-}
-
-function getItemMatchBox(item, start, end, styles, viewport){
-const text = item.str || ""
-if(!text || start < 0 || end <= start || end > text.length) return null
-
-const style = styles[item.fontName] || {}
-const tx = pdfjsLib.Util.transform(viewport.transform, item.transform)
-const x = tx[4]
-const y = tx[5]
-const fontHeight = Math.max(1, Math.hypot(tx[2], tx[3]))
-const ascent = style.ascent !== undefined ? style.ascent : 0.8
-const descent = style.descent !== undefined ? style.descent : -0.2
-const fontFamily = style.fontFamily || "sans-serif"
-
-measureCtx.font = fontHeight + "px " + fontFamily
-
-const totalMeasured = measureCtx.measureText(text).width
-const prefixMeasured = measureCtx.measureText(text.slice(0, start)).width
-const matchMeasured = measureCtx.measureText(text.slice(start, end)).width
-
-const fallbackTotal = Math.max(1, Math.abs(item.width * viewport.scale))
-const totalWidth = totalMeasured > 0 ? totalMeasured : fallbackTotal
-const prefixWidth = totalMeasured > 0
-? prefixMeasured
-: fallbackTotal * (start / text.length)
-const matchWidth = totalMeasured > 0
-? Math.max(1, matchMeasured)
-: Math.max(1, fallbackTotal * ((end - start) / text.length))
-
-const height = Math.max(2, fontHeight * (ascent - descent))
-const top = y - fontHeight * ascent
-const left = x + (prefixWidth * (fallbackTotal / totalWidth))
-const width = Math.max(1, matchWidth * (fallbackTotal / totalWidth))
-
-return {left, top, width, height}
-}
-
-async function getPageText(num){
-if(pageTextCache.has(num)) return pageTextCache.get(num)
-const page = await pdfDoc.getPage(num)
-const content = await page.getTextContent()
-const text = content.items.map(i => i.str || "").join(" ").toLowerCase()
-pageTextCache.set(num, text)
-return text
-}
-
-async function findPageWithMatch(query, startPage, dir){
-if(!pdfDoc) return null
-let page = startPage
-for(let i = 0; i < pdfDoc.numPages; i++){
-if(page < 1) page = pdfDoc.numPages
-if(page > pdfDoc.numPages) page = 1
-const txt = await getPageText(page)
-if(txt.includes(query)) return page
-page += dir
-}
-return null
-}
-
-async function runSearch(fromCurrentPage){
-if(!pdfDoc) return
-searchQuery = searchInput.value.trim().toLowerCase()
-if(!searchQuery){
-updateSearchHighlights(false)
-return
-}
-
-const totalMatches = await countMatchesInDocument(searchQuery)
-docMatchCount = totalMatches
-updateSearchCount(docMatchCount)
-
-if(fromCurrentPage){
-updateSearchHighlights(true)
-if(textLayerMatches.length) return
-}
-
-const target = await findPageWithMatch(searchQuery, pageNum, 1)
-if(target === null){
-docMatchCount = 0
-updateSearchCount(0)
-return
-}
-
-pendingSearchFocus = true
-if(target === pageNum){
-updateSearchHighlights(true)
-} else {
-goToPage(target)
-}
-}
-
-async function searchNext(){
-if(!searchQuery){
-await runSearch(true)
-return
-}
-
-if(textLayerMatches.length && activeMatchIndex < textLayerMatches.length - 1){
-activeMatchIndex++
-focusActiveMatch()
-return
-}
-
-const target = await findPageWithMatch(searchQuery, pageNum + 1, 1)
-if(target === null) return
-pendingSearchFocus = true
-goToPage(target)
-}
-
-async function searchPrev(){
-if(!searchQuery){
-await runSearch(true)
-return
-}
-
-if(textLayerMatches.length && activeMatchIndex > 0){
-activeMatchIndex--
-focusActiveMatch()
-return
-}
-
-const target = await findPageWithMatch(searchQuery, pageNum - 1, -1)
-if(target === null) return
-pendingSearchFocus = true
-goToPage(target)
-}
-
-searchInput.addEventListener("input",()=>{
-runSearch(true)
-})
-
-searchInput.addEventListener("keydown",e=>{
-if(e.key === "Enter"){
-e.preventDefault()
-if(e.shiftKey) searchPrev()
-else searchNext()
-}
-if(e.key === "Escape"){
-e.preventDefault()
-closeSearchBar()
-}
-})
-
-async function countMatchesInDocument(query){
-if(!pdfDoc) return 0
-let count = 0
-for(let i = 1; i <= pdfDoc.numPages; i++){
-const text = await getPageText(i)
-count += countOccurrences(text, query)
-}
-return count
-}
-
-function countOccurrences(text, query){
-if(!query) return 0
-let count = 0
-let pos = 0
-while(true){
-const idx = text.indexOf(query, pos)
-if(idx === -1) break
-count++
-pos = idx + Math.max(1, query.length)
-}
-return count
-}
-
-/* ── page navigation ── */
-
-function scrollToTopMiddle(){
-const viewer = document.getElementById("viewer")
-viewer.scrollLeft = (viewer.scrollWidth - viewer.clientWidth) / 2
-viewer.scrollTop = 0
-}
-
-function animateSlide(dir){
-document.getElementById("viewer").style.transform = "translateX(" + (dir * 80) + "px)"
-}
-
-function resetSlide(){
-document.getElementById("viewer").style.transform = "translateX(0)"
-}
-
-async function goToPage(num){
-if(!pdfDoc) return
-if(num < 1) num = 1
-if(num > pdfDoc.numPages) num = pdfDoc.numPages
-pageNum = num
-await renderPage(pageNum)
-scrollToTopMiddle()
-}
-
-function nextPage(){
-if(!pdfDoc || pageNum >= pdfDoc.numPages) return
-animateSlide(-1)
-pageNum++
-setTimeout(async ()=>{
-await renderPage(pageNum)
-scrollToTopMiddle()
-resetSlide()
-},180)
-}
-
-function prevPage(){
-if(!pdfDoc || pageNum <= 1) return
-animateSlide(1)
-pageNum--
-setTimeout(async ()=>{
-await renderPage(pageNum)
-scrollToTopMiddle()
-resetSlide()
-},180)
-}
-
-/* ── slider ── */
-
-slider.addEventListener("input",()=>{
-const num = parseInt(slider.value)
-document.getElementById("pageLabel").innerText = num + " / " + (pdfDoc ? pdfDoc.numPages : "?")
-})
-
-slider.addEventListener("change",()=>{
-goToPage(parseInt(slider.value))
-})
-
-/* ── dark mode ── */
-
-function updateDarkIcon(){
-const icon = document.body.classList.contains("dark") ? "light_mode" : "dark_mode"
-document.getElementById("darkIcon").textContent = icon
-document.getElementById("shelfDarkIcon").textContent = icon
-}
-
-function toggleDark(){
-document.body.classList.toggle("dark")
-localStorage.setItem(DARK_KEY,document.body.classList.contains("dark"))
-updateDarkIcon()
-}
-
-function loadDark(){
-if(localStorage.getItem(DARK_KEY) === "true"){
-document.body.classList.add("dark")
-}
-updateDarkIcon()
-}
-
-/* ── auto update ── */
-
-async function checkUpdate(){
-if(!currentBook) return
-try{
-const res = await fetch(currentBook.path,{method:"HEAD"})
-const mod = res.headers.get("last-modified")
-if(!lastModified){lastModified = mod;return}
-if(mod && mod !== lastModified){
-lastModified = mod
-const cur = pageNum
-await loadPDF()
-pageNum = cur
-renderPage(pageNum)
-}
-}catch(e){}
-}
-
-/* ── touch / swipe ── */
-
-let startX = 0
-
-document.addEventListener("touchstart",e=>{
-startX = e.touches[0].clientX
-})
-
-document.addEventListener("touchend",e=>{
-if(!currentBook) return
-const dx = e.changedTouches[0].clientX - startX
-if(Math.abs(dx) < 50) return
-dx < 0 ? nextPage() : prevPage()
-})
-
-/* ── keyboard ── */
-
-document.addEventListener("keydown",e=>{
-if(!currentBook) return
-if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f"){
-e.preventDefault()
-openSearchBar()
-return
-}
-if(searchBar.style.display === "flex" && e.key === "Escape"){
-e.preventDefault()
-closeSearchBar()
-return
-}
-if(e.key === "ArrowRight") nextPage()
-if(e.key === "ArrowLeft") prevPage()
-if(e.key === "Escape") goToShelf()
-if(e.key === "+" || e.key === "=") zoomIn()
-if(e.key === "-") zoomOut()
-if(e.key === "0") zoomFit()
-})
-
-/* ── init ── */
-
-loadDark()
-fetchBadges().then(()=> renderShelf())
-
-if("serviceWorker" in navigator){
-navigator.serviceWorker.register("sw.js")
-}
-
-</script>
+    <!-- ── SHELF VIEW ── -->
+    <div id="shelf">
+        <div style="display:flex;justify-content:flex-end;padding:8px 8px 0">
+            <button class="iconBtn" onclick="toggleDark()" title="Dark mode"><span id="shelfDarkIcon"
+                    class="material-symbols-rounded">dark_mode</span></button>
+        </div>
+        <h1>MSc Computing Notes</h1>
+        <p class="subtitle">Pick a notebook to start reading</p>
+        <div class="bookGrid" id="bookGrid"></div>
+    </div>
+
+    <!-- ── SIDEBAR ── -->
+    <div id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <div id="sidebar">
+        <div id="sidebarHeader">
+            <span>Contents</span>
+            <button class="iconBtn" onclick="closeSidebar()"><span
+                    class="material-symbols-rounded">close</span></button>
+        </div>
+        <div id="sidebarList"></div>
+    </div>
+
+    <!-- ── READER VIEW ── -->
+    <div id="readerView">
+
+        <div id="topBar">
+            <div style="display:flex;gap:4px">
+                <button class="textBtn" onclick="goToShelf()"><span
+                        class="material-symbols-rounded">arrow_back</span></button>
+                <button class="iconBtn" onclick="openSidebar()" title="Contents"><span
+                        class="material-symbols-rounded">menu</span></button>
+            </div>
+            <div id="rightControls">
+                <div class="btnGroup">
+                    <button class="iconBtn" onclick="prevPage()" title="Previous page"><span
+                            class="material-symbols-rounded">chevron_left</span></button>
+                    <button class="iconBtn" onclick="nextPage()" title="Next page"><span
+                            class="material-symbols-rounded">chevron_right</span></button>
+                </div>
+                <div class="separator"></div>
+                <div class="btnGroup">
+                    <button class="iconBtn" onclick="zoomOut()" title="Zoom out"><span
+                            class="material-symbols-rounded">remove</span></button>
+                    <button class="iconBtn" onclick="zoomFit()" title="Fit to screen"><span
+                            class="material-symbols-rounded">fit_screen</span></button>
+                    <button class="iconBtn" onclick="zoomIn()" title="Zoom in"><span
+                            class="material-symbols-rounded">add</span></button>
+                </div>
+                <div class="separator"></div>
+                <button class="iconBtn" onclick="openSearchBar()" title="Search"><span
+                        class="material-symbols-rounded">search</span></button>
+                <div class="separator"></div>
+                <button class="iconBtn" onclick="toggleDark()" title="Dark mode"><span id="darkIcon"
+                        class="material-symbols-rounded">dark_mode</span></button>
+            </div>
+        </div>
+
+        <div id="searchBar">
+            <input id="searchInput" type="text" placeholder="Search this PDF">
+            <span id="searchCount">0 matches</span>
+            <div class="btnGroup">
+                <button class="iconBtn" onclick="searchPrev()" title="Previous"><span
+                        class="material-symbols-rounded">keyboard_arrow_up</span></button>
+                <button class="iconBtn" onclick="searchNext()" title="Next"><span
+                        class="material-symbols-rounded">keyboard_arrow_down</span></button>
+            </div>
+            <button class="iconBtn" onclick="closeSearchBar()" title="Close search"><span
+                    class="material-symbols-rounded">close</span></button>
+        </div>
+
+        <div id="viewer">
+            <div id="pageWrapper">
+                <canvas id="pdfCanvas"></canvas>
+                <div id="textLayer" class="textLayer"></div>
+                <div id="searchLayer"></div>
+                <div id="annotationLayer"></div>
+            </div>
+        </div>
+
+        <div id="bottomBar">
+            <input type="range" id="pageSlider" min="1" max="1" value="1">
+            <span id="pageLabel">1 / 1</span>
+        </div>
+
+    </div>
+
+    <script>
+
+        /* ── book catalogue ── */
+
+        const BOOKS = [
+            {
+                id: "ml",
+                title: "Machine Learning",
+                icon: "smart_toy",
+                desc: "Compiled Lecture Notes",
+                color: "#C3E0DD",
+                path: "Machine Learning/Compiled Notes.pdf"
+            },
+            {
+                id: "tsa",
+                title: "Text & Sequence Analytics",
+                icon: "edit_note",
+                desc: "Compiled Lecture Notes",
+                color: "#D4E4BC",
+                path: "Text and Sequence Analytics/Compiled Notes.pdf"
+            },
+            {
+                id: "stats",
+                title: "Statistical Computing",
+                icon: "bar_chart",
+                desc: "Compiled Lecture Notes",
+                color: "#F7D9D9",
+                path: "Statistical Computing/Compiled Notes.pdf"
+            },
+            {
+                id: "statslab",
+                title: "Stats Lab Notes",
+                icon: "search",
+                desc: "R Focused Lab Notes",
+                color: "#FAE9DA",
+                path: "Statistical Computing/Lab Notes.pdf"
+            },
+            {
+                id: "cyber",
+                title: "Cybersecurity",
+                icon: "shield",
+                desc: "Compiled Lecture Notes",
+                color: "#DCD6F7",
+                path: "Cybersecurity and Secure Programming/Compiled Notes.pdf"
+            }
+        ]
+
+        const DARK_KEY = "reader-dark"
+        let badgeMap = {}
+
+        let currentBook = null
+        let pdfDoc = null
+        let pageNum = 1
+        let lastModified = null
+        let updateTimer = null
+        let zoomLevel = 1.0
+        let tocEntries = []
+        const ZOOM_STEP = 0.25
+        const ZOOM_MIN = 0.5
+        const ZOOM_MAX = 3.0
+
+        const canvas = document.getElementById("pdfCanvas")
+        const ctx = canvas.getContext("2d")
+        const slider = document.getElementById("pageSlider")
+        const textLayer = document.getElementById("textLayer")
+        const searchLayer = document.getElementById("searchLayer")
+        const searchBar = document.getElementById("searchBar")
+        const searchInput = document.getElementById("searchInput")
+
+        let textLayerMatches = []
+        let activeMatchIndex = -1
+        let searchQuery = ""
+        const pageTextCache = new Map()
+        let pendingSearchFocus = false
+        let docMatchCount = 0
+        let currentPageTextContent = null
+        let currentPageViewport = null
+        const measureCanvas = document.createElement("canvas")
+        const measureCtx = measureCanvas.getContext("2d")
+
+        /* ── shelf rendering ── */
+
+        async function fetchBadges() {
+            try {
+                const res = await fetch("README.md?t=" + Date.now())
+                const text = await res.text()
+                const re = /badge\/.*?-([^-]+)-(\w+)\?[^\]]*\]\(([^)]+)\)/g
+                let m
+                while ((m = re.exec(text)) !== null) {
+                    const label = decodeURIComponent(m[1]).replace(/%20/g, " ")
+                    const path = decodeURIComponent(m[3]).replace(/%20/g, " ")
+                    badgeMap[path] = label
+                }
+            } catch (e) { }
+        }
+
+        function renderShelf() {
+            const grid = document.getElementById("bookGrid")
+            grid.innerHTML = ""
+
+            BOOKS.forEach(book => {
+                const badge = badgeMap[book.path]
+                const card = document.createElement("div")
+                card.className = "bookCard"
+                card.style.background = book.color
+
+                card.innerHTML =
+                    '<div class="bookIcon"><span class="material-symbols-rounded">' + book.icon + '</span></div>' +
+                    '<div class="bookTitle">' + book.title + '</div>' +
+                    '<div class="bookDesc">' + book.desc + '</div>' +
+                    (badge ? '<span class="bookBadge">' + badge + '</span>' : '')
+
+                card.addEventListener("click", () => openBook(book))
+                grid.appendChild(card)
+            })
+        }
+
+        /* ── open / close book ── */
+
+        async function openBook(book) {
+            currentBook = book
+            pageNum = 1
+            lastModified = null
+            zoomLevel = 1.0
+            clearSearchState()
+            applyZoom()
+
+            document.getElementById("shelf").style.display = "none"
+            document.getElementById("readerView").style.display = "flex"
+
+            await loadPDF()
+            await loadOutline()
+
+            updateTimer = setInterval(() => checkUpdate(), 60000)
+        }
+
+        function goToShelf() {
+            if (updateTimer) {
+                clearInterval(updateTimer)
+                updateTimer = null
+            }
+            closeSidebar()
+            pdfDoc = null
+            currentBook = null
+            closeSearchBar()
+            clearSearchState()
+
+            document.getElementById("readerView").style.display = "none"
+            document.getElementById("shelf").style.display = "block"
+
+            renderShelf()
+        }
+
+        /* ── pdf loading ── */
+
+        async function loadPDF() {
+            const url = currentBook.path + "?t=" + Date.now()
+            pdfDoc = await pdfjsLib.getDocument(url).promise
+            pageTextCache.clear()
+
+            if (pageNum > pdfDoc.numPages) pageNum = pdfDoc.numPages
+            if (pageNum < 1) pageNum = 1
+
+            slider.max = pdfDoc.numPages
+            slider.value = pageNum
+
+            await renderPage(pageNum)
+            if (typeof scrollToTopMiddle === "function") scrollToTopMiddle()
+        }
+
+        async function renderPage(num) {
+            const page = await pdfDoc.getPage(num)
+
+            // Render at device resolution based on fit + user zoom for crisp text.
+            const dpr = window.devicePixelRatio || 1
+            const baseViewport = page.getViewport({ scale: 1 })
+            const viewer = document.getElementById("viewer")
+            const vw = viewer.clientWidth - 20 // padding
+            const vh = viewer.clientHeight - 20
+            const fitScale = Math.min(vw / baseViewport.width, vh / baseViewport.height, 1)
+            const displayScale = fitScale * zoomLevel
+
+            const viewport = page.getViewport({ scale: displayScale })
+            const qualityBoost = 1.25
+            const zoomBoost = Math.min(1.25, Math.max(1.0, zoomLevel * 0.25 + 1.0))
+            const renderPixelScale = Math.min(3.25, dpr * qualityBoost * zoomBoost)
+
+            canvas.width = Math.floor(viewport.width * renderPixelScale)
+            canvas.height = Math.floor(viewport.height * renderPixelScale)
+            canvas.style.width = viewport.width + "px"
+            canvas.style.height = viewport.height + "px"
+
+            ctx.setTransform(1, 0, 0, 1, 0, 0)
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            ctx.imageSmoothingEnabled = true
+            ctx.imageSmoothingQuality = "high"
+
+            await page.render({
+                canvasContext: ctx,
+                viewport: viewport,
+                transform: renderPixelScale !== 1
+                    ? [renderPixelScale, 0, 0, renderPixelScale, 0, 0]
+                    : null
+            }).promise
+
+            currentPageTextContent = await renderTextLayer(page, displayScale)
+            currentPageViewport = viewport
+
+            // Update slider & label
+            slider.value = num
+            document.getElementById("pageLabel").innerText = num + " / " + pdfDoc.numPages
+
+            // Render clickable links
+            await renderAnnotations(page, viewport)
+
+            updateSearchHighlights(pendingSearchFocus)
+            pendingSearchFocus = false
+
+            highlightToc()
+        }
+
+        async function renderTextLayer(page, displayScale) {
+            textLayer.innerHTML = ""
+
+            const viewport = page.getViewport({ scale: displayScale })
+            textLayer.style.width = viewport.width + "px"
+            textLayer.style.height = viewport.height + "px"
+            textLayer.style.setProperty("--scale-factor", displayScale)
+
+            const textContent = await page.getTextContent()
+            const task = pdfjsLib.renderTextLayer({
+                container: textLayer,
+                textContentSource: textContent,
+                viewport: viewport
+            })
+
+            if (task && task.promise) {
+                await task.promise
+            }
+
+            return textContent
+        }
+
+        /* ── clickable PDF links ── */
+
+        async function renderAnnotations(page, viewport) {
+            const layer = document.getElementById("annotationLayer")
+            layer.innerHTML = ""
+
+            const annotations = await page.getAnnotations()
+
+            annotations.forEach(ann => {
+                if (ann.subtype !== "Link") return
+
+                const rect = ann.rect
+                const vw = viewport.viewBox
+                // Convert PDF coords to CSS pixel positions
+                const x1 = (rect[0] - vw[0]) / (vw[2] - vw[0]) * 100
+                const y1 = (1 - (rect[3] - vw[1]) / (vw[3] - vw[1])) * 100
+                const x2 = (rect[2] - vw[0]) / (vw[2] - vw[0]) * 100
+                const y2 = (1 - (rect[1] - vw[1]) / (vw[3] - vw[1])) * 100
+
+                const a = document.createElement("a")
+                a.style.left = x1 + "%"
+                a.style.top = y1 + "%"
+                a.style.width = (x2 - x1) + "%"
+                a.style.height = (y2 - y1) + "%"
+
+                if (ann.url) {
+                    // External URL
+                    a.href = ann.url
+                    a.target = "_blank"
+                    a.rel = "noopener"
+                } else if (ann.dest) {
+                    // Internal link (named destination)
+                    a.href = "#"
+                    a.addEventListener("click", async (e) => {
+                        e.preventDefault()
+                        try {
+                            const dest = typeof ann.dest === "string"
+                                ? await pdfDoc.getDestination(ann.dest)
+                                : ann.dest
+                            if (dest) {
+                                const idx = await pdfDoc.getPageIndex(dest[0])
+                                goToPage(idx + 1)
+                            }
+                        } catch (ex) { }
+                    })
+                } else if (ann.newWindow === undefined && ann.action) {
+                    // GoTo action
+                    a.href = "#"
+                    a.addEventListener("click", async (e) => {
+                        e.preventDefault()
+                        try {
+                            if (ann.action.dest) {
+                                const dest = typeof ann.action.dest === "string"
+                                    ? await pdfDoc.getDestination(ann.action.dest)
+                                    : ann.action.dest
+                                if (dest) {
+                                    const idx = await pdfDoc.getPageIndex(dest[0])
+                                    goToPage(idx + 1)
+                                }
+                            }
+                        } catch (ex) { }
+                    })
+                } else {
+                    return
+                }
+
+                layer.appendChild(a)
+            })
+        }
+
+        /* ── outline / chapters sidebar ── */
+
+        async function loadOutline() {
+            const list = document.getElementById("sidebarList")
+            list.innerHTML = ""
+            tocEntries = []
+
+            if (!pdfDoc) return
+
+            const outline = await pdfDoc.getOutline()
+            if (!outline || outline.length === 0) {
+                list.innerHTML = '<div style="padding:16px;color:#999;font-size:13px">No chapters found</div>'
+                return
+            }
+
+            async function buildItems(items, depth) {
+                for (const item of items) {
+                    const btn = document.createElement("button")
+                    btn.className = "tocItem depth-" + Math.min(depth, 4)
+                    btn.textContent = item.title
+
+                    let tocPage = null
+                    try {
+                        const dest = typeof item.dest === "string"
+                            ? await pdfDoc.getDestination(item.dest)
+                            : item.dest
+                        if (dest) {
+                            tocPage = await pdfDoc.getPageIndex(dest[0]) + 1
+                        }
+                    } catch (ex) { }
+
+                    tocEntries.push({ btn: btn, page: tocPage, depth: depth })
+
+                    btn.addEventListener("click", async () => {
+                        if (tocPage !== null) {
+                            goToPage(tocPage)
+                            closeSidebar()
+                        }
+                    })
+
+                    list.appendChild(btn)
+
+                    if (item.items && item.items.length > 0) {
+                        await buildItems(item.items, depth + 1)
+                    }
+                }
+            }
+
+            await buildItems(outline, 1)
+            highlightToc()
+        }
+
+        function highlightToc() {
+            if (!tocEntries.length) return
+
+            // Clear all
+            tocEntries.forEach(e => e.btn.classList.remove("active"))
+
+            // For each depth, find the last entry whose page <= current page
+            const activeByDepth = {}
+            tocEntries.forEach(e => {
+                if (e.page !== null && e.page <= pageNum) {
+                    activeByDepth[e.depth] = e
+                }
+            })
+
+            // Highlight the active item at each depth level
+            Object.values(activeByDepth).forEach(e => e.btn.classList.add("active"))
+        }
+
+        function openSidebar() {
+            document.getElementById("sidebar").classList.add("open")
+            document.getElementById("sidebarOverlay").style.display = "block"
+        }
+
+        function closeSidebar() {
+            document.getElementById("sidebar").classList.remove("open")
+            document.getElementById("sidebarOverlay").style.display = "none"
+        }
+
+        /* ── zoom ── */
+
+        async function applyZoom() {
+            if (pdfDoc) {
+                const viewer = document.getElementById("viewer")
+                let sx = 0, sy = 0
+                if (viewer.scrollWidth > 0 && viewer.scrollHeight > 0) {
+                    sx = (viewer.scrollLeft + viewer.clientWidth / 2) / viewer.scrollWidth
+                    sy = (viewer.scrollTop + viewer.clientHeight / 2) / viewer.scrollHeight
+                }
+
+                await renderPage(pageNum)
+
+                if (sx > 0 || sy > 0) {
+                    viewer.scrollLeft = sx * viewer.scrollWidth - viewer.clientWidth / 2
+                    viewer.scrollTop = sy * viewer.scrollHeight - viewer.clientHeight / 2
+                }
+            }
+        }
+
+        function zoomIn() {
+            zoomLevel = Math.min(ZOOM_MAX, zoomLevel + ZOOM_STEP)
+            applyZoom()
+        }
+
+        function zoomOut() {
+            zoomLevel = Math.max(ZOOM_MIN, zoomLevel - ZOOM_STEP)
+            applyZoom()
+        }
+
+        async function zoomFit() {
+            zoomLevel = 1.0
+            await applyZoom()
+            if (typeof scrollToTopMiddle === "function") scrollToTopMiddle()
+        }
+
+        /* ── search ── */
+
+        function clearSearchState() {
+            searchQuery = ""
+            textLayerMatches = []
+            activeMatchIndex = -1
+            pendingSearchFocus = false
+            docMatchCount = 0
+            searchLayer.innerHTML = ""
+            updateSearchCount(0)
+        }
+
+        function openSearchBar() {
+            searchBar.style.display = "flex"
+            searchInput.focus()
+            searchInput.select()
+            updateSearchHighlights(false)
+        }
+
+        function closeSearchBar() {
+            searchBar.style.display = "none"
+            searchInput.value = ""
+            clearSearchState()
+            updateSearchHighlights(false)
+        }
+
+        function updateSearchCount(count) {
+            const countEl = document.getElementById("searchCount")
+            if (!searchQuery) {
+                countEl.textContent = "0 matches"
+                return
+            }
+            countEl.textContent = textLayerMatches.length + " on page / " + count + " total"
+        }
+
+        function updateSearchHighlights(focusFirst) {
+            searchLayer.innerHTML = ""
+            textLayerMatches = []
+            activeMatchIndex = -1
+
+            if (!searchQuery || !currentPageTextContent || !currentPageViewport) {
+                updateSearchCount(docMatchCount)
+                return
+            }
+
+            const styles = currentPageTextContent.styles || {}
+            currentPageTextContent.items.forEach(item => {
+                const raw = item.str || ""
+                if (!raw) return
+
+                const lower = raw.toLowerCase()
+                let from = 0
+                while (true) {
+                    const idx = lower.indexOf(searchQuery, from)
+                    if (idx === -1) break
+
+                    const box = getItemMatchBox(item, idx, idx + searchQuery.length, styles, currentPageViewport)
+                    if (box) {
+                        const hit = document.createElement("div")
+                        hit.className = "search-hit"
+                        hit.style.left = box.left + "px"
+                        hit.style.top = box.top + "px"
+                        hit.style.width = box.width + "px"
+                        hit.style.height = box.height + "px"
+                        searchLayer.appendChild(hit)
+                        textLayerMatches.push(hit)
+                    }
+
+                    from = idx + Math.max(1, searchQuery.length)
+                }
+            })
+
+            updateSearchCount(docMatchCount)
+
+            if (focusFirst && textLayerMatches.length) {
+                activeMatchIndex = 0
+                focusActiveMatch()
+            }
+        }
+
+        function focusActiveMatch() {
+            if (activeMatchIndex < 0 || activeMatchIndex >= textLayerMatches.length) return
+            textLayerMatches.forEach(s => s.classList.remove("search-active"))
+            const el = textLayerMatches[activeMatchIndex]
+            el.classList.add("search-active")
+            el.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" })
+        }
+
+        function getItemMatchBox(item, start, end, styles, viewport) {
+            const text = item.str || ""
+            if (!text || start < 0 || end <= start || end > text.length) return null
+
+            const style = styles[item.fontName] || {}
+            const tx = pdfjsLib.Util.transform(viewport.transform, item.transform)
+            const x = tx[4]
+            const y = tx[5]
+            const fontHeight = Math.max(1, Math.hypot(tx[2], tx[3]))
+            const ascent = style.ascent !== undefined ? style.ascent : 0.8
+            const descent = style.descent !== undefined ? style.descent : -0.2
+            const fontFamily = style.fontFamily || "sans-serif"
+
+            measureCtx.font = fontHeight + "px " + fontFamily
+
+            const totalMeasured = measureCtx.measureText(text).width
+            const prefixMeasured = measureCtx.measureText(text.slice(0, start)).width
+            const matchMeasured = measureCtx.measureText(text.slice(start, end)).width
+
+            const fallbackTotal = Math.max(1, Math.abs(item.width * viewport.scale))
+            const totalWidth = totalMeasured > 0 ? totalMeasured : fallbackTotal
+            const prefixWidth = totalMeasured > 0
+                ? prefixMeasured
+                : fallbackTotal * (start / text.length)
+            const matchWidth = totalMeasured > 0
+                ? Math.max(1, matchMeasured)
+                : Math.max(1, fallbackTotal * ((end - start) / text.length))
+
+            const height = Math.max(2, fontHeight * (ascent - descent))
+            const top = y - fontHeight * ascent
+            const left = x + (prefixWidth * (fallbackTotal / totalWidth))
+            const width = Math.max(1, matchWidth * (fallbackTotal / totalWidth))
+
+            return { left, top, width, height }
+        }
+
+        async function getPageText(num) {
+            if (pageTextCache.has(num)) return pageTextCache.get(num)
+            const page = await pdfDoc.getPage(num)
+            const content = await page.getTextContent()
+            const text = content.items.map(i => i.str || "").join(" ").toLowerCase()
+            pageTextCache.set(num, text)
+            return text
+        }
+
+        async function findPageWithMatch(query, startPage, dir) {
+            if (!pdfDoc) return null
+            let page = startPage
+            for (let i = 0; i < pdfDoc.numPages; i++) {
+                if (page < 1) page = pdfDoc.numPages
+                if (page > pdfDoc.numPages) page = 1
+                const txt = await getPageText(page)
+                if (txt.includes(query)) return page
+                page += dir
+            }
+            return null
+        }
+
+        async function runSearch(fromCurrentPage) {
+            if (!pdfDoc) return
+            searchQuery = searchInput.value.trim().toLowerCase()
+            if (!searchQuery) {
+                updateSearchHighlights(false)
+                return
+            }
+
+            const totalMatches = await countMatchesInDocument(searchQuery)
+            docMatchCount = totalMatches
+            updateSearchCount(docMatchCount)
+
+            if (fromCurrentPage) {
+                updateSearchHighlights(true)
+                if (textLayerMatches.length) return
+            }
+
+            const target = await findPageWithMatch(searchQuery, pageNum, 1)
+            if (target === null) {
+                docMatchCount = 0
+                updateSearchCount(0)
+                return
+            }
+
+            pendingSearchFocus = true
+            if (target === pageNum) {
+                updateSearchHighlights(true)
+            } else {
+                goToPage(target)
+            }
+        }
+
+        async function searchNext() {
+            if (!searchQuery) {
+                await runSearch(true)
+                return
+            }
+
+            if (textLayerMatches.length && activeMatchIndex < textLayerMatches.length - 1) {
+                activeMatchIndex++
+                focusActiveMatch()
+                return
+            }
+
+            const target = await findPageWithMatch(searchQuery, pageNum + 1, 1)
+            if (target === null) return
+            pendingSearchFocus = true
+            goToPage(target)
+        }
+
+        async function searchPrev() {
+            if (!searchQuery) {
+                await runSearch(true)
+                return
+            }
+
+            if (textLayerMatches.length && activeMatchIndex > 0) {
+                activeMatchIndex--
+                focusActiveMatch()
+                return
+            }
+
+            const target = await findPageWithMatch(searchQuery, pageNum - 1, -1)
+            if (target === null) return
+            pendingSearchFocus = true
+            goToPage(target)
+        }
+
+        searchInput.addEventListener("input", () => {
+            runSearch(true)
+        })
+
+        searchInput.addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                e.preventDefault()
+                if (e.shiftKey) searchPrev()
+                else searchNext()
+            }
+            if (e.key === "Escape") {
+                e.preventDefault()
+                closeSearchBar()
+            }
+        })
+
+        async function countMatchesInDocument(query) {
+            if (!pdfDoc) return 0
+            let count = 0
+            for (let i = 1; i <= pdfDoc.numPages; i++) {
+                const text = await getPageText(i)
+                count += countOccurrences(text, query)
+            }
+            return count
+        }
+
+        function countOccurrences(text, query) {
+            if (!query) return 0
+            let count = 0
+            let pos = 0
+            while (true) {
+                const idx = text.indexOf(query, pos)
+                if (idx === -1) break
+                count++
+                pos = idx + Math.max(1, query.length)
+            }
+            return count
+        }
+
+        /* ── page navigation ── */
+
+        function scrollToTopMiddle() {
+            const viewer = document.getElementById("viewer")
+            viewer.scrollLeft = (viewer.scrollWidth - viewer.clientWidth) / 2
+            viewer.scrollTop = 0
+        }
+
+        function animateSlide(dir) {
+            document.getElementById("viewer").style.transform = "translateX(" + (dir * 80) + "px)"
+        }
+
+        function resetSlide() {
+            document.getElementById("viewer").style.transform = "translateX(0)"
+        }
+
+        async function goToPage(num) {
+            if (!pdfDoc) return
+            if (num < 1) num = 1
+            if (num > pdfDoc.numPages) num = pdfDoc.numPages
+            pageNum = num
+            await renderPage(pageNum)
+            scrollToTopMiddle()
+        }
+
+        function nextPage() {
+            if (!pdfDoc || pageNum >= pdfDoc.numPages) return
+            animateSlide(-1)
+            pageNum++
+            setTimeout(async () => {
+                await renderPage(pageNum)
+                scrollToTopMiddle()
+                resetSlide()
+            }, 180)
+        }
+
+        function prevPage() {
+            if (!pdfDoc || pageNum <= 1) return
+            animateSlide(1)
+            pageNum--
+            setTimeout(async () => {
+                await renderPage(pageNum)
+                scrollToTopMiddle()
+                resetSlide()
+            }, 180)
+        }
+
+        /* ── slider ── */
+
+        slider.addEventListener("input", () => {
+            const num = parseInt(slider.value)
+            document.getElementById("pageLabel").innerText = num + " / " + (pdfDoc ? pdfDoc.numPages : "?")
+        })
+
+        slider.addEventListener("change", () => {
+            goToPage(parseInt(slider.value))
+        })
+
+        /* ── dark mode ── */
+
+        function updateDarkIcon() {
+            const icon = document.body.classList.contains("dark") ? "light_mode" : "dark_mode"
+            document.getElementById("darkIcon").textContent = icon
+            document.getElementById("shelfDarkIcon").textContent = icon
+        }
+
+        function toggleDark() {
+            document.body.classList.toggle("dark")
+            localStorage.setItem(DARK_KEY, document.body.classList.contains("dark"))
+            updateDarkIcon()
+        }
+
+        function loadDark() {
+            if (localStorage.getItem(DARK_KEY) === "true") {
+                document.body.classList.add("dark")
+            }
+            updateDarkIcon()
+        }
+
+        /* ── auto update ── */
+
+        async function checkUpdate() {
+            if (!currentBook) return
+            try {
+                const res = await fetch(currentBook.path, { method: "HEAD" })
+                const mod = res.headers.get("last-modified")
+                if (!lastModified) { lastModified = mod; return }
+                if (mod && mod !== lastModified) {
+                    lastModified = mod
+                    const cur = pageNum
+                    await loadPDF()
+                    pageNum = cur
+                    renderPage(pageNum)
+                }
+            } catch (e) { }
+        }
+
+        /* ── touch / swipe ── */
+
+        let startX = 0
+
+        document.addEventListener("touchstart", e => {
+            startX = e.touches[0].clientX
+        })
+
+        document.addEventListener("touchend", e => {
+            if (!currentBook) return
+            const dx = e.changedTouches[0].clientX - startX
+            if (Math.abs(dx) < 50) return
+            dx < 0 ? nextPage() : prevPage()
+        })
+
+        /* ── keyboard ── */
+
+        document.addEventListener("keydown", e => {
+            if (!currentBook) return
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
+                e.preventDefault()
+                openSearchBar()
+                return
+            }
+            if (searchBar.style.display === "flex" && e.key === "Escape") {
+                e.preventDefault()
+                closeSearchBar()
+                return
+            }
+            if (e.key === "ArrowRight") nextPage()
+            if (e.key === "ArrowLeft") prevPage()
+            if (e.key === "Escape") goToShelf()
+            if (e.key === "+" || e.key === "=") zoomIn()
+            if (e.key === "-") zoomOut()
+            if (e.key === "0") zoomFit()
+        })
+
+        /* ── init ── */
+
+        loadDark()
+        fetchBadges().then(() => renderShelf())
+
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("sw.js")
+        }
+
+    </script>
 
 </body>
+
 </html>
