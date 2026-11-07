@@ -6,9 +6,9 @@
 
   | Component | Weight | Timing | Details |
   | :--- | :--- | :--- | :--- |
-  | **Quiz** | 25% | Around Week 7--8 | In-term assessment covering foundational theory and practical concepts |
-  | **Written Exam** | 40% | Week 13 | Final comprehensive written examination |
-  | **Project and Viva** | 35% | Mid-January | Practical cybersecurity/secure programming project with oral defence (viva) |
+  | **Quiz** | 25% | 12th November | In-term assessment covering foundational theory and practical concepts |
+  | **Written Exam** | 25% | 15th December | Final comprehensive written examination |
+  | **Project and Viva** | 50% | Submission 13th January + Viva 14th & 15th January | Practical cybersecurity/secure programming project with oral defence (viva) |
 
 * * *
 
