@@ -6,6 +6,7 @@ on:
     paths:
       - '**/*.md'
       - '!README.md'
+      - '.github/scripts/convert_notes.py'
   workflow_dispatch:
 
 permissions:

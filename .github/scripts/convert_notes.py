@@ -6,6 +6,48 @@ LATEX_HEADER = r"""
 \usepackage{titling}
 \usepackage{xcolor}
 \usepackage{framed}
+\usepackage{fvextra}
+
+% Wrap long lines automatically in all fenced code blocks (both highlighted and plain verbatim)
+\fvset{breaklines=true,breakanywhere=true}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true,breakanywhere=true}
+\makeatletter
+\@ifundefined{Highlighting}{}{%
+  \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines=true,breakanywhere=true,commandchars=\\\{\}}%
+}
+\makeatother
+
+% Prevent inline code and long words from overflowing the right margin or table cells
+\setlength{\emergencystretch}{3em}
+
+% Allow inline \texttt{...} to break cleanly after punctuation (/, ., :, =, ,, ;, -, ?, &, _, $, \) in XeLaTeX
+\newskip\ttbreakskip
+\ttbreakskip=0pt plus 0.2em\relax
+\XeTeXcharclass`\/=250
+\XeTeXcharclass`\.=250
+\XeTeXcharclass`\:=250
+\XeTeXcharclass`\==250
+\XeTeXcharclass`\,=250
+\XeTeXcharclass`\;=250
+\XeTeXcharclass`\-=250
+\XeTeXcharclass`\?=250
+\XeTeXcharclass`\&=250
+\XeTeXinterchartoks 250 0   = {\hskip\ttbreakskip\allowbreak}
+\XeTeXinterchartoks 250 250 = {\hskip\ttbreakskip\allowbreak}
+
+\DeclareRobustCommand{\texttt}[1]{%
+  \begingroup
+  \ttfamily
+  \XeTeXinterchartokenstate=1
+  \let\oldtextunderscore\textunderscore
+  \renewcommand{\textunderscore}{\oldtextunderscore\hskip\ttbreakskip\allowbreak}%
+  \let\oldtextdollar\textdollar
+  \renewcommand{\textdollar}{\oldtextdollar\hskip\ttbreakskip\allowbreak}%
+  \let\oldtextbackslash\textbackslash
+  \renewcommand{\textbackslash}{\oldtextbackslash\hskip\ttbreakskip\allowbreak}%
+  #1%
+  \endgroup
+}
 
 % Define the background color for the box
 \definecolor{quote-bg}{HTML}{F1F1F1}

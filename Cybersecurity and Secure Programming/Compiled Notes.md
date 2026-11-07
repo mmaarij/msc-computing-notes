@@ -379,13 +379,13 @@
   - **PowerShell Commands:**
 
     ```powershell
-    # List all data streams attached to sample.txt (both default :$DATA and any named streams)
+    # List all data streams attached to sample.txt (:$DATA and named)
     Get-Item -LiteralPath .\sample.txt -Stream *
 
     # Read the contents of a specific named stream called "review"
     Get-Content -LiteralPath .\sample.txt -Stream review
 
-    # Read the Mark-of-the-Web Zone.Identifier stream on a downloaded file
+    # Read the Mark-of-the-Web Zone.Identifier stream
     Get-Content -LiteralPath .\brief.txt -Stream Zone.Identifier
     ```
 
@@ -1011,7 +1011,7 @@
 - **Why Deleting a File or Adding `.gitignore` Does Not Erase Git History:**
   - Git is a snapshot-based version control system. Every commit permanently stores a snapshot of the repository's tracked files inside the hidden `.git/objects` directory.
   - **Common Developer Mistake:**
-    1. Commit `a1b2c3d`: Developer accidentally commits `.env` containing `STRIPE_SECRET_KEY=sk_live_998877...`.
+    1. Commit `a1b2c3d`: Developer accidentally commits `.env` containing `STRIPE_KEY=sk_live_998...`.
     2. Commit `e4f5g6h`: Developer deletes `.env`, adds `.env` to `.gitignore`, and commits `"Remove secret file"`.
   - **Why the Secret is Still Compromised:**
     - Adding a file to `.gitignore` only tells Git not to track *new untracked* files; it does **not** alter past commits. Anyone who clones the repository can run `git log -p` or `git show a1b2c3d:.env` and read the live key in seconds!
@@ -1030,7 +1030,8 @@
 - **Safe Audit Logging Example:**
 
   ```javascript
-  // SAFE: Logs security event and correlation ID without logging the submitted password or token
+  // SAFE: Logs security event and correlation ID
+  // without logging the submitted password or token
   audit({
     timestamp: new Date().toISOString(),
     event: "sign_in_failed",
@@ -1306,10 +1307,10 @@
 - **How Unique Per-Account Salts Stop Precomputation and Equality Leaks:**
   - Suppose both **Account A** and **Account B** choose the exact same weak password `"blue"`:
 
-  | Account | Chosen Password | CSPRNG Per-Account Salt (Base64) | Stored `Argon2id` Hash Output |
+  | Account | Submitted Password | Library-Generated Salt | Stored `Argon2id` Result |
   | :--- | :---: | :---: | :--- |
-  | **Account A** | `"blue"` | `c2FsdF9vbmVfMTIzNDU2` | `$argon2id$v=19$m=65536,t=3,p=4$c2FsdF9vbmVfMTIzNDU2$K9x8m...` |
-  | **Account B** | `"blue"` | `ZGlmZmVyZW50X3NhbHRf` | `$argon2id$v=19$m=65536,t=3,p=4$ZGlmZmVyZW50X3NhbHRf$7Qp2v...` |
+  | **Account A** | `"blue"` | `Random salt A` (`c2FsdA...`) | `Hash A` (`$argon2id$...$K9x8m...`) |
+  | **Account B** | `"blue"` | `Random salt B` (`ZGlmZg...`) | `Hash B` (`$argon2id$...$7Qp2v...`) |
 
   - **Two Critical Benefits of the Unique Salt:**
     1. **No Equality Leak:** Looking at the database, the two hashes look completely unrelated; an attacker cannot tell that Account A and Account B share the same password.
@@ -1343,16 +1344,15 @@
 ### Reading a Stored Argon2id Record
 
 - **Standard Modular Crypt Format String:**
-  - Example stored string:
-    `$argon2id$v=19$m=65536,t=3,p=4$c2FsdF9vbmVfMTIzNDU2$K9x8mPqR2vL5nZ0wXyZaBcDeFgHiJkLmNoPqRsTuVwX`
+  - Example stored record:
+    `$argon2id$v=19$m=65536,t=3,p=4$<salt>$<hash>`
 
   | Segment | Value in Example | Meaning |
   | :--- | :--- | :--- |
   | **Algorithm Identifier** | `argon2id` | Specifies the hybrid Argon2id algorithm |
-  | **Algorithm Version** | `v=19` | Argon2 specification version `0x13` ($19$ in decimal) |
+  | **Algorithm Version** | `v=19` | Argon2 specification version `0x13` ($19$ in decimal, not the year 2019) |
   | **Cost Parameters** | `m=65536,t=3,p=4` | $64\text{ MiB}$ RAM ($65,536\text{ KiB}$), $3$ passes, $4$ parallel lanes |
-  | **Salt** | `c2FsdF9vbmVfMTIzNDU2` | Base64-encoded (unpadded) unique random per-password salt |
-  | **Output Hash Digest** | `K9x8mPqR2vL5n...` | Base64-encoded (unpadded) derived hash tag used for constant-time verification |
+  | **Salt and Hash** | `<salt>$<hash>` | Base64-encoded random per-password salt and expected output digest |
 
   - **Seamless Parameter Upgrades:** Because every row stores its own `m`, `t`, and `p` parameters, when hardware improves next year and you increase the config for new hashes to `m=131072` ($128\text{ MiB}$), existing users can still log in seamlessly! On a successful login, the server inspects the user's stored record, sees it used the older `m=65536`, and transparently re-hashes the validated password with `m=131072` and saves the upgraded record.
 
@@ -1368,13 +1368,13 @@
   3. **Issuing the Cookie (`Set-Cookie`):** The server sends the HTTP response with a `Set-Cookie` header containing the opaque session ID and defensive cookie attributes:
 
      ```http
-     Set-Cookie: __Host-sid=9f8e7d6c5b4a3210fedcba9876543210; Secure; HttpOnly; SameSite=Lax; Max-Age=1800; Path=/
+     Set-Cookie: __Host-session=<unpredictable-id>; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=1800
      ```
 
   4. **Subsequent Requests (`Cookie`):** On future requests to the site, the browser automatically attaches the cookie in the request header:
 
      ```http
-     Cookie: __Host-sid=9f8e7d6c5b4a3210fedcba9876543210
+     Cookie: __Host-session=<unpredictable-id>
      ```
 
      *(Notice that the browser sends only the `name=value` pair in the `Cookie` request header; the attributes `Secure`, `HttpOnly`, `SameSite`, and `Max-Age` are instructions from the server to the browser during `Set-Cookie` and are not echoed back).*
@@ -1413,9 +1413,10 @@
   ```javascript
   function canViewPurchase(account, purchase) {
     if (!account || !purchase) {
-      return false; // Fail closed if session account or purchase record is missing
+      return false; // Fail closed if either record is missing
     }
-    return account.id === purchase.ownerId || account.role === "support";
+    return account.id === purchase.ownerId ||
+           account.role === "support";
   }
   ```
 
