@@ -134,8 +134,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 8px;
+            gap: 8px;
+            padding: 8px 10px;
+            width: 100%;
+            box-sizing: border-box;
             z-index: 20;
+            flex-shrink: 0;
+        }
+
+        #leftControls,
+        #rightControls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             flex-shrink: 0;
         }
 
@@ -152,6 +163,7 @@
             align-items: center;
             justify-content: center;
             padding: 0;
+            flex-shrink: 0;
             transition: background 0.12s;
         }
 
@@ -186,20 +198,20 @@
             font-size: 18px;
         }
 
-        #rightControls {
-            display: flex;
-            gap: 4px;
-        }
-
         .btnGroup {
             display: flex;
+            align-items: center;
             gap: 2px;
-            background: rgba(0, 0, 0, 0.04);
+            height: 36px;
+            box-sizing: border-box;
+            background: rgba(0, 0, 0, 0.05);
             border-radius: 10px;
             padding: 2px;
         }
 
         .btnGroup .iconBtn {
+            width: 32px;
+            height: 32px;
             background: transparent;
             border-radius: 8px;
         }
@@ -209,7 +221,8 @@
         }
 
         .separator {
-            width: 8px;
+            width: 4px;
+            flex-shrink: 0;
         }
 
         #viewer {
@@ -292,10 +305,12 @@
             margin: 0 10px 8px;
             border-radius: 12px;
             background: rgba(0, 0, 0, 0.06);
+            box-sizing: border-box;
         }
 
         #searchInput {
             flex: 1;
+            min-width: 0;
             border: none;
             outline: none;
             padding: 8px 10px;
@@ -307,7 +322,8 @@
         #searchCount {
             font-size: 12px;
             color: #666;
-            min-width: 90px;
+            min-width: 72px;
+            white-space: nowrap;
             text-align: center;
         }
 
@@ -610,6 +626,88 @@
             background: rgba(255, 255, 255, 0.04);
             color: #aaa;
         }
+
+        /* ── mobile responsiveness ── */
+
+        @media (max-width: 520px) {
+            #topBar {
+                padding: 6px 8px;
+                gap: 4px;
+            }
+
+            #leftControls,
+            #rightControls {
+                gap: 4px;
+            }
+
+            .separator {
+                display: none;
+            }
+
+            .iconBtn {
+                width: 34px;
+                height: 34px;
+                border-radius: 9px;
+            }
+
+            .iconBtn .material-symbols-rounded {
+                font-size: 19px;
+            }
+
+            .btnGroup {
+                height: 34px;
+                border-radius: 9px;
+                padding: 2px;
+                gap: 1px;
+            }
+
+            .btnGroup .iconBtn {
+                width: 30px;
+                height: 30px;
+                border-radius: 7px;
+            }
+
+            #searchBar {
+                gap: 6px;
+                padding: 5px 8px;
+                margin: 0 8px 6px;
+            }
+
+            #searchCount {
+                min-width: 58px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            #topBar {
+                padding: 6px 6px;
+                gap: 3px;
+            }
+
+            #leftControls,
+            #rightControls {
+                gap: 3px;
+            }
+
+            .iconBtn {
+                width: 30px;
+                height: 30px;
+            }
+
+            .iconBtn .material-symbols-rounded {
+                font-size: 18px;
+            }
+
+            .btnGroup {
+                height: 30px;
+            }
+
+            .btnGroup .iconBtn {
+                width: 26px;
+                height: 26px;
+            }
+        }
     </style>
 </head>
 
@@ -641,8 +739,8 @@
     <div id="readerView">
 
         <div id="topBar">
-            <div style="display:flex;gap:4px">
-                <button class="textBtn" onclick="goToShelf()"><span
+            <div id="leftControls">
+                <button class="iconBtn" onclick="goToShelf()" title="Back to shelf"><span
                         class="material-symbols-rounded">arrow_back</span></button>
                 <button class="iconBtn" onclick="openSidebar()" title="Contents"><span
                         class="material-symbols-rounded">menu</span></button>
@@ -781,11 +879,52 @@
         const measureCanvas = document.createElement("canvas")
         const measureCtx = measureCanvas.getContext("2d")
 
+        const CACHE_NAME = "notes-reader-v13"
+        if (window.pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc =
+                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
+        }
+
+        function getCanonicalAssetUrl(path) {
+            const url = new URL(path, window.location.href)
+            url.search = ""
+            url.hash = ""
+            return url.toString()
+        }
+
+        async function fetchAndCacheAsset(path) {
+            const canonicalUrl = getCanonicalAssetUrl(path)
+            if (navigator.onLine) {
+                try {
+                    const res = await fetch(canonicalUrl, { cache: "no-cache" })
+                    if (res && res.ok) {
+                        if ("caches" in window) {
+                            const cache = await caches.open(CACHE_NAME)
+                            await cache.put(canonicalUrl, res.clone())
+                        }
+                        return res
+                    }
+                } catch (e) { }
+            }
+            if ("caches" in window) {
+                const cached = await caches.match(canonicalUrl, { ignoreSearch: true })
+                if (cached) return cached
+            }
+            return fetch(canonicalUrl)
+        }
+
+        async function syncAllBooksForOffline() {
+            if (!navigator.onLine) return
+            await Promise.allSettled(
+                BOOKS.map(book => fetchAndCacheAsset(book.path))
+            )
+        }
+
         /* ── shelf rendering ── */
 
         async function fetchBadges() {
             try {
-                const res = await fetch("README.md?t=" + Date.now())
+                const res = await fetchAndCacheAsset("README.md")
                 const text = await res.text()
                 const re = /badge\/.*?-([^-]+)-(\w+)\?[^\]]*\]\(([^)]+)\)/g
                 let m
@@ -857,8 +996,11 @@
         /* ── pdf loading ── */
 
         async function loadPDF() {
-            const url = currentBook.path + "?t=" + Date.now()
-            pdfDoc = await pdfjsLib.getDocument(url).promise
+            const res = await fetchAndCacheAsset(currentBook.path)
+            const mod = res.headers ? res.headers.get("last-modified") : null
+            if (mod) lastModified = mod
+            const arrayBuffer = await res.arrayBuffer()
+            pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
             pageTextCache.clear()
 
             if (pageNum > pdfDoc.numPages) pageNum = pdfDoc.numPages
@@ -1465,9 +1607,12 @@
         /* ── auto update ── */
 
         async function checkUpdate() {
-            if (!currentBook) return
+            if (!currentBook || !navigator.onLine) return
             try {
-                const res = await fetch(currentBook.path, { method: "HEAD" })
+                const res = await fetch(getCanonicalAssetUrl(currentBook.path), {
+                    method: "HEAD",
+                    cache: "no-cache"
+                })
                 const mod = res.headers.get("last-modified")
                 if (!lastModified) { lastModified = mod; return }
                 if (mod && mod !== lastModified) {
@@ -1520,7 +1665,15 @@
         /* ── init ── */
 
         loadDark()
-        fetchBadges().then(() => renderShelf())
+        fetchBadges().then(() => {
+            renderShelf()
+            syncAllBooksForOffline()
+        })
+
+        window.addEventListener("online", () => {
+            fetchBadges().then(() => renderShelf())
+            syncAllBooksForOffline()
+        })
 
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("sw.js")

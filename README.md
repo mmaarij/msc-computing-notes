@@ -2,6 +2,8 @@
 
 This repository contains my compiled notes for the ATU MSc Computing program. Feel free to use these to help with your studies.
 
+> **Web Reader & Installable PWA:** Read the notes online at **[mmaarij.github.io/msc-computing-notes](https://mmaarij.github.io/msc-computing-notes/)** - also installable as a **Progressive Web App (PWA)** on desktop and mobile for offline access.
+
 > **Available in both Markdown and PDF formats**: PDFs are automatically generated from the markdown files.
 
 > **Update Schedule:** Notes are usually updated every weekend.
