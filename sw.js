@@ -1,4 +1,4 @@
-const CACHE = "notes-reader-v13"
+const CACHE = "notes-reader-v14"
 
 const SHELL = [
   "./",
@@ -16,7 +16,8 @@ const PDFS = [
   "./Text and Sequence Analytics/Compiled Notes.pdf",
   "./Statistical Computing/Compiled Notes.pdf",
   "./Statistical Computing/Lab Notes.pdf",
-  "./Cybersecurity and Secure Programming/Compiled Notes.pdf"
+  "./Cybersecurity and Secure Programming/Compiled Notes.pdf",
+  "./Advanced Database Technology/Compiled Notes.pdf"
 ]
 
 function getCanonicalUrl(requestUrl) {

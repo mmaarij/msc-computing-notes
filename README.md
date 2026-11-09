@@ -19,6 +19,8 @@ This repository contains my compiled notes for the ATU MSc Computing program. Fe
 [![](https://img.shields.io/badge/🔎%20Stats%20Lab%20Notes-Exam%202%20%28Week%209%29-FAE9DA?style=for-the-badge)](Statistical%20Computing/Lab%20Notes.pdf)
 <br>
 [![](https://img.shields.io/badge/🛡️%20Cybersecurity-Week%207-DCD6F7?style=for-the-badge)](Cybersecurity%20and%20Secure%20Programming/Compiled%20Notes.pdf)
+<br>
+[![](https://img.shields.io/badge/🗄️%20Advanced%20Databases-Week%207-D0E1F9?style=for-the-badge)](Advanced%20Database%20Technology/Compiled%20Notes.pdf)
 
 ## Contributing
 

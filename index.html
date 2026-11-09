@@ -843,6 +843,14 @@
                 desc: "Compiled Lecture Notes",
                 color: "#DCD6F7",
                 path: "Cybersecurity and Secure Programming/Compiled Notes.pdf"
+            },
+            {
+                id: "advdb",
+                title: "Advanced Databases",
+                icon: "database",
+                desc: "Compiled Lecture Notes",
+                color: "#D0E1F9",
+                path: "Advanced Database Technology/Compiled Notes.pdf"
             }
         ]
 
@@ -879,7 +887,7 @@
         const measureCanvas = document.createElement("canvas")
         const measureCtx = measureCanvas.getContext("2d")
 
-        const CACHE_NAME = "notes-reader-v13"
+        const CACHE_NAME = "notes-reader-v14"
         if (window.pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
             pdfjsLib.GlobalWorkerOptions.workerSrc =
                 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
